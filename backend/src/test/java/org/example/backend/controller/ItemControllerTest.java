@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @AutoConfigureMockMvc
 class ItemControllerTest {
 
-    private static final String BASE_URL = "/api/item";
+    private static final String URL_BASE = "/api/item";
 
     private static final Double ITEM_QUANTITY = 5.5;
 
@@ -66,7 +66,8 @@ class ItemControllerTest {
                 Arguments.of("Empty product data", itemRequest.withProduct(null)),
                 Arguments.of("Empty product title", itemRequest.withProduct(productRequest.withTitle(null))),
                 Arguments.of("Empty product description", itemRequest.withProduct(productRequest.withDescription(null))),
-                Arguments.of("Empty product link", itemRequest.withProduct(productRequest.withLink(null)))
+                Arguments.of("Empty product link", itemRequest.withProduct(productRequest.withLink(null))),
+                Arguments.of("Empty request", null)
         );
     }
 
@@ -85,7 +86,7 @@ class ItemControllerTest {
         );
 
         MvcResult mvcResult = mockMvc.perform(
-                        post(BASE_URL)
+                        post(URL_BASE)
                                 .contentType(APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(itemRequest))
                 ).andExpect(
@@ -111,7 +112,7 @@ class ItemControllerTest {
     @MethodSource("nullParamDataProvider")
     void create_nullParam(String name, ItemRequestMock itemRequest) throws Exception {
         mockMvc.perform(
-                post(BASE_URL)
+                post(URL_BASE)
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(itemRequest))
         ).andExpect(
