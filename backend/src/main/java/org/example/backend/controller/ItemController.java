@@ -4,12 +4,10 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.IdResponse;
 import org.example.backend.dto.ItemRequest;
+import org.example.backend.dto.ItemResponse;
 import org.example.backend.model.Item;
 import org.example.backend.service.ItemService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/item")
@@ -23,5 +21,12 @@ public class ItemController {
         Item item = itemRequest.toItem();
 
         return IdResponse.of(itemService.create(item).getId());
+    }
+
+    @GetMapping("/{id}")
+    public ItemResponse getById(@PathVariable @NonNull String id) {
+        Item item = itemService.getById(id);
+
+        return ItemResponse.of(item);
     }
 }

@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.util.NoSuchElementException;
+
 @RestControllerAdvice
 @Log4j2
 public class GlobalExceptionHandler {
@@ -20,6 +22,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
         log.info(exception);
+
         return new ErrorResponse(ERROR_MESSAGE_NOT_READABLE);
     }
 
@@ -27,6 +30,15 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleNoResourceFoundException(NoResourceFoundException exception) {
         log.info(exception);
+
+        return new ErrorResponse(exception.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNoSuchElementException(NoSuchElementException exception) {
+        log.info(exception);
+
         return new ErrorResponse(exception.getMessage());
     }
 
@@ -34,6 +46,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleGlobalException(Exception exception) {
         log.error(exception);
+
         return new ErrorResponse(ERROR_MESSAGE_GENERIC);
     }
 }
