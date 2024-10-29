@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest
 @AutoConfigureMockMvc
 class ItemControllerTest {
+
     private static final String BASE_URL = "/api/item";
 
     private static final Double ITEM_QUANTITY = 5.5;
