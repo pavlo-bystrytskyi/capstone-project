@@ -38,6 +38,7 @@ class ItemControllerTest {
 
     private static final String URL_BASE = "/api/item";
     private static final String URL_WITH_ID = "/api/item/{id}";
+    private static final String URL_PUBLIC_WITH_ID = "/api/item/public/{id}";
 
     private static final Double ITEM_QUANTITY_FIRST = 5.5;
     private static final Double ITEM_QUANTITY_SECOND = 10.1;
@@ -208,6 +209,90 @@ class ItemControllerTest {
 
         MvcResult mvcResult = mockMvc.perform(
                         get(URL_WITH_ID, ID_SECOND)
+                ).andExpect(
+                        MockMvcResultMatchers.status().is4xxClientError()
+                )
+                .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+        ErrorResponse errorResponse = objectMapper.readValue(response, ErrorResponse.class);
+        assertEquals(MESSAGE_NOT_FOUND, errorResponse.message());
+    }
+
+    @Test
+    @DirtiesContext
+    @DisplayName("Get by public id successful")
+    void getByPublicId_successful() throws Exception {
+        Product productFirst = Product.builder()
+                .title(PRODUCT_TITLE_FIRST)
+                .description(PRODUCT_DESCRIPTION_FIRST)
+                .link(PRODUCT_LINK_FIRST)
+                .build();
+        Item itemFirst = Item.builder()
+                .id(ID_FIRST)
+                .publicId(PUBLIC_ID_FIRST)
+                .product(productFirst)
+                .quantity(ITEM_QUANTITY_FIRST)
+                .build();
+        Product productSecond = Product.builder()
+                .title(PRODUCT_TITLE_SECOND)
+                .description(PRODUCT_DESCRIPTION_SECOND)
+                .link(PRODUCT_LINK_SECOND)
+                .build();
+        Item itemSecond = Item.builder()
+                .id(ID_SECOND)
+                .publicId(PUBLIC_ID_SECOND)
+                .product(productSecond)
+                .quantity(ITEM_QUANTITY_SECOND)
+                .build();
+        itemRepository.saveAll(
+                List.of(
+                        itemFirst,
+                        itemSecond
+                )
+        );
+
+        MvcResult mvcResult = mockMvc.perform(
+                        get(URL_PUBLIC_WITH_ID, itemFirst.getPublicId())
+                ).andExpect(
+                        MockMvcResultMatchers.status().isOk()
+                )
+                .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+        assertFalse(response.contains(itemFirst.getId()));
+        assertFalse(response.contains(itemFirst.getPublicId()));
+        ItemResponse itemResponse = objectMapper.readValue(response, ItemResponse.class);
+        assertEquals(itemFirst.getQuantity(), itemResponse.quantity());
+        ProductResponse productResponse = itemResponse.product();
+        assertEquals(productFirst.getTitle(), productResponse.title());
+        assertEquals(productFirst.getDescription(), productResponse.description());
+        assertEquals(productFirst.getLink(), productResponse.link());
+    }
+
+    @Test
+    @DirtiesContext
+    @DisplayName("Get by public id not found")
+    void getByPublicId_notFound() throws Exception {
+        Product productFirst = Product.builder()
+                .title(PRODUCT_TITLE_FIRST)
+                .description(PRODUCT_DESCRIPTION_FIRST)
+                .link(PRODUCT_LINK_FIRST)
+                .build();
+        Item itemFirst = Item.builder()
+                .id(ID_FIRST)
+                .publicId(PUBLIC_ID_FIRST)
+                .product(productFirst)
+                .quantity(ITEM_QUANTITY_FIRST)
+                .build();
+        itemRepository.saveAll(
+                List.of(
+                        itemFirst
+                )
+        );
+
+        MvcResult mvcResult = mockMvc.perform(
+                        get(URL_PUBLIC_WITH_ID, PUBLIC_ID_SECOND)
                 ).andExpect(
                         MockMvcResultMatchers.status().is4xxClientError()
                 )
