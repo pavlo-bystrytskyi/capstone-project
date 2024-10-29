@@ -1,7 +1,10 @@
 package org.example.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.backend.dto.ErrorResponse;
 import org.example.backend.dto.IdResponse;
+import org.example.backend.dto.ItemResponse;
+import org.example.backend.dto.ProductResponse;
 import org.example.backend.mock.dto.ItemRequestMock;
 import org.example.backend.mock.dto.ProductRequestMock;
 import org.example.backend.model.Item;
@@ -24,22 +27,33 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class ItemControllerTest {
 
-    private static final String BASE_URL = "/api/item";
+    private static final String URL_BASE = "/api/item";
+    private static final String URL_WITH_ID = "/api/item/{id}";
 
-    private static final Double ITEM_QUANTITY = 5.5;
+    private static final Double ITEM_QUANTITY_FIRST = 5.5;
+    private static final Double ITEM_QUANTITY_SECOND = 10.1;
 
-    private static final String PRODUCT_TITLE = "some product title";
-    private static final String PRODUCT_DESCRIPTION = "some product description";
-    private static final String PRODUCT_LINK = "https://example.com/some-product-link";
+    private static final String ID_FIRST = "some id 1";
+    private static final String ID_SECOND = "some id 2";
+    private static final String PUBLIC_ID_FIRST = "some public id 1";
+    private static final String PUBLIC_ID_SECOND = "some public id 2";
+    private static final String PRODUCT_TITLE_FIRST = "some product title 1";
+    private static final String PRODUCT_TITLE_SECOND = "some product title 2";
+    private static final String PRODUCT_DESCRIPTION_FIRST = "some product description 1";
+    private static final String PRODUCT_DESCRIPTION_SECOND = "some product description 2";
+    private static final String PRODUCT_LINK_FIRST = "https://example.com/some-product-link-1";
+    private static final String PRODUCT_LINK_SECOND = "https://example.com/some-product-link-2";
+
+    private static final String MESSAGE_NOT_FOUND = "No value present";
 
     @Autowired
     private MockMvc mockMvc;
@@ -52,12 +66,12 @@ class ItemControllerTest {
 
     static Stream<Arguments> nullParamDataProvider() {
         ProductRequestMock productRequest = new ProductRequestMock(
-                PRODUCT_TITLE,
-                PRODUCT_DESCRIPTION,
-                PRODUCT_LINK
+                PRODUCT_TITLE_FIRST,
+                PRODUCT_DESCRIPTION_FIRST,
+                PRODUCT_LINK_FIRST
         );
         ItemRequestMock itemRequest = new ItemRequestMock(
-                ITEM_QUANTITY,
+                ITEM_QUANTITY_FIRST,
                 productRequest
         );
 
@@ -75,17 +89,17 @@ class ItemControllerTest {
     @DirtiesContext
     void create_successful() throws Exception {
         ProductRequestMock productRequest = new ProductRequestMock(
-                PRODUCT_TITLE,
-                PRODUCT_DESCRIPTION,
-                PRODUCT_LINK
+                PRODUCT_TITLE_FIRST,
+                PRODUCT_DESCRIPTION_FIRST,
+                PRODUCT_LINK_FIRST
         );
         ItemRequestMock itemRequest = new ItemRequestMock(
-                ITEM_QUANTITY,
+                ITEM_QUANTITY_FIRST,
                 productRequest
         );
 
         MvcResult mvcResult = mockMvc.perform(
-                        post(BASE_URL)
+                        post(URL_BASE)
                                 .contentType(APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(itemRequest))
                 ).andExpect(
@@ -111,7 +125,7 @@ class ItemControllerTest {
     @MethodSource("nullParamDataProvider")
     void create_nullParam(String name, ItemRequestMock itemRequest) throws Exception {
         mockMvc.perform(
-                post(BASE_URL)
+                post(URL_BASE)
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(itemRequest))
         ).andExpect(
@@ -120,5 +134,87 @@ class ItemControllerTest {
 
         List<Item> itemList = itemRepository.findAll();
         assertTrue(itemList.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Get by id successful")
+    void getById_successful() throws Exception {
+        Product productFirst = Product.builder()
+                .title(PRODUCT_TITLE_FIRST)
+                .description(PRODUCT_DESCRIPTION_FIRST)
+                .link(PRODUCT_LINK_FIRST)
+                .build();
+        Item itemFirst = Item.builder()
+                .id(ID_FIRST)
+                .publicId(PUBLIC_ID_FIRST)
+                .product(productFirst)
+                .quantity(ITEM_QUANTITY_FIRST)
+                .build();
+        Product productSecond = Product.builder()
+                .title(PRODUCT_TITLE_SECOND)
+                .description(PRODUCT_DESCRIPTION_SECOND)
+                .link(PRODUCT_LINK_SECOND)
+                .build();
+        Item itemSecond = Item.builder()
+                .id(ID_SECOND)
+                .publicId(PUBLIC_ID_SECOND)
+                .product(productSecond)
+                .quantity(ITEM_QUANTITY_SECOND)
+                .build();
+        itemRepository.saveAll(
+                List.of(
+                        itemFirst,
+                        itemSecond
+                )
+        );
+
+        MvcResult mvcResult = mockMvc.perform(
+                        get(URL_WITH_ID, itemFirst.getId())
+                ).andExpect(
+                        MockMvcResultMatchers.status().isOk()
+                )
+                .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+        assertFalse(response.contains(itemFirst.getId()));
+        assertFalse(response.contains(itemFirst.getPublicId()));
+        ItemResponse itemResponse = objectMapper.readValue(response, ItemResponse.class);
+        assertEquals(itemFirst.getQuantity(), itemResponse.quantity());
+        ProductResponse productResponse = itemResponse.product();
+        assertEquals(productFirst.getTitle(), productResponse.title());
+        assertEquals(productFirst.getDescription(), productResponse.description());
+        assertEquals(productFirst.getLink(), productResponse.link());
+    }
+
+    @Test
+    @DisplayName("Get by id not found")
+    void getById_notFound() throws Exception {
+        Product productFirst = Product.builder()
+                .title(PRODUCT_TITLE_FIRST)
+                .description(PRODUCT_DESCRIPTION_FIRST)
+                .link(PRODUCT_LINK_FIRST)
+                .build();
+        Item itemFirst = Item.builder()
+                .id(ID_FIRST)
+                .publicId(PUBLIC_ID_FIRST)
+                .product(productFirst)
+                .quantity(ITEM_QUANTITY_FIRST)
+                .build();
+        itemRepository.saveAll(
+                List.of(
+                        itemFirst
+                )
+        );
+
+        MvcResult mvcResult = mockMvc.perform(
+                        get(URL_WITH_ID, ID_SECOND)
+                ).andExpect(
+                        MockMvcResultMatchers.status().is4xxClientError()
+                )
+                .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+        ErrorResponse errorResponse = objectMapper.readValue(response, ErrorResponse.class);
+        assertEquals(MESSAGE_NOT_FOUND, errorResponse.message());
     }
 }
