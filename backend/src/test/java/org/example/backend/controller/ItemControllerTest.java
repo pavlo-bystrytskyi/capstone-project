@@ -66,7 +66,8 @@ class ItemControllerTest {
                 Arguments.of("Empty product data", itemRequest.withProduct(null)),
                 Arguments.of("Empty product title", itemRequest.withProduct(productRequest.withTitle(null))),
                 Arguments.of("Empty product description", itemRequest.withProduct(productRequest.withDescription(null))),
-                Arguments.of("Empty product link", itemRequest.withProduct(productRequest.withLink(null)))
+                Arguments.of("Empty product link", itemRequest.withProduct(productRequest.withLink(null))),
+                Arguments.of("Empty request", null)
         );
     }
 
