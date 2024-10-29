@@ -56,7 +56,8 @@ class WishlistControllerTest {
         return Stream.of(
                 Arguments.of("Empty wishlist title", wishlistRequest.withTitle(null)),
                 Arguments.of("Empty wishlist description", wishlistRequest.withDescription(null)),
-                Arguments.of("Empty item list", wishlistRequest.withItemIds(null))
+                Arguments.of("Empty item list", wishlistRequest.withItemIds(null)),
+                Arguments.of("Empty request", null)
         );
     }
 
