@@ -139,6 +139,7 @@ class ItemControllerTest {
     }
 
     @Test
+    @DirtiesContext
     @DisplayName("Get by id successful")
     void getById_successful() throws Exception {
         Product productFirst = Product.builder()
@@ -189,6 +190,7 @@ class ItemControllerTest {
     }
 
     @Test
+    @DirtiesContext
     @DisplayName("Get by id not found")
     void getById_notFound() throws Exception {
         Product productFirst = Product.builder()
