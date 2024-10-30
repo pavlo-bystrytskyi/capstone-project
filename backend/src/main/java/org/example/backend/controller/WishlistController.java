@@ -36,4 +36,9 @@ public class WishlistController {
 
         return WishlistResponse.of(wishlist);
     }
+
+    @DeleteMapping("/{id}")
+    public void deleteById(@PathVariable @NonNull String id) {
+        wishlistService.deleteById(id);
+    }
 }
