@@ -25,4 +25,8 @@ public class ItemService {
     public Item getById(@NonNull String id) {
         return itemRepository.findById(id).orElseThrow();
     }
+
+    public Item getByPublicId(@NonNull String publicId) {
+        return itemRepository.findByPublicId(publicId).orElseThrow();
+    }
 }

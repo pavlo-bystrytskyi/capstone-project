@@ -29,4 +29,11 @@ public class ItemController {
 
         return ItemResponse.of(item);
     }
+
+    @GetMapping("/public/{id}")
+    public ItemResponse getByPublicId(@PathVariable @NonNull String id) {
+        Item item = itemService.getByPublicId(id);
+
+        return ItemResponse.of(item);
+    }
 }
