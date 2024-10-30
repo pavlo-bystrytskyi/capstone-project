@@ -41,4 +41,12 @@ public class ItemController {
 
         return ItemResponse.of(item);
     }
+
+    @PutMapping("/{id}")
+    public ItemResponse updateById(@PathVariable @NonNull String id, @RequestBody @NonNull ItemRequest itemRequest) {
+        Item item = itemRequest.toItem();
+        Item updatedItem = itemService.updateById(id, item);
+
+        return ItemResponse.of(updatedItem);
+    }
 }

@@ -18,6 +18,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -86,7 +87,7 @@ class ItemControllerTest {
     }
 
     @Test
-    @DisplayName("Correct payload")
+    @DisplayName("Create - successful")
     @DirtiesContext
     void create_successful() throws Exception {
         ProductRequestMock productRequest = new ProductRequestMock(
@@ -122,7 +123,7 @@ class ItemControllerTest {
 
     @ParameterizedTest(name = "{0}")
     @DirtiesContext
-    @DisplayName("Incorrect payload")
+    @DisplayName("Create - incorrect payload")
     @MethodSource("nullParamDataProvider")
     void create_nullParam(String name, ItemRequestMock itemRequest) throws Exception {
         mockMvc.perform(
@@ -139,7 +140,7 @@ class ItemControllerTest {
 
     @Test
     @DirtiesContext
-    @DisplayName("Get by id successful")
+    @DisplayName("Get by id - successful")
     void getById_successful() throws Exception {
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
@@ -190,7 +191,7 @@ class ItemControllerTest {
 
     @Test
     @DirtiesContext
-    @DisplayName("Get by id not found")
+    @DisplayName("Get by id - not found")
     void getById_notFound() throws Exception {
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
@@ -223,7 +224,7 @@ class ItemControllerTest {
 
     @Test
     @DirtiesContext
-    @DisplayName("Get by public id successful")
+    @DisplayName("Get by public id - successful")
     void getByPublicId_successful() throws Exception {
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
@@ -274,7 +275,7 @@ class ItemControllerTest {
 
     @Test
     @DirtiesContext
-    @DisplayName("Get by public id not found")
+    @DisplayName("Get by public id - not found")
     void getByPublicId_notFound() throws Exception {
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
@@ -307,7 +308,7 @@ class ItemControllerTest {
 
     @Test
     @DirtiesContext
-    @DisplayName("Delete by id successful")
+    @DisplayName("Delete by id - successful")
     void deleteById_successful() throws Exception {
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
@@ -352,7 +353,7 @@ class ItemControllerTest {
 
     @Test
     @DirtiesContext
-    @DisplayName("Delete by id not found")
+    @DisplayName("Delete by id - not found")
     void deleteById_notFound() throws Exception {
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
@@ -381,5 +382,152 @@ class ItemControllerTest {
         assertEquals(1, items.size());
         Optional<Item> item = itemRepository.findById(itemFirst.getId());
         assertTrue(item.isPresent());
+    }
+
+    @Test
+    @DirtiesContext
+    @DisplayName("Update by id - successful")
+    void updateById_successful() throws Exception {
+        Product productFirst = Product.builder()
+                .title(PRODUCT_TITLE_FIRST)
+                .description(PRODUCT_DESCRIPTION_FIRST)
+                .link(PRODUCT_LINK_FIRST)
+                .build();
+        Item itemFirst = Item.builder()
+                .id(ID_FIRST)
+                .publicId(PUBLIC_ID_FIRST)
+                .product(productFirst)
+                .quantity(ITEM_QUANTITY_FIRST)
+                .build();
+        Product productSecond = Product.builder()
+                .title(PRODUCT_TITLE_SECOND)
+                .description(PRODUCT_DESCRIPTION_SECOND)
+                .link(PRODUCT_LINK_SECOND)
+                .build();
+        Item itemSecond = Item.builder()
+                .id(ID_SECOND)
+                .publicId(PUBLIC_ID_SECOND)
+                .product(productSecond)
+                .quantity(ITEM_QUANTITY_SECOND)
+                .build();
+        itemRepository.saveAll(
+                List.of(
+                        itemFirst,
+                        itemSecond
+                )
+        );
+        ProductRequestMock productRequest = new ProductRequestMock(
+                PRODUCT_TITLE_FIRST,
+                PRODUCT_DESCRIPTION_FIRST,
+                PRODUCT_LINK_FIRST
+        );
+        ItemRequestMock itemRequest = new ItemRequestMock(
+                ITEM_QUANTITY_FIRST,
+                productRequest
+        );
+        String updateId = itemSecond.getId();
+
+        MvcResult mvcResult = mockMvc.perform(
+                        put(URL_WITH_ID, updateId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(itemRequest))
+                ).andExpect(
+                        MockMvcResultMatchers.status().isOk()
+                )
+                .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+        ItemResponse itemResponse = objectMapper.readValue(response, ItemResponse.class);
+
+        assetItemRequestReturned(itemRequest, itemResponse);
+        assertItemTableSize(2);
+        assertItemRequestSaved(itemRequest, updateId);
+        assertItemInTable(itemFirst);
+    }
+
+    @Test
+    @DirtiesContext
+    @DisplayName("Update by id - not found")
+    void updateById_notFound() throws Exception {
+        Product productFirst = Product.builder()
+                .title(PRODUCT_TITLE_FIRST)
+                .description(PRODUCT_DESCRIPTION_FIRST)
+                .link(PRODUCT_LINK_FIRST)
+                .build();
+        Item itemFirst = Item.builder()
+                .id(ID_FIRST)
+                .publicId(PUBLIC_ID_FIRST)
+                .product(productFirst)
+                .quantity(ITEM_QUANTITY_FIRST)
+                .build();
+        itemRepository.saveAll(
+                List.of(
+                        itemFirst
+                )
+        );
+        ProductRequestMock productRequest = new ProductRequestMock(
+                PRODUCT_TITLE_SECOND,
+                PRODUCT_DESCRIPTION_SECOND,
+                PRODUCT_LINK_SECOND
+        );
+        ItemRequestMock itemRequest = new ItemRequestMock(
+                ITEM_QUANTITY_SECOND,
+                productRequest
+        );
+
+        MvcResult mvcResult = mockMvc.perform(
+                        put(URL_WITH_ID, ID_SECOND)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(itemRequest))
+                ).andExpect(
+                        MockMvcResultMatchers.status().is4xxClientError()
+                )
+                .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+        ErrorResponse errorResponse = objectMapper.readValue(response, ErrorResponse.class);
+        assertEquals(MESSAGE_NOT_FOUND, errorResponse.message());
+        assertItemTableSize(1);
+        assertItemInTable(itemFirst);
+    }
+
+    private void assetItemRequestReturned(ItemRequestMock itemRequest, ItemResponse itemResponse) {
+        assertEquals(itemRequest.quantity(), itemResponse.quantity());
+        assetProductRequestReturned(itemRequest.product(), itemResponse.product());
+    }
+
+    private void assertItemTableSize(int size) {
+        List<Item> items = itemRepository.findAll();
+        assertEquals(size, items.size());
+    }
+
+    private void assertItemRequestSaved(ItemRequestMock itemRequest, String updateId) {
+        Optional<Item> itemOptional = itemRepository.findById(updateId);
+        assertTrue(itemOptional.isPresent());
+        Item actualItem = itemOptional.get();
+        assertEquals(itemRequest.quantity(), actualItem.getQuantity());
+        assertProductRequestSaved(itemRequest.product(), actualItem.getProduct());
+    }
+
+    private void assertItemInTable(Item expectedItem) {
+        Optional<Item> itemOptional = itemRepository.findById(expectedItem.getId());
+        assertTrue(itemOptional.isPresent());
+        Item actualItem = itemOptional.get();
+        assertEquals(expectedItem.getId(), actualItem.getId());
+        assertEquals(expectedItem.getPublicId(), actualItem.getPublicId());
+        assertEquals(expectedItem.getQuantity(), actualItem.getQuantity());
+        assertEquals(expectedItem.getProduct(), actualItem.getProduct());
+    }
+
+    private void assetProductRequestReturned(ProductRequestMock productRequest, ProductResponse productResponse) {
+        assertEquals(productRequest.title(), productResponse.title());
+        assertEquals(productRequest.description(), productResponse.description());
+        assertEquals(productRequest.link(), productResponse.link());
+    }
+
+    private void assertProductRequestSaved(ProductRequestMock productRequest, Product product) {
+        assertEquals(productRequest.title(), product.getTitle());
+        assertEquals(productRequest.description(), product.getDescription());
+        assertEquals(productRequest.link(), product.getLink());
     }
 }

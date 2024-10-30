@@ -22,6 +22,15 @@ public class ItemService {
         );
     }
 
+    public Item updateById(@NonNull String id, @NonNull Item item) {
+        Item existingItem = getById(id);
+        Item updatedItem = item
+                .withId(existingItem.getId())
+                .withPublicId(existingItem.getPublicId());
+
+        return itemRepository.save(updatedItem);
+    }
+
     public Item getById(@NonNull String id) {
         return itemRepository.findById(id).orElseThrow();
     }
