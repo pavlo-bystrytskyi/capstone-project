@@ -20,6 +20,15 @@ public class WishlistService {
         return wishlistRepository.save(wishlist.withPublicId(id));
     }
 
+    public Wishlist updateById(@NonNull String id, @NonNull Wishlist wishlist) {
+        Wishlist existingWishlist = getById(id);
+        Wishlist updatedWishlist = wishlist
+                .withId(existingWishlist.getId())
+                .withPublicId(existingWishlist.getPublicId());
+
+        return wishlistRepository.save(updatedWishlist);
+    }
+
     public Wishlist getById(@NonNull String id) {
         return wishlistRepository.findById(id).orElseThrow();
     }

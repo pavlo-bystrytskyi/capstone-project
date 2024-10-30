@@ -15,6 +15,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -42,8 +43,10 @@ class WishlistControllerTest {
     private static final String PUBLIC_ID_SECOND = "some public id 2";
     private static final String TITLE_FIRST = "some wishlist title 1";
     private static final String TITLE_SECOND = "some wishlist title 2";
+    private static final String TITLE_THIRD = "some wishlist title 3";
     private static final String DESCRIPTION_FIRST = "some wishlist description 1";
     private static final String DESCRIPTION_SECOND = "some wishlist description 2";
+    private static final String DESCRIPTION_THIRD = "some wishlist description 3";
     private static final String ITEM_ID_FIRST = "some item id 1";
     private static final String ITEM_ID_SECOND = "some item id 2";
     private static final String ITEM_ID_THIRD = "some item id 3";
@@ -74,7 +77,7 @@ class WishlistControllerTest {
     }
 
     @Test
-    @DisplayName("Correct payload")
+    @DisplayName("Create - successful")
     @DirtiesContext
     void create_successful() throws Exception {
         WishlistRequestMock wishlistRequest = new WishlistRequestMock(
@@ -93,18 +96,21 @@ class WishlistControllerTest {
                 .andReturn();
 
         IdResponse response = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), IdResponse.class);
+        assertWishlistRequestSaved(wishlistRequest, response.id());
+    }
 
-        Optional<Wishlist> result = wishlistRepository.findById(response.id());
-        assertTrue(result.isPresent());
-        Wishlist wishlist = result.get();
-        assertEquals(wishlistRequest.title(), wishlist.getTitle());
-        assertEquals(wishlistRequest.description(), wishlist.getDescription());
-        assertEquals(wishlistRequest.itemIds(), wishlist.getItemIds());
+    private void assertWishlistRequestSaved(WishlistRequestMock expected, String id) {
+        Optional<Wishlist> optional = wishlistRepository.findById(id);
+        assertTrue(optional.isPresent());
+        Wishlist actual = optional.get();
+        assertEquals(expected.title(), actual.getTitle());
+        assertEquals(expected.description(), actual.getDescription());
+        assertEquals(expected.itemIds(), actual.getItemIds());
     }
 
     @ParameterizedTest(name = "{0}")
     @DirtiesContext
-    @DisplayName("Incorrect payload")
+    @DisplayName("Create - incorrect payload")
     @MethodSource("nullParamDataProvider")
     void create_nullParam(String name, WishlistRequestMock wishlistRequest) throws Exception {
         mockMvc.perform(
@@ -121,7 +127,7 @@ class WishlistControllerTest {
 
     @Test
     @DirtiesContext
-    @DisplayName("Get by id successful")
+    @DisplayName("Get by id - successful")
     void getById_successful() throws Exception {
         Wishlist wishlistFirst = Wishlist.builder()
                 .id(ID_FIRST)
@@ -155,14 +161,21 @@ class WishlistControllerTest {
         assertFalse(response.contains(wishlistFirst.getId()));
         assertFalse(response.contains(wishlistFirst.getPublicId()));
         WishlistResponse wishlistResponse = objectMapper.readValue(response, WishlistResponse.class);
-        assertEquals(wishlistFirst.getTitle(), wishlistResponse.title());
-        assertEquals(wishlistFirst.getDescription(), wishlistResponse.description());
-        assertEquals(wishlistFirst.getItemIds(), wishlistResponse.itemIds());
+        assertWishlistResponseInTable(wishlistResponse, wishlistFirst.getId());
+    }
+
+    private void assertWishlistResponseInTable(WishlistResponse actual, String id) {
+        Optional<Wishlist> optional = wishlistRepository.findById(id);
+        assertTrue(optional.isPresent());
+        Wishlist expected = optional.get();
+        assertEquals(expected.getTitle(), actual.title());
+        assertEquals(expected.getDescription(), actual.description());
+        assertEquals(expected.getItemIds(), actual.itemIds());
     }
 
     @Test
     @DirtiesContext
-    @DisplayName("Get by id not found")
+    @DisplayName("Get by id - not found")
     void getById_notFound() throws Exception {
         Wishlist wishlistFirst = Wishlist.builder()
                 .id(ID_FIRST)
@@ -191,7 +204,7 @@ class WishlistControllerTest {
 
     @Test
     @DirtiesContext
-    @DisplayName("Get by public id successful")
+    @DisplayName("Get by public id - successful")
     void getByPublicId_successful() throws Exception {
         Wishlist wishlistFirst = Wishlist.builder()
                 .id(ID_FIRST)
@@ -225,14 +238,12 @@ class WishlistControllerTest {
         assertFalse(response.contains(wishlistFirst.getId()));
         assertFalse(response.contains(wishlistFirst.getPublicId()));
         WishlistResponse wishlistResponse = objectMapper.readValue(response, WishlistResponse.class);
-        assertEquals(wishlistFirst.getTitle(), wishlistResponse.title());
-        assertEquals(wishlistFirst.getDescription(), wishlistResponse.description());
-        assertEquals(wishlistFirst.getItemIds(), wishlistResponse.itemIds());
+        assertWishlistResponseInTable(wishlistResponse, wishlistFirst.getId());
     }
 
     @Test
     @DirtiesContext
-    @DisplayName("Get by public id not found")
+    @DisplayName("Get by public id - not found")
     void getByPublicId_notFound() throws Exception {
         Wishlist wishlistFirst = Wishlist.builder()
                 .id(ID_FIRST)
@@ -261,7 +272,7 @@ class WishlistControllerTest {
 
     @Test
     @DirtiesContext
-    @DisplayName("Delete by id successful")
+    @DisplayName("Delete by id - successful")
     void deleteById_successful() throws Exception {
         Wishlist wishlistFirst = Wishlist.builder()
                 .id(ID_FIRST)
@@ -290,15 +301,34 @@ class WishlistControllerTest {
                 MockMvcResultMatchers.status().isOk()
         );
 
-        List<Wishlist> items = wishlistRepository.findAll();
-        assertEquals(1, items.size());
-        Optional<Wishlist> item = wishlistRepository.findById(wishlistFirst.getId());
-        assertTrue(item.isEmpty());
+        assertWishlistTableSize(1);
+        assertWishlistNotInTable(wishlistFirst);
+        assertWishlistInTable(wishlistSecond);
+    }
+
+    private void assertWishlistTableSize(int expectedSize) {
+        List<Wishlist> wishlists = wishlistRepository.findAll();
+        assertEquals(expectedSize, wishlists.size());
+    }
+
+    private void assertWishlistNotInTable(Wishlist wishlist) {
+        Optional<Wishlist> optional = wishlistRepository.findById(wishlist.getId());
+        assertTrue(optional.isEmpty());
+    }
+
+    private void assertWishlistInTable(Wishlist expected) {
+        Optional<Wishlist> optional = wishlistRepository.findById(expected.getId());
+        assertTrue(optional.isPresent());
+        Wishlist actual = optional.get();
+        assertEquals(expected.getPublicId(), actual.getPublicId());
+        assertEquals(expected.getTitle(), actual.getTitle());
+        assertEquals(expected.getDescription(), actual.getDescription());
+        assertEquals(expected.getItemIds(), actual.getItemIds());
     }
 
     @Test
     @DirtiesContext
-    @DisplayName("Delete by id not found")
+    @DisplayName("Delete by id - not found")
     void deleteById_notFound() throws Exception {
         Wishlist wishlistFirst = Wishlist.builder()
                 .id(ID_FIRST)
@@ -319,9 +349,100 @@ class WishlistControllerTest {
                 MockMvcResultMatchers.status().isOk()
         );
 
-        List<Wishlist> wishlists = wishlistRepository.findAll();
-        assertEquals(1, wishlists.size());
-        Optional<Wishlist> wishlist = wishlistRepository.findById(wishlistFirst.getId());
-        assertTrue(wishlist.isPresent());
+        assertWishlistTableSize(1);
+        assertWishlistInTable(wishlistFirst);
+    }
+
+    @Test
+    @DirtiesContext
+    @DisplayName("Update by id - successful")
+    void updateById_successful() throws Exception {
+        Wishlist wishlistFirst = Wishlist.builder()
+                .id(ID_FIRST)
+                .publicId(PUBLIC_ID_FIRST)
+                .title(TITLE_FIRST)
+                .description(DESCRIPTION_FIRST)
+                .itemIds(List.of(ITEM_ID_FIRST, ITEM_ID_THIRD))
+                .build();
+        Wishlist wishlistSecond = Wishlist.builder()
+                .id(ID_SECOND)
+                .publicId(PUBLIC_ID_SECOND)
+                .title(TITLE_SECOND)
+                .description(DESCRIPTION_SECOND)
+                .itemIds(List.of(ITEM_ID_SECOND))
+                .build();
+        wishlistRepository.saveAll(
+                List.of(
+                        wishlistFirst,
+                        wishlistSecond
+                )
+        );
+        WishlistRequestMock wishlistRequest = new WishlistRequestMock(
+                TITLE_THIRD,
+                DESCRIPTION_THIRD,
+                List.of(ITEM_ID_THIRD)
+        );
+        String editId = wishlistSecond.getId();
+
+        MvcResult mvcResult = mockMvc.perform(
+                        put(URL_WITH_ID, editId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(wishlistRequest))
+                ).andExpect(
+                        MockMvcResultMatchers.status().isOk()
+                )
+                .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+        WishlistResponse wishlistResponse = objectMapper.readValue(response, WishlistResponse.class);
+
+        assetWishlistRequestReturned(wishlistRequest, wishlistResponse);
+        assertWishlistTableSize(2);
+        assertWishlistRequestSaved(wishlistRequest, editId);
+        assertWishlistInTable(wishlistFirst);
+    }
+
+    private void assetWishlistRequestReturned(WishlistRequestMock expected, WishlistResponse actual) {
+        assertEquals(expected.title(), actual.title());
+        assertEquals(expected.description(), actual.description());
+        assertEquals(expected.itemIds(), actual.itemIds());
+    }
+
+    @Test
+    @DirtiesContext
+    @DisplayName("Update by id - not found")
+    void updateById_notFound() throws Exception {
+        Wishlist wishlistFirst = Wishlist.builder()
+                .id(ID_FIRST)
+                .publicId(PUBLIC_ID_FIRST)
+                .title(TITLE_FIRST)
+                .description(DESCRIPTION_FIRST)
+                .itemIds(List.of(ITEM_ID_FIRST, ITEM_ID_THIRD))
+                .build();
+        wishlistRepository.saveAll(
+                List.of(
+                        wishlistFirst
+                )
+        );
+        WishlistRequestMock wishlistRequest = new WishlistRequestMock(
+                TITLE_THIRD,
+                DESCRIPTION_THIRD,
+                List.of(ITEM_ID_THIRD)
+        );
+
+        MvcResult mvcResult = mockMvc.perform(
+                        put(URL_WITH_ID, ID_SECOND)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(wishlistRequest))
+                ).andExpect(
+                        MockMvcResultMatchers.status().is4xxClientError()
+                )
+                .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+        ErrorResponse errorResponse = objectMapper.readValue(response, ErrorResponse.class);
+        assertEquals(MESSAGE_NOT_FOUND, errorResponse.message());
+        assertWishlistTableSize(1);
+        assertWishlistInTable(wishlistFirst);
     }
 }
