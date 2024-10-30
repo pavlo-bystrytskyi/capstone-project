@@ -1,4 +1,4 @@
-package org.example.backend.dto;
+package org.example.backend.dto.item;
 
 import lombok.NonNull;
 import org.example.backend.model.Item;
