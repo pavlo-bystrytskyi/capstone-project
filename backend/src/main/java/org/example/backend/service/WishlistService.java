@@ -23,4 +23,8 @@ public class WishlistService {
     public Wishlist getById(@NonNull String id) {
         return wishlistRepository.findById(id).orElseThrow();
     }
+
+    public Wishlist getByPublicId(@NonNull String id) {
+        return wishlistRepository.findByPublicId(id).orElseThrow();
+    }
 }
