@@ -41,4 +41,12 @@ public class WishlistController {
     public void deleteById(@PathVariable @NonNull String id) {
         wishlistService.deleteById(id);
     }
+
+    @PutMapping("/{id}")
+    public WishlistResponse updateById(@PathVariable @NonNull String id, @RequestBody @NonNull WishlistRequest wishlistRequest) {
+        Wishlist wishlist = wishlistRequest.toWishlist();
+        Wishlist updatedWishlist = wishlistService.updateById(id, wishlist);
+
+        return WishlistResponse.of(updatedWishlist);
+    }
 }
