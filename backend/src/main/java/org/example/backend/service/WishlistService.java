@@ -1,5 +1,6 @@
 package org.example.backend.service;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.model.Wishlist;
 import org.example.backend.repository.WishlistRepository;
@@ -15,6 +16,11 @@ public class WishlistService {
 
     public Wishlist create(Wishlist wishlist) {
         String id = idService.generateId();
+
         return wishlistRepository.save(wishlist.withPublicId(id));
+    }
+
+    public Wishlist getById(@NonNull String id) {
+        return wishlistRepository.findById(id).orElseThrow();
     }
 }
