@@ -29,4 +29,8 @@ public class ItemService {
     public Item getByPublicId(@NonNull String publicId) {
         return itemRepository.findByPublicId(publicId).orElseThrow();
     }
+
+    public void deleteById(@NonNull String id) {
+        itemRepository.deleteById(id);
+    }
 }
