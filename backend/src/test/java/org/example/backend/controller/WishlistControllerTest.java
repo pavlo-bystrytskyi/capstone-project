@@ -35,6 +35,7 @@ class WishlistControllerTest {
 
     private static final String URL_BASE = "/api/wishlist";
     private static final String URL_WITH_ID = "/api/wishlist/{id}";
+    private static final String URL_PUBLIC_WITH_ID = "/api/wishlist/public/{id}";
 
     private static final String ID_FIRST = "some id 1";
     private static final String ID_SECOND = "some id 2";
@@ -179,6 +180,76 @@ class WishlistControllerTest {
 
         MvcResult mvcResult = mockMvc.perform(
                         get(URL_WITH_ID, ID_SECOND)
+                ).andExpect(
+                        MockMvcResultMatchers.status().is4xxClientError()
+                )
+                .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+        ErrorResponse errorResponse = objectMapper.readValue(response, ErrorResponse.class);
+        assertEquals(MESSAGE_NOT_FOUND, errorResponse.message());
+    }
+
+    @Test
+    @DirtiesContext
+    @DisplayName("Get by public id successful")
+    void getByPublicId_successful() throws Exception {
+        Wishlist wishlistFirst = Wishlist.builder()
+                .id(ID_FIRST)
+                .publicId(PUBLIC_ID_FIRST)
+                .title(TITLE_FIRST)
+                .description(DESCRIPTION_FIRST)
+                .itemIds(List.of(ITEM_ID_FIRST, ITEM_ID_THIRD))
+                .build();
+        Wishlist wishlistSecond = Wishlist.builder()
+                .id(ID_SECOND)
+                .publicId(PUBLIC_ID_SECOND)
+                .title(TITLE_SECOND)
+                .description(DESCRIPTION_SECOND)
+                .itemIds(List.of(ITEM_ID_SECOND))
+                .build();
+        wishlistRepository.saveAll(
+                List.of(
+                        wishlistFirst,
+                        wishlistSecond
+                )
+        );
+
+        MvcResult mvcResult = mockMvc.perform(
+                        get(URL_PUBLIC_WITH_ID, wishlistFirst.getPublicId())
+                ).andExpect(
+                        MockMvcResultMatchers.status().isOk()
+                )
+                .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+        assertFalse(response.contains(wishlistFirst.getId()));
+        assertFalse(response.contains(wishlistFirst.getPublicId()));
+        WishlistResponse wishlistResponse = objectMapper.readValue(response, WishlistResponse.class);
+        assertEquals(wishlistFirst.getTitle(), wishlistResponse.title());
+        assertEquals(wishlistFirst.getDescription(), wishlistResponse.description());
+        assertEquals(wishlistFirst.getItemIds(), wishlistResponse.itemIds());
+    }
+
+    @Test
+    @DirtiesContext
+    @DisplayName("Get by public id not found")
+    void getByPublicId_notFound() throws Exception {
+        Wishlist wishlistFirst = Wishlist.builder()
+                .id(ID_FIRST)
+                .publicId(PUBLIC_ID_FIRST)
+                .title(TITLE_FIRST)
+                .description(DESCRIPTION_FIRST)
+                .itemIds(List.of(ITEM_ID_FIRST, ITEM_ID_THIRD))
+                .build();
+        wishlistRepository.saveAll(
+                List.of(
+                        wishlistFirst
+                )
+        );
+
+        MvcResult mvcResult = mockMvc.perform(
+                        get(URL_PUBLIC_WITH_ID, PUBLIC_ID_SECOND)
                 ).andExpect(
                         MockMvcResultMatchers.status().is4xxClientError()
                 )

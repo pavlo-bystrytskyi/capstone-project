@@ -29,4 +29,11 @@ public class WishlistController {
 
         return WishlistResponse.of(wishlist);
     }
+
+    @GetMapping("/public/{id}")
+    public WishlistResponse getByPublicId(@PathVariable @NonNull String id) {
+        Wishlist wishlist = wishlistService.getByPublicId(id);
+
+        return WishlistResponse.of(wishlist);
+    }
 }
