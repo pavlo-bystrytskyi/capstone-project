@@ -27,4 +27,8 @@ public class WishlistService {
     public Wishlist getByPublicId(@NonNull String id) {
         return wishlistRepository.findByPublicId(id).orElseThrow();
     }
+
+    public void deleteById(@NonNull String id) {
+        wishlistRepository.deleteById(id);
+    }
 }

@@ -26,8 +26,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -258,5 +257,71 @@ class WishlistControllerTest {
         String response = mvcResult.getResponse().getContentAsString();
         ErrorResponse errorResponse = objectMapper.readValue(response, ErrorResponse.class);
         assertEquals(MESSAGE_NOT_FOUND, errorResponse.message());
+    }
+
+    @Test
+    @DirtiesContext
+    @DisplayName("Delete by id successful")
+    void deleteById_successful() throws Exception {
+        Wishlist wishlistFirst = Wishlist.builder()
+                .id(ID_FIRST)
+                .publicId(PUBLIC_ID_FIRST)
+                .title(TITLE_FIRST)
+                .description(DESCRIPTION_FIRST)
+                .itemIds(List.of(ITEM_ID_FIRST, ITEM_ID_THIRD))
+                .build();
+        Wishlist wishlistSecond = Wishlist.builder()
+                .id(ID_SECOND)
+                .publicId(PUBLIC_ID_SECOND)
+                .title(TITLE_SECOND)
+                .description(DESCRIPTION_SECOND)
+                .itemIds(List.of(ITEM_ID_SECOND))
+                .build();
+        wishlistRepository.saveAll(
+                List.of(
+                        wishlistFirst,
+                        wishlistSecond
+                )
+        );
+
+        mockMvc.perform(
+                delete(URL_WITH_ID, wishlistFirst.getId())
+        ).andExpect(
+                MockMvcResultMatchers.status().isOk()
+        );
+
+        List<Wishlist> items = wishlistRepository.findAll();
+        assertEquals(1, items.size());
+        Optional<Wishlist> item = wishlistRepository.findById(wishlistFirst.getId());
+        assertTrue(item.isEmpty());
+    }
+
+    @Test
+    @DirtiesContext
+    @DisplayName("Delete by id not found")
+    void deleteById_notFound() throws Exception {
+        Wishlist wishlistFirst = Wishlist.builder()
+                .id(ID_FIRST)
+                .publicId(PUBLIC_ID_FIRST)
+                .title(TITLE_FIRST)
+                .description(DESCRIPTION_FIRST)
+                .itemIds(List.of(ITEM_ID_FIRST, ITEM_ID_THIRD))
+                .build();
+        wishlistRepository.saveAll(
+                List.of(
+                        wishlistFirst
+                )
+        );
+
+        mockMvc.perform(
+                delete(URL_WITH_ID, ID_SECOND)
+        ).andExpect(
+                MockMvcResultMatchers.status().isOk()
+        );
+
+        List<Wishlist> wishlists = wishlistRepository.findAll();
+        assertEquals(1, wishlists.size());
+        Optional<Wishlist> wishlist = wishlistRepository.findById(wishlistFirst.getId());
+        assertTrue(wishlist.isPresent());
     }
 }
