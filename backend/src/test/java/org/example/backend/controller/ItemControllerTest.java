@@ -29,8 +29,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -304,5 +303,83 @@ class ItemControllerTest {
         String response = mvcResult.getResponse().getContentAsString();
         ErrorResponse errorResponse = objectMapper.readValue(response, ErrorResponse.class);
         assertEquals(MESSAGE_NOT_FOUND, errorResponse.message());
+    }
+
+    @Test
+    @DirtiesContext
+    @DisplayName("Delete by id successful")
+    void deleteById_successful() throws Exception {
+        Product productFirst = Product.builder()
+                .title(PRODUCT_TITLE_FIRST)
+                .description(PRODUCT_DESCRIPTION_FIRST)
+                .link(PRODUCT_LINK_FIRST)
+                .build();
+        Item itemFirst = Item.builder()
+                .id(ID_FIRST)
+                .publicId(PUBLIC_ID_FIRST)
+                .product(productFirst)
+                .quantity(ITEM_QUANTITY_FIRST)
+                .build();
+        Product productSecond = Product.builder()
+                .title(PRODUCT_TITLE_SECOND)
+                .description(PRODUCT_DESCRIPTION_SECOND)
+                .link(PRODUCT_LINK_SECOND)
+                .build();
+        Item itemSecond = Item.builder()
+                .id(ID_SECOND)
+                .publicId(PUBLIC_ID_SECOND)
+                .product(productSecond)
+                .quantity(ITEM_QUANTITY_SECOND)
+                .build();
+        itemRepository.saveAll(
+                List.of(
+                        itemFirst,
+                        itemSecond
+                )
+        );
+
+        mockMvc.perform(
+                delete(URL_WITH_ID, itemFirst.getId())
+        ).andExpect(
+                MockMvcResultMatchers.status().isOk()
+        );
+
+        List<Item> items = itemRepository.findAll();
+        assertEquals(1, items.size());
+        Optional<Item> item = itemRepository.findById(itemFirst.getId());
+        assertTrue(item.isEmpty());
+    }
+
+    @Test
+    @DirtiesContext
+    @DisplayName("Delete by id not found")
+    void deleteById_notFound() throws Exception {
+        Product productFirst = Product.builder()
+                .title(PRODUCT_TITLE_FIRST)
+                .description(PRODUCT_DESCRIPTION_FIRST)
+                .link(PRODUCT_LINK_FIRST)
+                .build();
+        Item itemFirst = Item.builder()
+                .id(ID_FIRST)
+                .publicId(PUBLIC_ID_FIRST)
+                .product(productFirst)
+                .quantity(ITEM_QUANTITY_FIRST)
+                .build();
+        itemRepository.saveAll(
+                List.of(
+                        itemFirst
+                )
+        );
+
+        mockMvc.perform(
+                delete(URL_WITH_ID, ID_SECOND)
+        ).andExpect(
+                MockMvcResultMatchers.status().isOk()
+        );
+
+        List<Item> items = itemRepository.findAll();
+        assertEquals(1, items.size());
+        Optional<Item> item = itemRepository.findById(itemFirst.getId());
+        assertTrue(item.isPresent());
     }
 }

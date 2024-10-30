@@ -30,6 +30,11 @@ public class ItemController {
         return ItemResponse.of(item);
     }
 
+    @DeleteMapping("/{id}")
+    public void deleteById(@PathVariable @NonNull String id) {
+        itemService.deleteById(id);
+    }
+
     @GetMapping("/public/{id}")
     public ItemResponse getByPublicId(@PathVariable @NonNull String id) {
         Item item = itemService.getByPublicId(id);
