@@ -38,9 +38,8 @@ public class ItemService {
 
     public Item updateStatusByPublicId(@NonNull String publicId, @NonNull ItemStatus status) {
         Item item = getByPublicId(publicId);
-        Item updatedItem = itemRepository.save(item.withStatus(status));
 
-        return updatedItem;
+        return itemRepository.save(item.withStatus(status));
     }
 
     public Item getByPublicId(@NonNull String publicId) {
