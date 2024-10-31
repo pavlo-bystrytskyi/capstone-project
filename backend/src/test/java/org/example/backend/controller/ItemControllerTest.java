@@ -7,8 +7,10 @@ import org.example.backend.dto.item.ItemResponse;
 import org.example.backend.dto.item.ProductResponse;
 import org.example.backend.mock.dto.ItemRequestMock;
 import org.example.backend.mock.dto.ProductRequestMock;
+import org.example.backend.mock.dto.ItemStatusRequestMock;
 import org.example.backend.model.Item;
 import org.example.backend.model.Product;
+import org.example.backend.model.item.ItemStatus;
 import org.example.backend.repository.ItemRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.example.backend.model.item.ItemStatus.AVAILABLE;
+import static org.example.backend.model.item.ItemStatus.PURCHASED;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -73,6 +77,7 @@ class ItemControllerTest {
         );
         ItemRequestMock itemRequest = new ItemRequestMock(
                 ITEM_QUANTITY_FIRST,
+                AVAILABLE,
                 productRequest
         );
 
@@ -97,6 +102,7 @@ class ItemControllerTest {
         );
         ItemRequestMock itemRequest = new ItemRequestMock(
                 ITEM_QUANTITY_FIRST,
+                AVAILABLE,
                 productRequest
         );
 
@@ -150,6 +156,7 @@ class ItemControllerTest {
         Item itemFirst = Item.builder()
                 .id(ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
+                .status(AVAILABLE)
                 .product(productFirst)
                 .quantity(ITEM_QUANTITY_FIRST)
                 .build();
@@ -161,6 +168,7 @@ class ItemControllerTest {
         Item itemSecond = Item.builder()
                 .id(ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
+                .status(AVAILABLE)
                 .product(productSecond)
                 .quantity(ITEM_QUANTITY_SECOND)
                 .build();
@@ -201,6 +209,7 @@ class ItemControllerTest {
         Item itemFirst = Item.builder()
                 .id(ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
+                .status(AVAILABLE)
                 .product(productFirst)
                 .quantity(ITEM_QUANTITY_FIRST)
                 .build();
@@ -234,6 +243,7 @@ class ItemControllerTest {
         Item itemFirst = Item.builder()
                 .id(ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
+                .status(AVAILABLE)
                 .product(productFirst)
                 .quantity(ITEM_QUANTITY_FIRST)
                 .build();
@@ -245,6 +255,7 @@ class ItemControllerTest {
         Item itemSecond = Item.builder()
                 .id(ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
+                .status(AVAILABLE)
                 .product(productSecond)
                 .quantity(ITEM_QUANTITY_SECOND)
                 .build();
@@ -285,6 +296,7 @@ class ItemControllerTest {
         Item itemFirst = Item.builder()
                 .id(ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
+                .status(AVAILABLE)
                 .product(productFirst)
                 .quantity(ITEM_QUANTITY_FIRST)
                 .build();
@@ -318,6 +330,7 @@ class ItemControllerTest {
         Item itemFirst = Item.builder()
                 .id(ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
+                .status(AVAILABLE)
                 .product(productFirst)
                 .quantity(ITEM_QUANTITY_FIRST)
                 .build();
@@ -329,7 +342,7 @@ class ItemControllerTest {
         Item itemSecond = Item.builder()
                 .id(ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
-                .product(productSecond)
+                .status(AVAILABLE).product(productSecond)
                 .quantity(ITEM_QUANTITY_SECOND)
                 .build();
         itemRepository.saveAll(
@@ -363,6 +376,7 @@ class ItemControllerTest {
         Item itemFirst = Item.builder()
                 .id(ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
+                .status(AVAILABLE)
                 .product(productFirst)
                 .quantity(ITEM_QUANTITY_FIRST)
                 .build();
@@ -396,6 +410,7 @@ class ItemControllerTest {
         Item itemFirst = Item.builder()
                 .id(ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
+                .status(AVAILABLE)
                 .product(productFirst)
                 .quantity(ITEM_QUANTITY_FIRST)
                 .build();
@@ -407,6 +422,7 @@ class ItemControllerTest {
         Item itemSecond = Item.builder()
                 .id(ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
+                .status(AVAILABLE)
                 .product(productSecond)
                 .quantity(ITEM_QUANTITY_SECOND)
                 .build();
@@ -423,6 +439,7 @@ class ItemControllerTest {
         );
         ItemRequestMock itemRequest = new ItemRequestMock(
                 ITEM_QUANTITY_FIRST,
+                AVAILABLE,
                 productRequest
         );
         String updateId = itemSecond.getId();
@@ -442,52 +459,6 @@ class ItemControllerTest {
         assetItemRequestReturned(itemRequest, itemResponse);
         assertItemTableSize(2);
         assertItemRequestSaved(itemRequest, updateId);
-        assertItemInTable(itemFirst);
-    }
-
-    @Test
-    @DirtiesContext
-    @DisplayName("Update by id - not found")
-    void updateById_notFound() throws Exception {
-        Product productFirst = Product.builder()
-                .title(PRODUCT_TITLE_FIRST)
-                .description(PRODUCT_DESCRIPTION_FIRST)
-                .link(PRODUCT_LINK_FIRST)
-                .build();
-        Item itemFirst = Item.builder()
-                .id(ID_FIRST)
-                .publicId(PUBLIC_ID_FIRST)
-                .product(productFirst)
-                .quantity(ITEM_QUANTITY_FIRST)
-                .build();
-        itemRepository.saveAll(
-                List.of(
-                        itemFirst
-                )
-        );
-        ProductRequestMock productRequest = new ProductRequestMock(
-                PRODUCT_TITLE_SECOND,
-                PRODUCT_DESCRIPTION_SECOND,
-                PRODUCT_LINK_SECOND
-        );
-        ItemRequestMock itemRequest = new ItemRequestMock(
-                ITEM_QUANTITY_SECOND,
-                productRequest
-        );
-
-        MvcResult mvcResult = mockMvc.perform(
-                        put(URL_WITH_ID, ID_SECOND)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(itemRequest))
-                ).andExpect(
-                        MockMvcResultMatchers.status().is4xxClientError()
-                )
-                .andReturn();
-
-        String response = mvcResult.getResponse().getContentAsString();
-        ErrorResponse errorResponse = objectMapper.readValue(response, ErrorResponse.class);
-        assertEquals(MESSAGE_NOT_FOUND, errorResponse.message());
-        assertItemTableSize(1);
         assertItemInTable(itemFirst);
     }
 
@@ -529,5 +500,111 @@ class ItemControllerTest {
         assertEquals(productRequest.title(), product.getTitle());
         assertEquals(productRequest.description(), product.getDescription());
         assertEquals(productRequest.link(), product.getLink());
+    }
+
+    @Test
+    @DirtiesContext
+    @DisplayName("Update by id - not found")
+    void updateById_notFound() throws Exception {
+        Product productFirst = Product.builder()
+                .title(PRODUCT_TITLE_FIRST)
+                .description(PRODUCT_DESCRIPTION_FIRST)
+                .link(PRODUCT_LINK_FIRST)
+                .build();
+        Item itemFirst = Item.builder()
+                .id(ID_FIRST)
+                .publicId(PUBLIC_ID_FIRST)
+                .status(AVAILABLE)
+                .product(productFirst)
+                .quantity(ITEM_QUANTITY_FIRST)
+                .build();
+        itemRepository.saveAll(
+                List.of(
+                        itemFirst
+                )
+        );
+        ProductRequestMock productRequest = new ProductRequestMock(
+                PRODUCT_TITLE_SECOND,
+                PRODUCT_DESCRIPTION_SECOND,
+                PRODUCT_LINK_SECOND
+        );
+        ItemRequestMock itemRequest = new ItemRequestMock(
+                ITEM_QUANTITY_SECOND,
+                AVAILABLE,
+                productRequest
+        );
+
+        MvcResult mvcResult = mockMvc.perform(
+                        put(URL_WITH_ID, ID_SECOND)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(itemRequest))
+                ).andExpect(
+                        MockMvcResultMatchers.status().is4xxClientError()
+                )
+                .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+        ErrorResponse errorResponse = objectMapper.readValue(response, ErrorResponse.class);
+        assertEquals(MESSAGE_NOT_FOUND, errorResponse.message());
+        assertItemTableSize(1);
+        assertItemInTable(itemFirst);
+    }
+
+    @Test
+    @DirtiesContext
+    @DisplayName("Update status by public id - successful")
+    void updateStatusByPublicId_successful() throws Exception {
+        Product productFirst = Product.builder()
+                .title(PRODUCT_TITLE_FIRST)
+                .description(PRODUCT_DESCRIPTION_FIRST)
+                .link(PRODUCT_LINK_FIRST)
+                .build();
+        Item itemFirst = Item.builder()
+                .id(ID_FIRST)
+                .publicId(PUBLIC_ID_FIRST)
+                .status(AVAILABLE)
+                .product(productFirst)
+                .quantity(ITEM_QUANTITY_FIRST)
+                .build();
+        Product productSecond = Product.builder()
+                .title(PRODUCT_TITLE_SECOND)
+                .description(PRODUCT_DESCRIPTION_SECOND)
+                .link(PRODUCT_LINK_SECOND)
+                .build();
+        Item itemSecond = Item.builder()
+                .id(ID_SECOND)
+                .publicId(PUBLIC_ID_SECOND)
+                .status(AVAILABLE)
+                .product(productSecond)
+                .quantity(ITEM_QUANTITY_SECOND)
+                .build();
+        itemRepository.saveAll(
+                List.of(
+                        itemFirst,
+                        itemSecond
+                )
+        );
+        ItemStatus newStatus = PURCHASED;
+        ItemStatusRequestMock itemRequest = new ItemStatusRequestMock(
+                newStatus
+        );
+        String updateId = itemSecond.getPublicId();
+
+        MvcResult mvcResult = mockMvc.perform(
+                        put(URL_PUBLIC_WITH_ID, updateId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(itemRequest))
+                ).andExpect(
+                        MockMvcResultMatchers.status().isOk()
+                )
+                .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+        ItemResponse itemResponse = objectMapper.readValue(response, ItemResponse.class);
+
+        assertEquals(newStatus, itemResponse.status());
+        assertItemTableSize(2);
+        assertItemInTable(itemFirst);
+        assertItemInTable(itemSecond.withStatus(newStatus));
     }
 }
