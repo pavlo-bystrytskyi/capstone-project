@@ -3,6 +3,7 @@ package org.example.backend.service;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.model.Item;
+import org.example.backend.model.item.ItemStatus;
 import org.example.backend.repository.ItemRepository;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +34,13 @@ public class ItemService {
 
     public Item getById(@NonNull String id) {
         return itemRepository.findById(id).orElseThrow();
+    }
+
+    public Item updateStatusByPublicId(@NonNull String publicId, @NonNull ItemStatus status) {
+        Item item = getByPublicId(publicId);
+        Item updatedItem = itemRepository.save(item.withStatus(status));
+
+        return updatedItem;
     }
 
     public Item getByPublicId(@NonNull String publicId) {
