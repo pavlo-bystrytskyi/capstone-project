@@ -19,9 +19,10 @@ public class ItemController {
 
     @PostMapping
     public IdResponse create(@RequestBody @NonNull ItemRequest itemRequest) {
-        Item item = itemRequest.toItem();
+        Item itemData = itemRequest.toItem();
+        Item item = itemService.create(itemData);
 
-        return IdResponse.of(itemService.create(item).getId());
+        return IdResponse.of(item.getPublicId(), item.getId());
     }
 
     @GetMapping("/{id}")

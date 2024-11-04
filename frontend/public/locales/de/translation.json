@@ -11,5 +11,7 @@
   "public_link": "Öffentlicher Link",
   "public_link_description": "Diesen Link können Sie mit jedem teilen.",
   "private_link": "Privater Link",
-  "private_link_description": "Dieser Link ermöglicht es Ihnen, Ihr Verzeichnis zu bearbeiten. Teilen Sie ihn nicht."
+  "private_link_description": "Dieser Link ermöglicht es Ihnen, Ihr Verzeichnis zu bearbeiten. Teilen Sie ihn nicht.",
+  "open_link": "Öffnen",
+  "copy_link": "Kopieren"
 }
