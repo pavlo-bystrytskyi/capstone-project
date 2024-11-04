@@ -1,6 +1,6 @@
 type NewRegistryData = {
-    edit_link: string,
-    show_link: string
+    privateId: string,
+    publicId: string
 }
 
 export default NewRegistryData

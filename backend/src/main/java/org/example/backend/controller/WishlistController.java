@@ -18,9 +18,10 @@ public class WishlistController {
 
     @PostMapping
     public IdResponse create(@RequestBody @NonNull WishlistRequest wishlistRequest) {
-        Wishlist wishlist = wishlistRequest.toWishlist();
+        Wishlist wishlistData = wishlistRequest.toWishlist();
+        Wishlist wishlist = wishlistService.create(wishlistData);
 
-        return IdResponse.of(wishlistService.create(wishlist).getId());
+        return IdResponse.of(wishlist.getPublicId(), wishlist.getId());
     }
 
     @GetMapping("/{id}")

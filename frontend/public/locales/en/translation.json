@@ -11,5 +11,7 @@
   "public_link": "Public link",
   "public_link_description": "You can share this link with anyone.",
   "private_link": "Private link",
-  "private_link_description": "This link provides a possibility to edit your registry. Don't share it."
+  "private_link_description": "This link provides a possibility to edit your registry. Don't share it.",
+  "open_link": "Open",
+  "copy_link": "Copy"
 }
