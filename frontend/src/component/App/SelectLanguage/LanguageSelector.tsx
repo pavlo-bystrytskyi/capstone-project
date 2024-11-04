@@ -1,4 +1,4 @@
-import "../../../style/src/component/App/SelectLanguage/LanguageSelector.css";
+import "../../.././style/App/SelectLanguage/LanguageSelector.css";
 import {SupportedLanguage} from "../../../type/SupportedLanguage.tsx";
 
 export default function LanguageSelector({language}: { readonly language: SupportedLanguage }) {

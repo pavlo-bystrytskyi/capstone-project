@@ -1,4 +1,4 @@
-import "../../style/src/component/App/SelectLanguage.css";
+import "../.././style/App/SelectLanguage.css";
 import LanguageSelector from "./SelectLanguage/LanguageSelector.tsx";
 import {SupportedLanguage, SupportedLanguageCode} from "../../type/SupportedLanguage.tsx";
 

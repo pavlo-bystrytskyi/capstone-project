@@ -1,6 +1,6 @@
 import {useTranslation} from "react-i18next";
 import SelectLanguage from "./App/SelectLanguage.tsx";
-import "../style/src/component/App.css"
+import ".././style/App.css"
 
 import {Route, Routes, useNavigate} from "react-router-dom";
 import SelectType from "./App/SelectType.tsx";
