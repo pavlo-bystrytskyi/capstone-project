@@ -1,0 +1,15 @@
+{
+  "hello_world": "Hallo, Welt!",
+  "create": "Erstellen",
+  "new_registry": "Neues Verzeichnis",
+  "create_as_guest": "Als Gast erstellen",
+  "create_as_customer": "Als Kunde erstellen",
+  "registry_name": "Name des Verzeichnisses",
+  "registry_description": "Beschreibung des Verzeichnisses",
+  "registry_item": "Produkt hinzufügen",
+  "registry_created": "Verzeichnis erfolgreich erstellt",
+  "public_link": "Öffentlicher Link",
+  "public_link_description": "Diesen Link können Sie mit jedem teilen.",
+  "private_link": "Privater Link",
+  "private_link_description": "Dieser Link ermöglicht es Ihnen, Ihr Verzeichnis zu bearbeiten. Teilen Sie ihn nicht."
+}

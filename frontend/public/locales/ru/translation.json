@@ -1,0 +1,15 @@
+{
+  "hello_world": "Привет, мир!",
+  "create": "Создать",
+  "new_registry": "Новый реестр",
+  "create_as_guest": "Создать как гость",
+  "create_as_customer": "Создать как пользователь",
+  "registry_name": "Название реестра",
+  "registry_description": "Описание реестра",
+  "registry_item": "Добавить товар",
+  "registry_created": "Реестр успешно создан",
+  "public_link": "Публичная ссылка",
+  "public_link_description": "Вы можете поделиться этой ссылкой с кем угодно.",
+  "private_link": "Приватная ссылка",
+  "private_link_description": "Эта ссылка предоставляет возможность редактировать ваш реестр. Не делитесь ею."
+}
