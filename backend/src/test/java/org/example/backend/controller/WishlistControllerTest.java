@@ -96,7 +96,7 @@ class WishlistControllerTest {
                 .andReturn();
 
         IdResponse response = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), IdResponse.class);
-        assertWishlistRequestSaved(wishlistRequest, response.id());
+        assertWishlistRequestSaved(wishlistRequest, response.privateId());
     }
 
     private void assertWishlistRequestSaved(WishlistRequestMock expected, String id) {

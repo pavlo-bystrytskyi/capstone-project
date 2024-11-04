@@ -117,7 +117,7 @@ class ItemControllerTest {
 
         IdResponse response = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), IdResponse.class);
 
-        Optional<Item> result = itemRepository.findById(response.id());
+        Optional<Item> result = itemRepository.findById(response.privateId());
         assertTrue(result.isPresent());
         Item item = result.get();
         assertEquals(itemRequest.quantity(), item.getQuantity());
