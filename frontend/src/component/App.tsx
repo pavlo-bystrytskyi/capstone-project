@@ -19,7 +19,7 @@ function App() {
     const [newRegistryData, setNewRegistryData] = useState<NewRegistryData>()
     const setLanguage = function (languageCode: SupportedLanguageCode) {
         if (languageCode !== i18n.resolvedLanguage && Object.values(SupportedLanguageCode).includes(languageCode)) {
-            i18n.changeLanguage(languageCode);            
+            i18n.changeLanguage(languageCode);
         }
         navigate("/type");
     };
@@ -30,20 +30,18 @@ function App() {
     }
 
     useEffect(() => {
-        if(registryTypeCode && registryTypeCode === RegistryTypeCode.GUEST) navigate("/new-guest");
+        if (registryTypeCode && registryTypeCode === RegistryTypeCode.GUEST) navigate("/new-guest");
     }, [registryTypeCode]);
 
     return (
-        <>
-            <Routes>
-                <Route path="/"
-                       element={<SelectLanguage languages={supportedLanguages} setLanguage={setLanguage}/>}/>
-                <Route path="/type"
-                       element={<SelectType types={registryTypes} setRegistryType={setRegistryTypeCode}/>}/>
-                <Route path="/new-guest" element={<NewRegistry onSuccess={redirectToSuccess}/>}/>
-                <Route path="/success-guest" element={<RegistrySuccess data={newRegistryData}/>}/>
-            </Routes>
-        </>
+        <Routes>
+            <Route path="/"
+                   element={<SelectLanguage languages={supportedLanguages} setLanguage={setLanguage}/>}/>
+            <Route path="/type"
+                   element={<SelectType types={registryTypes} setRegistryType={setRegistryTypeCode}/>}/>
+            <Route path="/new-guest" element={<NewRegistry onSuccess={redirectToSuccess}/>}/>
+            <Route path="/success-guest" element={<RegistrySuccess data={newRegistryData}/>}/>
+        </Routes>
     )
 }
 

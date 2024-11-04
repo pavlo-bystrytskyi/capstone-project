@@ -1,7 +1,7 @@
 import {useTranslation} from "react-i18next";
 import NewRegistryData from "../../dto/NewRegistryData.tsx";
 
-export default function NewRegistry({onSuccess}: { onSuccess: (data: NewRegistryData) => void }) {
+export default function NewRegistry({onSuccess}: {readonly onSuccess: (data: NewRegistryData) => void }) {
     const {t} = useTranslation();
 
     return (

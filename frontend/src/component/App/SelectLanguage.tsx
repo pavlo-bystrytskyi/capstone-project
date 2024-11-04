@@ -3,14 +3,14 @@ import LanguageSelector from "./SelectLanguage/LanguageSelector.tsx";
 import {SupportedLanguage, SupportedLanguageCode} from "../../type/SupportedLanguage.tsx";
 
 export default function SelectLanguage({languages, setLanguage}: {
-    languages: SupportedLanguage[],
-    setLanguage: (code: SupportedLanguageCode) => void
+    readonly languages: SupportedLanguage[],
+    readonly setLanguage: (code: SupportedLanguageCode) => void
 }) {
     const languageSelectors = languages.map(
-        (language) => <li className="select-language-element" key={language.code}
+        (language) => <button className="select-language-element" key={language.code}
                           onClick={() => setLanguage(language.code)}>
             <LanguageSelector language={language}/>
-        </li>
+        </button>
     )
 
     return <div className="select-language">

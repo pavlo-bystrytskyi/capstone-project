@@ -21,8 +21,6 @@ export default function RegistrySuccess({data}: { data?: NewRegistryData }) {
                     </div>
                 </div>
             </> :
-            <>
-                <h1>Error: No data available</h1>
-            </>
+            <h1>Error: No data available</h1>
     )
 }
