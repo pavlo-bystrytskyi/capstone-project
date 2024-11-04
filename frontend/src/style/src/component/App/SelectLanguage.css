@@ -1,0 +1,21 @@
+.select-language {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.select-language-list {
+    list-style-type: none;
+    display: flex;
+    gap: 20px;
+    padding: 0;
+    margin: 0;
+}
+
+.select-language-element {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+}

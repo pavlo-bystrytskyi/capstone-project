@@ -1,0 +1,15 @@
+{
+  "hello_world": "Hello, World!",
+  "create": "Create",
+  "new_registry": "New Registry",
+  "create_as_guest": "Create as Guest",
+  "create_as_customer": "Create as Customer",
+  "registry_name": "Registry name",
+  "registry_description": "Registry description",
+  "registry_item": "Add a product",
+  "registry_created": "Registry successfully created",
+  "public_link": "Public link",
+  "public_link_description": "You can share this link with anyone.",
+  "private_link": "Private link",
+  "private_link_description": "This link provides a possibility to edit your registry. Don't share it."
+}
