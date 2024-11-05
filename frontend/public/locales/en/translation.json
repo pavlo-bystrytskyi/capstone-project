@@ -13,5 +13,12 @@
   "private_link": "Private link",
   "private_link_description": "This link provides a possibility to edit your registry. Don't share it.",
   "open_link": "Open",
-  "copy_link": "Copy"
+  "copy_link": "Copy",
+  "item_name": "Item name",
+  "item_description": "Product description",
+  "item_link": "Link to a Product",
+  "item_quantity": "Quantity of the Product",
+  "add_some_products": "Please add some product to your Gift Registry",
+  "add_item": "Add",
+  "remove_item": "Remove"
 }

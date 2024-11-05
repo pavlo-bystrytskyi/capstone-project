@@ -1,0 +1,64 @@
+import {ChangeEvent, FormEvent, useRef, useState} from "react";
+import axios from "axios";
+import Item from "../../../../type/Item.tsx";
+import {useTranslation} from "react-i18next";
+import ItemIdContainer from "../../../../dto/ItemIdContainer.tsx";
+import {emptyItem} from "../../../../type/EmptyItem.tsx";
+
+export default function NewItemForm(
+    {
+        addItem
+    }: {
+        readonly addItem: (item: Item) => void
+    }
+) {
+    const {t} = useTranslation();
+    const formRef = useRef<HTMLFormElement>(null);
+    const [itemData, setItemData] = useState<Item>(emptyItem);
+    const handleSubmit = function (event: FormEvent) {
+        event.preventDefault();
+        axios.post<ItemIdContainer>('/api/item', itemData)
+            .then(response => {
+                addItem({
+                    ...itemData,
+                    publicId: response.data.publicId,
+                    privateId: response.data.privateId
+                });
+                formRef.current?.reset();
+                setItemData(emptyItem);
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    }
+    const handleProductDataChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const {name, value} = event.target;
+        setItemData((prevState) => ({
+            ...prevState,
+            product: {
+                ...prevState.product,
+                [name]: value,
+            },
+        }));
+    };
+    const handleItemDataChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const {name, value} = event.target;
+        setItemData((prevState) => ({
+            ...prevState,
+            [name]: value,
+        }));
+    };
+
+    return <form className="new-item-form" onSubmit={handleSubmit} ref={formRef}>
+        <label htmlFor="title">{t("item_name")}</label>
+        <input type="text" name="title" value={itemData.product.title} onChange={(e) => handleProductDataChange(e)}/>
+        <label htmlFor="description">{t("item_description")}</label>
+        <input type="text" name="description" value={itemData.product.description}
+               onChange={(e) => handleProductDataChange(e)}/>
+        <label htmlFor="link">{t("item_link")}</label>
+        <input type="text" name="link" value={itemData.product.link} onChange={(e) => handleProductDataChange(e)}/>
+        <label htmlFor="quantity">{t("item_quantity")}</label>
+        <input type="text" name="quantity" value={itemData.quantity} onChange={(e) => handleItemDataChange(e)}/>
+        <button>{t("add_item")}</button>
+    </form>
+}

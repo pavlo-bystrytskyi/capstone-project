@@ -13,5 +13,12 @@
   "private_link": "Privater Link",
   "private_link_description": "Dieser Link ermöglicht es Ihnen, Ihr Verzeichnis zu bearbeiten. Teilen Sie ihn nicht.",
   "open_link": "Öffnen",
-  "copy_link": "Kopieren"
+  "copy_link": "Kopieren",
+  "item_name": "Produktname",
+  "item_description": "Produktbeschreibung",
+  "item_link": "Link zum Produkt",
+  "item_quantity": "Produktanzahl",
+  "add_some_products": "Bitte fügen Sie Produkte zu Ihrem Verzeichnis hinzu",
+  "add_item": "Hinzufügen",
+  "remove_item": "Entfernen"
 }
