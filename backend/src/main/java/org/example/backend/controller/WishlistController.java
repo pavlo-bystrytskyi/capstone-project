@@ -3,8 +3,9 @@ package org.example.backend.controller;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.IdResponse;
+import org.example.backend.dto.wishlist.PrivateWishlistResponse;
 import org.example.backend.dto.wishlist.WishlistRequest;
-import org.example.backend.dto.wishlist.WishlistResponse;
+import org.example.backend.dto.wishlist.PublicWishlistResponse;
 import org.example.backend.model.Wishlist;
 import org.example.backend.service.WishlistService;
 import org.springframework.web.bind.annotation.*;
@@ -25,17 +26,17 @@ public class WishlistController {
     }
 
     @GetMapping("/{id}")
-    public WishlistResponse getById(@PathVariable @NonNull String id) {
+    public PrivateWishlistResponse getById(@PathVariable @NonNull String id) {
         Wishlist wishlist = wishlistService.getById(id);
 
-        return WishlistResponse.of(wishlist);
+        return PrivateWishlistResponse.of(wishlist);
     }
 
     @GetMapping("/public/{id}")
-    public WishlistResponse getByPublicId(@PathVariable @NonNull String id) {
+    public PublicWishlistResponse getByPublicId(@PathVariable @NonNull String id) {
         Wishlist wishlist = wishlistService.getByPublicId(id);
 
-        return WishlistResponse.of(wishlist);
+        return PublicWishlistResponse.of(wishlist);
     }
 
     @DeleteMapping("/{id}")
@@ -44,10 +45,10 @@ public class WishlistController {
     }
 
     @PutMapping("/{id}")
-    public WishlistResponse updateById(@PathVariable @NonNull String id, @RequestBody @NonNull WishlistRequest wishlistRequest) {
+    public PrivateWishlistResponse updateById(@PathVariable @NonNull String id, @RequestBody @NonNull WishlistRequest wishlistRequest) {
         Wishlist wishlist = wishlistRequest.toWishlist();
         Wishlist updatedWishlist = wishlistService.updateById(id, wishlist);
 
-        return WishlistResponse.of(updatedWishlist);
+        return PrivateWishlistResponse.of(updatedWishlist);
     }
 }

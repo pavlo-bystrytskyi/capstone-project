@@ -11,12 +11,15 @@ import java.util.List;
 @Data
 @With
 public class Wishlist {
+
     @Id
     private String id;
 
     private String publicId;
 
-    private List<String> itemIds;
+    private List<String> publicItemIds;
+
+    private List<String> privateItemIds;
 
     private String title;
 
