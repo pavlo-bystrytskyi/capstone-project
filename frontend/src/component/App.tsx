@@ -10,7 +10,8 @@ import {useEffect, useState} from "react";
 import NewRegistry from "./App/NewRegistry.tsx";
 import RegistrySuccess from "./App/RegistrySuccess.tsx";
 import NewRegistryData from "../dto/NewRegistryData.tsx";
-import ViewPublic from "./App/ViewPublic.tsx";
+import View from "./App/View.tsx";
+import ViewConfig from "../type/ViewConfig.tsx";
 
 
 function App() {
@@ -34,6 +35,28 @@ function App() {
         if (registryTypeCode && registryTypeCode === RegistryTypeCode.GUEST) navigate("/new-guest");
     }, [registryTypeCode]);
 
+    const publicConfig: ViewConfig = {
+        wishlist: {
+            url: "/api/wishlist/public/",
+            itemIdField: "publicItemIds"
+        },
+        item: {
+            url: "/api/item/public/",
+            idField: "publicId"
+        }
+    }
+
+    const privateConfig: ViewConfig = {
+        wishlist: {
+            url: "/api/wishlist/",
+            itemIdField: "privateItemIds"
+        },
+        item: {
+            url: "/api/item/",
+            idField: "privateId"
+        }
+    }
+
     return (
         <Routes>
             <Route path="/"
@@ -42,7 +65,8 @@ function App() {
                    element={<SelectType types={registryTypes} setRegistryType={setRegistryTypeCode}/>}/>
             <Route path="/new-guest" element={<NewRegistry onSuccess={redirectToSuccess}/>}/>
             <Route path="/success-guest" element={<RegistrySuccess data={newRegistryData}/>}/>
-            <Route path="/show-public/:id" element={<ViewPublic/>}/>
+            <Route path="/show-public/:id" element={<View config={publicConfig}/>}/>
+            <Route path="/show-private/:id" element={<View config={privateConfig}/>}/>
         </Routes>
     )
 }
