@@ -10,8 +10,8 @@ import {useEffect, useState} from "react";
 import NewRegistry from "./App/NewRegistry.tsx";
 import RegistrySuccess from "./App/RegistrySuccess.tsx";
 import NewRegistryData from "../dto/NewRegistryData.tsx";
-import ViewPublic from "./App/ViewPublic.tsx";
-
+import ViewPublic from "./App/View/ViewPublic.tsx";
+import ViewPrivate from "./App/View/ViewPrivate.tsx";
 
 function App() {
     const {i18n} = useTranslation();
@@ -43,6 +43,7 @@ function App() {
             <Route path="/new-guest" element={<NewRegistry onSuccess={redirectToSuccess}/>}/>
             <Route path="/success-guest" element={<RegistrySuccess data={newRegistryData}/>}/>
             <Route path="/show-public/:id" element={<ViewPublic/>}/>
+            <Route path="/show-private/:id" element={<ViewPrivate/>}/>
         </Routes>
     )
 }

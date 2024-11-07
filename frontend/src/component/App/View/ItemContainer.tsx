@@ -5,9 +5,11 @@ import ItemComponent from "./ItemContainer/ItemComponent.tsx";
 
 export default function ItemContainer(
     {
-        itemIdList
+        itemIdList,
+        itemUrl
     }: {
         itemIdList: string[],
+        itemUrl: string
     }
 ) {
     const [itemList, setItemList] = useState<Item[]>([])
@@ -16,7 +18,7 @@ export default function ItemContainer(
         try {
             const items = await Promise.all(
                 itemIdList.map(
-                    async (itemId: string) => (await axios.get<Item>("/api/item/public/" + itemId)).data
+                    async (itemId: string) => (await axios.get<Item>(itemUrl + itemId)).data
                 )
             );
             setItemList(items);
