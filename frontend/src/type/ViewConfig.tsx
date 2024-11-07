@@ -6,5 +6,12 @@ export default interface ViewConfig {
     item: {
         url: string
         idField: string
+    },
+    access: {
+        item: {
+            status: {
+                edit: boolean
+            }
+        }
     }
 }

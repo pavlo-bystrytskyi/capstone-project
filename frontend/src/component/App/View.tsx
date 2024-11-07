@@ -33,6 +33,6 @@ export default function View({config}: { config: ViewConfig }) {
             <input type="text" name="description" disabled={true} value={wishlist.description}/>
         </form>
         {wishlist?.[itemIdField] &&
-            <ItemContainer itemIdList={wishlist[itemIdField] as string[]} itemUrl={config.item.url}/>}
+            <ItemContainer itemIdList={wishlist[itemIdField] as string[]} config={config}/>}
     </>
 }
