@@ -3,7 +3,8 @@ package org.example.backend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.backend.dto.ErrorResponse;
 import org.example.backend.dto.IdResponse;
-import org.example.backend.dto.wishlist.WishlistResponse;
+import org.example.backend.dto.wishlist.PrivateWishlistResponse;
+import org.example.backend.dto.wishlist.PublicWishlistResponse;
 import org.example.backend.mock.dto.WishlistRequestMock;
 import org.example.backend.model.Wishlist;
 import org.example.backend.repository.WishlistRepository;
@@ -47,9 +48,12 @@ class WishlistControllerTest {
     private static final String DESCRIPTION_FIRST = "some wishlist description 1";
     private static final String DESCRIPTION_SECOND = "some wishlist description 2";
     private static final String DESCRIPTION_THIRD = "some wishlist description 3";
-    private static final String ITEM_ID_FIRST = "some item id 1";
-    private static final String ITEM_ID_SECOND = "some item id 2";
-    private static final String ITEM_ID_THIRD = "some item id 3";
+    private static final String PRIVATE_ITEM_ID_FIRST = "some item id 1";
+    private static final String PRIVATE_ITEM_ID_SECOND = "some item id 2";
+    private static final String PRIVATE_ITEM_ID_THIRD = "some item id 3";
+    private static final String PUBLIC_ITEM_ID_FIRST = "some public item id 1";
+    private static final String PUBLIC_ITEM_ID_SECOND = "some public item id 2";
+    private static final String PUBLIC_ITEM_ID_THIRD = "some public item id 3";
 
     private static final String MESSAGE_NOT_FOUND = "No value present";
 
@@ -65,13 +69,14 @@ class WishlistControllerTest {
         WishlistRequestMock wishlistRequest = new WishlistRequestMock(
                 TITLE_FIRST,
                 DESCRIPTION_FIRST,
-                List.of(ITEM_ID_FIRST, ITEM_ID_SECOND)
+                List.of(PRIVATE_ITEM_ID_FIRST, PRIVATE_ITEM_ID_SECOND),
+                List.of(PRIVATE_ITEM_ID_FIRST, PRIVATE_ITEM_ID_SECOND)
         );
 
         return Stream.of(
                 Arguments.of("Empty wishlist title", wishlistRequest.withTitle(null)),
                 Arguments.of("Empty wishlist description", wishlistRequest.withDescription(null)),
-                Arguments.of("Empty item list", wishlistRequest.withItemIds(null)),
+                Arguments.of("Empty item list", wishlistRequest.withPrivateItemIds(null)),
                 Arguments.of("Empty request", null)
         );
     }
@@ -83,7 +88,8 @@ class WishlistControllerTest {
         WishlistRequestMock wishlistRequest = new WishlistRequestMock(
                 TITLE_FIRST,
                 DESCRIPTION_FIRST,
-                List.of(ITEM_ID_FIRST, ITEM_ID_SECOND)
+                List.of(PRIVATE_ITEM_ID_FIRST, PRIVATE_ITEM_ID_SECOND),
+                List.of(PUBLIC_ITEM_ID_FIRST, PUBLIC_ITEM_ID_SECOND)
         );
 
         MvcResult mvcResult = mockMvc.perform(
@@ -105,7 +111,7 @@ class WishlistControllerTest {
         Wishlist actual = optional.get();
         assertEquals(expected.title(), actual.getTitle());
         assertEquals(expected.description(), actual.getDescription());
-        assertEquals(expected.itemIds(), actual.getItemIds());
+        assertEquals(expected.privateItemIds(), actual.getPrivateItemIds());
     }
 
     @ParameterizedTest(name = "{0}")
@@ -134,14 +140,16 @@ class WishlistControllerTest {
                 .publicId(PUBLIC_ID_FIRST)
                 .title(TITLE_FIRST)
                 .description(DESCRIPTION_FIRST)
-                .itemIds(List.of(ITEM_ID_FIRST, ITEM_ID_THIRD))
+                .privateItemIds(List.of(PRIVATE_ITEM_ID_FIRST, PRIVATE_ITEM_ID_THIRD))
+                .publicItemIds(List.of(PUBLIC_ITEM_ID_FIRST, PUBLIC_ITEM_ID_THIRD))
                 .build();
         Wishlist wishlistSecond = Wishlist.builder()
                 .id(ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
                 .title(TITLE_SECOND)
                 .description(DESCRIPTION_SECOND)
-                .itemIds(List.of(ITEM_ID_SECOND))
+                .privateItemIds(List.of(PRIVATE_ITEM_ID_SECOND))
+                .privateItemIds(List.of(PUBLIC_ITEM_ID_SECOND))
                 .build();
         wishlistRepository.saveAll(
                 List.of(
@@ -160,17 +168,17 @@ class WishlistControllerTest {
         String response = mvcResult.getResponse().getContentAsString();
         assertFalse(response.contains(wishlistFirst.getId()));
         assertFalse(response.contains(wishlistFirst.getPublicId()));
-        WishlistResponse wishlistResponse = objectMapper.readValue(response, WishlistResponse.class);
-        assertWishlistResponseInTable(wishlistResponse, wishlistFirst.getId());
+        PrivateWishlistResponse wishlistResponse = objectMapper.readValue(response, PrivateWishlistResponse.class);
+        assertPrivateWishlistResponseInTable(wishlistResponse, wishlistFirst.getId());
     }
 
-    private void assertWishlistResponseInTable(WishlistResponse actual, String id) {
+    private void assertPrivateWishlistResponseInTable(PrivateWishlistResponse actual, String id) {
         Optional<Wishlist> optional = wishlistRepository.findById(id);
         assertTrue(optional.isPresent());
         Wishlist expected = optional.get();
         assertEquals(expected.getTitle(), actual.title());
         assertEquals(expected.getDescription(), actual.description());
-        assertEquals(expected.getItemIds(), actual.itemIds());
+        assertEquals(expected.getPrivateItemIds(), actual.privateItemIds());
     }
 
     @Test
@@ -182,7 +190,7 @@ class WishlistControllerTest {
                 .publicId(PUBLIC_ID_FIRST)
                 .title(TITLE_FIRST)
                 .description(DESCRIPTION_FIRST)
-                .itemIds(List.of(ITEM_ID_FIRST, ITEM_ID_THIRD))
+                .privateItemIds(List.of(PRIVATE_ITEM_ID_FIRST, PRIVATE_ITEM_ID_THIRD))
                 .build();
         wishlistRepository.saveAll(
                 List.of(
@@ -211,14 +219,16 @@ class WishlistControllerTest {
                 .publicId(PUBLIC_ID_FIRST)
                 .title(TITLE_FIRST)
                 .description(DESCRIPTION_FIRST)
-                .itemIds(List.of(ITEM_ID_FIRST, ITEM_ID_THIRD))
+                .privateItemIds(List.of(PRIVATE_ITEM_ID_FIRST, PRIVATE_ITEM_ID_THIRD))
+                .publicItemIds(List.of(PUBLIC_ITEM_ID_FIRST, PUBLIC_ITEM_ID_SECOND))
                 .build();
         Wishlist wishlistSecond = Wishlist.builder()
                 .id(ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
                 .title(TITLE_SECOND)
                 .description(DESCRIPTION_SECOND)
-                .itemIds(List.of(ITEM_ID_SECOND))
+                .privateItemIds(List.of(PRIVATE_ITEM_ID_SECOND))
+                .publicItemIds(List.of(PUBLIC_ITEM_ID_SECOND))
                 .build();
         wishlistRepository.saveAll(
                 List.of(
@@ -228,17 +238,25 @@ class WishlistControllerTest {
         );
 
         MvcResult mvcResult = mockMvc.perform(
-                        get(URL_PUBLIC_WITH_ID, wishlistFirst.getPublicId())
-                ).andExpect(
-                        MockMvcResultMatchers.status().isOk()
-                )
-                .andReturn();
+                get(URL_PUBLIC_WITH_ID, wishlistFirst.getPublicId())
+        ).andExpect(
+                MockMvcResultMatchers.status().isOk()
+        ).andReturn();
 
         String response = mvcResult.getResponse().getContentAsString();
         assertFalse(response.contains(wishlistFirst.getId()));
         assertFalse(response.contains(wishlistFirst.getPublicId()));
-        WishlistResponse wishlistResponse = objectMapper.readValue(response, WishlistResponse.class);
-        assertWishlistResponseInTable(wishlistResponse, wishlistFirst.getId());
+        PublicWishlistResponse wishlistResponse = objectMapper.readValue(response, PublicWishlistResponse.class);
+        assertPublicWishlistResponseInTable(wishlistResponse, wishlistFirst.getId());
+    }
+
+    private void assertPublicWishlistResponseInTable(PublicWishlistResponse actual, String id) {
+        Optional<Wishlist> optional = wishlistRepository.findById(id);
+        assertTrue(optional.isPresent());
+        Wishlist expected = optional.get();
+        assertEquals(expected.getTitle(), actual.title());
+        assertEquals(expected.getDescription(), actual.description());
+        assertEquals(expected.getPublicItemIds(), actual.publicItemIds());
     }
 
     @Test
@@ -250,7 +268,7 @@ class WishlistControllerTest {
                 .publicId(PUBLIC_ID_FIRST)
                 .title(TITLE_FIRST)
                 .description(DESCRIPTION_FIRST)
-                .itemIds(List.of(ITEM_ID_FIRST, ITEM_ID_THIRD))
+                .privateItemIds(List.of(PRIVATE_ITEM_ID_FIRST, PRIVATE_ITEM_ID_THIRD))
                 .build();
         wishlistRepository.saveAll(
                 List.of(
@@ -279,14 +297,14 @@ class WishlistControllerTest {
                 .publicId(PUBLIC_ID_FIRST)
                 .title(TITLE_FIRST)
                 .description(DESCRIPTION_FIRST)
-                .itemIds(List.of(ITEM_ID_FIRST, ITEM_ID_THIRD))
+                .privateItemIds(List.of(PRIVATE_ITEM_ID_FIRST, PRIVATE_ITEM_ID_THIRD))
                 .build();
         Wishlist wishlistSecond = Wishlist.builder()
                 .id(ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
                 .title(TITLE_SECOND)
                 .description(DESCRIPTION_SECOND)
-                .itemIds(List.of(ITEM_ID_SECOND))
+                .privateItemIds(List.of(PRIVATE_ITEM_ID_SECOND))
                 .build();
         wishlistRepository.saveAll(
                 List.of(
@@ -323,7 +341,7 @@ class WishlistControllerTest {
         assertEquals(expected.getPublicId(), actual.getPublicId());
         assertEquals(expected.getTitle(), actual.getTitle());
         assertEquals(expected.getDescription(), actual.getDescription());
-        assertEquals(expected.getItemIds(), actual.getItemIds());
+        assertEquals(expected.getPrivateItemIds(), actual.getPrivateItemIds());
     }
 
     @Test
@@ -335,7 +353,7 @@ class WishlistControllerTest {
                 .publicId(PUBLIC_ID_FIRST)
                 .title(TITLE_FIRST)
                 .description(DESCRIPTION_FIRST)
-                .itemIds(List.of(ITEM_ID_FIRST, ITEM_ID_THIRD))
+                .privateItemIds(List.of(PRIVATE_ITEM_ID_FIRST, PRIVATE_ITEM_ID_THIRD))
                 .build();
         wishlistRepository.saveAll(
                 List.of(
@@ -362,14 +380,16 @@ class WishlistControllerTest {
                 .publicId(PUBLIC_ID_FIRST)
                 .title(TITLE_FIRST)
                 .description(DESCRIPTION_FIRST)
-                .itemIds(List.of(ITEM_ID_FIRST, ITEM_ID_THIRD))
+                .privateItemIds(List.of(PRIVATE_ITEM_ID_FIRST, PRIVATE_ITEM_ID_THIRD))
+                .publicItemIds(List.of(PUBLIC_ITEM_ID_FIRST, PUBLIC_ITEM_ID_THIRD))
                 .build();
         Wishlist wishlistSecond = Wishlist.builder()
                 .id(ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
                 .title(TITLE_SECOND)
                 .description(DESCRIPTION_SECOND)
-                .itemIds(List.of(ITEM_ID_SECOND))
+                .privateItemIds(List.of(PRIVATE_ITEM_ID_SECOND))
+                .publicItemIds(List.of(PUBLIC_ITEM_ID_SECOND))
                 .build();
         wishlistRepository.saveAll(
                 List.of(
@@ -380,7 +400,8 @@ class WishlistControllerTest {
         WishlistRequestMock wishlistRequest = new WishlistRequestMock(
                 TITLE_THIRD,
                 DESCRIPTION_THIRD,
-                List.of(ITEM_ID_THIRD)
+                List.of(PRIVATE_ITEM_ID_THIRD),
+                List.of(PUBLIC_ITEM_ID_THIRD)
         );
         String editId = wishlistSecond.getId();
 
@@ -394,18 +415,18 @@ class WishlistControllerTest {
                 .andReturn();
 
         String response = mvcResult.getResponse().getContentAsString();
-        WishlistResponse wishlistResponse = objectMapper.readValue(response, WishlistResponse.class);
+        PrivateWishlistResponse privateWishlistResponse = objectMapper.readValue(response, PrivateWishlistResponse.class);
 
-        assetWishlistRequestReturned(wishlistRequest, wishlistResponse);
+        assetWishlistRequestReturned(wishlistRequest, privateWishlistResponse);
         assertWishlistTableSize(2);
         assertWishlistRequestSaved(wishlistRequest, editId);
         assertWishlistInTable(wishlistFirst);
     }
 
-    private void assetWishlistRequestReturned(WishlistRequestMock expected, WishlistResponse actual) {
+    private void assetWishlistRequestReturned(WishlistRequestMock expected, PrivateWishlistResponse actual) {
         assertEquals(expected.title(), actual.title());
         assertEquals(expected.description(), actual.description());
-        assertEquals(expected.itemIds(), actual.itemIds());
+        assertEquals(expected.privateItemIds(), actual.privateItemIds());
     }
 
     @Test
@@ -417,7 +438,7 @@ class WishlistControllerTest {
                 .publicId(PUBLIC_ID_FIRST)
                 .title(TITLE_FIRST)
                 .description(DESCRIPTION_FIRST)
-                .itemIds(List.of(ITEM_ID_FIRST, ITEM_ID_THIRD))
+                .privateItemIds(List.of(PRIVATE_ITEM_ID_FIRST, PRIVATE_ITEM_ID_THIRD))
                 .build();
         wishlistRepository.saveAll(
                 List.of(
@@ -427,7 +448,8 @@ class WishlistControllerTest {
         WishlistRequestMock wishlistRequest = new WishlistRequestMock(
                 TITLE_THIRD,
                 DESCRIPTION_THIRD,
-                List.of(ITEM_ID_THIRD)
+                List.of(PRIVATE_ITEM_ID_THIRD),
+                List.of(PUBLIC_ITEM_ID_THIRD)
         );
 
         MvcResult mvcResult = mockMvc.perform(

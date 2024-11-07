@@ -2,7 +2,7 @@ import {useTranslation} from "react-i18next";
 import {ChangeEvent, FormEvent, useState} from "react";
 import axios from "axios";
 import NewRegistryData from "../../dto/NewRegistryData.tsx";
-import RegistryData from "../../dto/RegistryData.tsx";
+import Registry from "../../type/Registry.tsx";
 import ItemContainer from "./NewRegistry/ItemContainer.tsx";
 import Item from "../../type/Item.tsx";
 
@@ -14,10 +14,12 @@ export default function NewRegistry(
     }
 ) {
     const {t} = useTranslation();
-    const [registryData, setRegistryData] = useState<RegistryData>(
+    const [registryData, setRegistryData] = useState<Registry>(
         {
             title: "",
-            description: ""
+            description: "",
+            privateItemIds: [],
+            publicItemIds: [],
         }
     );
     const [itemList, setItemList] = useState<Item[]>([]);
@@ -25,9 +27,12 @@ export default function NewRegistry(
         event.preventDefault();
         const payload = {
             ...registryData,
-            itemIds: itemList.map(
+            privateItemIds: itemList.map(
                 (item: Item) => item.privateId
-            )
+            ),
+            publicItemIds: itemList.map(
+                (item: Item) => item.publicId
+            ),
         }
         axios.post<NewRegistryData>('/api/wishlist', payload)
             .then(response => {

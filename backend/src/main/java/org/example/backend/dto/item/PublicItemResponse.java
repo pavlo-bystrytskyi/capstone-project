@@ -6,10 +6,12 @@ import org.example.backend.model.Item;
 import org.example.backend.model.item.ItemStatus;
 
 @Builder
-public record ItemResponse(@NonNull Double quantity, @NonNull ProductResponse product, @NonNull ItemStatus status) {
+public record PublicItemResponse(@NonNull String publicId, @NonNull Double quantity, @NonNull ProductResponse product,
+                                 @NonNull ItemStatus status) {
 
-    public static ItemResponse of(Item item) {
-        return ItemResponse.builder()
+    public static PublicItemResponse of(Item item) {
+        return PublicItemResponse.builder()
+                .publicId(item.getPublicId())
                 .product(ProductResponse.of(item.getProduct()))
                 .quantity(item.getQuantity())
                 .status(item.getStatus())

@@ -10,6 +10,7 @@ import {useEffect, useState} from "react";
 import NewRegistry from "./App/NewRegistry.tsx";
 import RegistrySuccess from "./App/RegistrySuccess.tsx";
 import NewRegistryData from "../dto/NewRegistryData.tsx";
+import ViewPublic from "./App/ViewPublic.tsx";
 
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
                    element={<SelectType types={registryTypes} setRegistryType={setRegistryTypeCode}/>}/>
             <Route path="/new-guest" element={<NewRegistry onSuccess={redirectToSuccess}/>}/>
             <Route path="/success-guest" element={<RegistrySuccess data={newRegistryData}/>}/>
+            <Route path="/show-public/:id" element={<ViewPublic/>}/>
         </Routes>
     )
 }

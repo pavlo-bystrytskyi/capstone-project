@@ -3,7 +3,7 @@ package org.example.backend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.backend.dto.ErrorResponse;
 import org.example.backend.dto.IdResponse;
-import org.example.backend.dto.item.ItemResponse;
+import org.example.backend.dto.item.PublicItemResponse;
 import org.example.backend.dto.item.ProductResponse;
 import org.example.backend.mock.dto.ItemRequestMock;
 import org.example.backend.mock.dto.ProductRequestMock;
@@ -188,8 +188,8 @@ class ItemControllerTest {
 
         String response = mvcResult.getResponse().getContentAsString();
         assertFalse(response.contains(itemFirst.getId()));
-        assertFalse(response.contains(itemFirst.getPublicId()));
-        ItemResponse itemResponse = objectMapper.readValue(response, ItemResponse.class);
+        assertTrue(response.contains(itemFirst.getPublicId()));
+        PublicItemResponse itemResponse = objectMapper.readValue(response, PublicItemResponse.class);
         assertEquals(itemFirst.getQuantity(), itemResponse.quantity());
         ProductResponse productResponse = itemResponse.product();
         assertEquals(productFirst.getTitle(), productResponse.title());
@@ -275,8 +275,8 @@ class ItemControllerTest {
 
         String response = mvcResult.getResponse().getContentAsString();
         assertFalse(response.contains(itemFirst.getId()));
-        assertFalse(response.contains(itemFirst.getPublicId()));
-        ItemResponse itemResponse = objectMapper.readValue(response, ItemResponse.class);
+        assertTrue(response.contains(itemFirst.getPublicId()));
+        PublicItemResponse itemResponse = objectMapper.readValue(response, PublicItemResponse.class);
         assertEquals(itemFirst.getQuantity(), itemResponse.quantity());
         ProductResponse productResponse = itemResponse.product();
         assertEquals(productFirst.getTitle(), productResponse.title());
@@ -454,7 +454,7 @@ class ItemControllerTest {
                 .andReturn();
 
         String response = mvcResult.getResponse().getContentAsString();
-        ItemResponse itemResponse = objectMapper.readValue(response, ItemResponse.class);
+        PublicItemResponse itemResponse = objectMapper.readValue(response, PublicItemResponse.class);
 
         assetItemRequestReturned(itemRequest, itemResponse);
         assertItemTableSize(2);
@@ -462,7 +462,7 @@ class ItemControllerTest {
         assertItemInTable(itemFirst);
     }
 
-    private void assetItemRequestReturned(ItemRequestMock itemRequest, ItemResponse itemResponse) {
+    private void assetItemRequestReturned(ItemRequestMock itemRequest, PublicItemResponse itemResponse) {
         assertEquals(itemRequest.quantity(), itemResponse.quantity());
         assetProductRequestReturned(itemRequest.product(), itemResponse.product());
     }
@@ -600,9 +600,9 @@ class ItemControllerTest {
                 .andReturn();
 
         String response = mvcResult.getResponse().getContentAsString();
-        ItemResponse itemResponse = objectMapper.readValue(response, ItemResponse.class);
+        PublicItemResponse publicItemResponse = objectMapper.readValue(response, PublicItemResponse.class);
 
-        assertEquals(newStatus, itemResponse.status());
+        assertEquals(newStatus, publicItemResponse.status());
         assertItemTableSize(2);
         assertItemInTable(itemFirst);
         assertItemInTable(itemSecond.withStatus(newStatus));

@@ -4,9 +4,9 @@ import NewRegistryData from "../../dto/NewRegistryData.tsx";
 export default function RegistrySuccess({data}: { data?: NewRegistryData }) {
     const {t} = useTranslation();
 
-    const host = window.location.host === 'localhost:5173' ? 'http://localhost:8080' : window.location.origin
-    const publicLink = data ? host + "/api/wishlist/public/" + data.publicId : host;
-    const privateLink = data ? host + "/api/wishlist/" + data.privateId : host;
+    const host = window.location.origin
+    const publicLink = data ? host + "/show-public/" + data.publicId : host;
+    const privateLink = data ? host + "/show-private/" + data.privateId : host;
 
     return (
         data ?
