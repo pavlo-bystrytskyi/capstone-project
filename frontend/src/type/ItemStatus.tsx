@@ -1,7 +1,7 @@
 enum ItemStatus {
-    AVAILABLE,
-    RESERVED,
-    PURCHASED
+    AVAILABLE = "AVAILABLE",
+    RESERVED = "RESERVED",
+    PURCHASED = "PURCHASED"
 }
 
 export default ItemStatus

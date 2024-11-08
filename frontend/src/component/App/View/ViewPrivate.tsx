@@ -13,6 +13,13 @@ export default function ViewPrivate() {
         item: {
             url: "/api/item/",
             idField: "privateId"
+        },
+        access: {
+            item: {
+                status: {
+                    edit: true
+                }
+            }
         }
     }
 

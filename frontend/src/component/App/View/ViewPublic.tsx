@@ -13,6 +13,13 @@ export default function ViewPublic() {
         item: {
             url: "/api/item/public/",
             idField: "publicId"
+        },
+        access: {
+            item: {
+                status: {
+                    edit: true
+                }
+            }
         }
     }
 
