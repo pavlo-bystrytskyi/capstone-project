@@ -7,17 +7,18 @@ import SelectType from "./App/SelectType.tsx";
 import {SupportedLanguageCode, supportedLanguages} from "../type/SupportedLanguage.tsx";
 import {RegistryTypeCode, registryTypes} from "../type/RegistryType.tsx";
 import {useEffect, useState} from "react";
-import NewRegistry from "./App/NewRegistry.tsx";
 import RegistrySuccess from "./App/RegistrySuccess.tsx";
-import NewRegistryData from "../dto/NewRegistryData.tsx";
+import RegistryIdData from "../dto/RegistryIdData.tsx";
 import ViewPublic from "./App/View/ViewPublic.tsx";
 import ViewPrivate from "./App/View/ViewPrivate.tsx";
+import CreateGuest from "./App/Edit/CreateGuest.tsx";
+import EditGuest from "./App/Edit/EditGuest.tsx";
 
 function App() {
     const {i18n} = useTranslation();
     const navigate = useNavigate();
     const [registryTypeCode, setRegistryTypeCode] = useState<RegistryTypeCode>();
-    const [newRegistryData, setNewRegistryData] = useState<NewRegistryData>()
+    const [registryIdData, setRegistryIdData] = useState<RegistryIdData>()
     const setLanguage = function (languageCode: SupportedLanguageCode) {
         if (languageCode !== i18n.resolvedLanguage && Object.values(SupportedLanguageCode).includes(languageCode)) {
             i18n.changeLanguage(languageCode);
@@ -25,8 +26,8 @@ function App() {
         navigate("/type");
     };
 
-    const redirectToSuccess = function (data: NewRegistryData) {
-        setNewRegistryData(data);
+    const redirectToSuccess = function (data: RegistryIdData) {
+        setRegistryIdData(data);
         navigate("/success-guest");
     }
 
@@ -40,8 +41,9 @@ function App() {
                    element={<SelectLanguage languages={supportedLanguages} setLanguage={setLanguage}/>}/>
             <Route path="/type"
                    element={<SelectType types={registryTypes} setRegistryType={setRegistryTypeCode}/>}/>
-            <Route path="/new-guest" element={<NewRegistry onSuccess={redirectToSuccess}/>}/>
-            <Route path="/success-guest" element={<RegistrySuccess data={newRegistryData}/>}/>
+            <Route path="/new-guest" element={<CreateGuest onSuccess={redirectToSuccess}/>}/>
+            <Route path="/edit-guest/:id" element={<EditGuest onSuccess={redirectToSuccess}/>}/>
+            <Route path="/success-guest" element={<RegistrySuccess data={registryIdData}/>}/>
             <Route path="/show-public/:id" element={<ViewPublic/>}/>
             <Route path="/show-private/:id" element={<ViewPrivate/>}/>
         </Routes>

@@ -45,10 +45,10 @@ public class WishlistController {
     }
 
     @PutMapping("/{id}")
-    public PrivateWishlistResponse updateById(@PathVariable @NonNull String id, @RequestBody @NonNull WishlistRequest wishlistRequest) {
+    public IdResponse updateById(@PathVariable @NonNull String id, @RequestBody @NonNull WishlistRequest wishlistRequest) {
         Wishlist wishlist = wishlistRequest.toWishlist();
         Wishlist updatedWishlist = wishlistService.updateById(id, wishlist);
 
-        return PrivateWishlistResponse.of(updatedWishlist);
+        return IdResponse.of(updatedWishlist.getPublicId(), updatedWishlist.getId());
     }
 }

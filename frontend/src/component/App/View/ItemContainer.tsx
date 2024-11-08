@@ -1,5 +1,5 @@
 import ItemComponent from "./ItemContainer/ItemComponent.tsx";
-import ViewConfig from "../../../type/ViewConfig.tsx";
+import RegistryConfig from "../../../type/RegistryConfig.tsx";
 
 export default function ItemContainer(
     {
@@ -7,7 +7,7 @@ export default function ItemContainer(
         config
     }: {
         itemIdList: string[],
-        config: ViewConfig
+        config: RegistryConfig
     }
 ) {
     return <>

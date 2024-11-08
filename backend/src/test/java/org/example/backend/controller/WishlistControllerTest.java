@@ -415,9 +415,8 @@ class WishlistControllerTest {
                 .andReturn();
 
         String response = mvcResult.getResponse().getContentAsString();
-        PrivateWishlistResponse privateWishlistResponse = objectMapper.readValue(response, PrivateWishlistResponse.class);
-
-        assetWishlistRequestReturned(wishlistRequest, privateWishlistResponse);
+        IdResponse idResponse = objectMapper.readValue(response, IdResponse.class);
+        assertEquals(editId, idResponse.privateId());
         assertWishlistTableSize(2);
         assertWishlistRequestSaved(wishlistRequest, editId);
         assertWishlistInTable(wishlistFirst);
