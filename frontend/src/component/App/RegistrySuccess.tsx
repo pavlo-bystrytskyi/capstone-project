@@ -1,7 +1,7 @@
 import {useTranslation} from "react-i18next";
-import NewRegistryData from "../../dto/NewRegistryData.tsx";
+import RegistryIdData from "../../dto/RegistryIdData.tsx";
 
-export default function RegistrySuccess({data}: { data?: NewRegistryData }) {
+export default function RegistrySuccess({data}: { data?: RegistryIdData }) {
     const {t} = useTranslation();
 
     const host = window.location.origin

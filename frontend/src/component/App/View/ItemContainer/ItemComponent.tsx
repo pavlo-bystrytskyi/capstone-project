@@ -1,7 +1,7 @@
 import Item from "../../../../type/Item.tsx";
 import {useTranslation} from "react-i18next";
 import ItemStatus from "../../../../type/ItemStatus.tsx";
-import ViewConfig from "../../../../type/ViewConfig.tsx";
+import RegistryConfig from "../../../../type/RegistryConfig.tsx";
 import {ChangeEvent, useEffect, useState} from "react";
 import axios from "axios";
 
@@ -11,7 +11,7 @@ export default function ItemComponent(
         config
     }: {
         itemId: string,
-        config: ViewConfig
+        config: RegistryConfig
     }
 ) {
     const {t} = useTranslation();
