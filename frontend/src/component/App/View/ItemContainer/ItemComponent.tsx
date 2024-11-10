@@ -4,13 +4,14 @@ import ItemStatus from "../../../../type/ItemStatus.tsx";
 import RegistryConfig from "../../../../type/RegistryConfig.tsx";
 import {ChangeEvent, useEffect, useState} from "react";
 import axios from "axios";
+import ItemIdContainer from "../../../../type/ItemIdContainer.tsx";
 
 export default function ItemComponent(
     {
-        itemId,
+        itemIdContainer,
         config
     }: {
-        itemId: string,
+        itemIdContainer: ItemIdContainer,
         config: RegistryConfig
     }
 ) {
@@ -19,7 +20,7 @@ export default function ItemComponent(
     const [item, setItem] = useState<Item>()
     const loadItem = function () {
         axios.get<Item>(
-            `${config.item.url}/${itemId}`
+            `${config.item.url}/${itemIdContainer[config.item.idField as keyof ItemIdContainer]}`
         ).then(
             result => setItem(result.data)
         ).catch(
@@ -27,7 +28,7 @@ export default function ItemComponent(
         );
     }
     useEffect(
-        loadItem, [itemId]
+        loadItem, [itemIdContainer]
     );
     const handleStatusChange = (event: ChangeEvent<HTMLSelectElement>) => {
         if (!item) return;

@@ -1,22 +1,22 @@
 import NewItemForm from "./ItemContainer/NewItemForm.tsx";
 import ItemComponent from "./ItemContainer/ItemComponent.tsx";
 import {useTranslation} from "react-i18next";
-import ItemId from "../../../../type/ItemId.tsx";
+import ItemIdContainer from "../../../../type/ItemIdContainer.tsx";
 
 export default function ItemContainer(
     {
         itemIdList,
         setItemIdList
     }: {
-        itemIdList: ItemId[],
-        setItemIdList: (itemIdList: ItemId[]) => void
+        itemIdList: ItemIdContainer[],
+        setItemIdList: (itemIdList: ItemIdContainer[]) => void
     }
 ) {
     const {t} = useTranslation();
-    const addItemId = function (itemId: ItemId) {
+    const addItemId = function (itemId: ItemIdContainer) {
         setItemIdList([...itemIdList, itemId]);
     }
-    const removeItemId = function (itemIdToRemove: ItemId) {
+    const removeItemId = function (itemIdToRemove: ItemIdContainer) {
         setItemIdList(
             itemIdList.filter(
                 (itemId) => itemIdToRemove !== itemId)

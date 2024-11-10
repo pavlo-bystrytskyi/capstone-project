@@ -6,7 +6,8 @@ import Registry from "../../../type/Registry.tsx";
 import ItemContainer from "./BaseEdit/ItemContainer.tsx";
 import {useParams} from "react-router-dom";
 import RegistryConfig from "../../../type/RegistryConfig.tsx";
-import ItemId from "../../../type/ItemId.tsx";
+import ItemIdContainer from "../../../type/ItemIdContainer.tsx";
+import {emptyRegistry} from "../../../type/EmptyRegistry.tsx";
 
 export default function BaseEdit(
     {
@@ -20,25 +21,13 @@ export default function BaseEdit(
     const {t} = useTranslation();
     const params = useParams();
     const id: string | undefined = params.id;
-    const [wishlist, setWishlist] = useState<Registry>(
-        {
-            title: "",
-            description: "",
-            privateItemIds: [],
-            publicItemIds: [],
-        }
-    );
-    const [itemIdList, setItemIdList] = useState<ItemId[]>([]);
+    const [wishlist, setWishlist] = useState<Registry>(emptyRegistry);
+    const [itemIdList, setItemIdList] = useState<ItemIdContainer[]>([]);
     const handleSubmit = function (event: FormEvent) {
         event.preventDefault();
         const payload = {
             ...wishlist,
-            privateItemIds: itemIdList.map(
-                (item: ItemId) => item.privateId
-            ),
-            publicItemIds: itemIdList.map(
-                (item: ItemId) => item.publicId
-            ),
+            itemIds: itemIdList
         }
         if (id) {
             axios.put<RegistryIdData>(`${config.wishlist.url}/${id}`, payload)
@@ -70,19 +59,11 @@ export default function BaseEdit(
         axios.get<Registry>(`${config.wishlist.url}/${id}`).then(
             (response) => {
                 setWishlist(response.data);
-                setInitialItems(response.data.privateItemIds);
+                setItemIdList(response.data.itemIds);
             }
         ).catch(error => {
             console.error('Error fetching data:', error);
         });
-    }
-    const setInitialItems = function (privateIdList: string[]) {
-        setItemIdList(
-            privateIdList.map((privateItemId: string) => {
-                    return {privateId: privateItemId, publicId: ""};
-                }
-            )
-        );
     }
 
     useEffect(

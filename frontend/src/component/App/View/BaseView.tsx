@@ -24,7 +24,6 @@ export default function BaseView({config}: { config: RegistryConfig }) {
         loadWishlist,
         [id]
     );
-    const itemIdField = config.wishlist.itemIdField as keyof Registry;
     const openEditPage = function () {
         navigate("/edit-guest/" + id);
     }
@@ -37,7 +36,6 @@ export default function BaseView({config}: { config: RegistryConfig }) {
             <input type="text" name="description" disabled={true} value={wishlist.description}/>
             <button hidden={!config.access.wishlist.edit}>{t("edit_registry")}</button>
         </form>
-        {wishlist?.[itemIdField] &&
-            <ItemContainer itemIdList={wishlist[itemIdField] as string[]} config={config}/>}
+        <ItemContainer itemIdList={wishlist.itemIds} config={config}/>
     </>
 }

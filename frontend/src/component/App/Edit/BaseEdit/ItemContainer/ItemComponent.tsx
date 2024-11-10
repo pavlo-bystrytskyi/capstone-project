@@ -3,15 +3,15 @@ import axios from "axios";
 import {useTranslation} from "react-i18next";
 import Item from "../../../../../type/Item.tsx";
 import {emptyItem} from "../../../../../type/EmptyItem.tsx";
-import ItemId from "../../../../../type/ItemId.tsx";
+import ItemIdContainer from "../../../../../type/ItemIdContainer.tsx";
 
 export default function ItemComponent(
     {
         itemId,
         removeItemId
     }: {
-        itemId: ItemId,
-        readonly removeItemId: (itemId: ItemId) => void
+        itemId: ItemIdContainer,
+        readonly removeItemId: (itemId: ItemIdContainer) => void
     }
 ) {
     const {t} = useTranslation();
