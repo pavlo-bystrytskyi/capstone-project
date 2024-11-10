@@ -78,7 +78,7 @@ export default function BaseEdit(
                 <input type="text" name="title" value={wishlist.title} onChange={(e) => handleDataChange(e)}/>
                 <label htmlFor="description">{t("registry_description")}</label>
                 <input type="text" name="description" value={wishlist.description}
-                       onChange={(e) => handleDataChange(e)}/>
+                       onChange={handleDataChange}/>
                 <button>{t("registry_save")}</button>
             </form>
             <ItemContainer itemIdList={itemIdList} setItemIdList={setItemIdList}/>

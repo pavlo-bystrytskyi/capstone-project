@@ -1,4 +1,4 @@
-import {FormEvent, useEffect, useState} from "react";
+import {ChangeEvent, FormEvent, useEffect, useState} from "react";
 import axios from "axios";
 import {useTranslation} from "react-i18next";
 import Item from "../../../../../type/Item.tsx";
@@ -16,12 +16,19 @@ export default function ItemComponent(
 ) {
     const {t} = useTranslation();
     const [item, setItem] = useState<Item>(emptyItem)
-    const handleSubmit = function (event: FormEvent) {
+    const removeItem = function (event: FormEvent) {
         event.preventDefault();
         axios.delete('/api/item/' + itemId.privateId)
             .then(() => {
                 removeItemId(itemId);
             })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    }
+    const saveItem = function (event: FormEvent) {
+        event.preventDefault();
+        axios.put('/api/item/' + itemId.privateId, item)
             .catch(error => {
                 console.error('Error fetching data:', error);
             });
@@ -37,15 +44,34 @@ export default function ItemComponent(
     }
     useEffect(loadItem, [itemId]);
 
-    return <form className="item-form" onSubmit={handleSubmit}>
+    const handleProductDataChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const {name, value} = event.target;
+        setItem((prevState) => ({
+            ...prevState,
+            product: {
+                ...prevState.product,
+                [name]: value,
+            },
+        }));
+    };
+    const handleItemDataChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const {name, value} = event.target;
+        setItem((prevState) => ({
+            ...prevState,
+            [name]: value,
+        }));
+    };
+
+    return <form className="item-form">
         <label htmlFor="title">{t("item_name")}</label>
-        <input type="text" name="title" disabled={true} value={item.product.title}/>
+        <input type="text" name="title" value={item.product.title} onChange={handleProductDataChange}/>
         <label htmlFor="description">{t("item_description")}</label>
-        <input type="text" name="description" disabled={true} value={item.product.description}/>
+        <input type="text" name="description" value={item.product.description} onChange={handleProductDataChange}/>
         <label htmlFor="link">{t("item_link")}</label>
-        <input type="text" name="link" disabled={true} value={item.product.link}/>
+        <input type="text" name="link" value={item.product.link} onChange={handleProductDataChange}/>
         <label htmlFor="quantity">{t("item_quantity")}</label>
-        <input type="text" name="quantity" disabled={true} value={item.quantity}/>
-        <button>{t("remove_item")}</button>
+        <input type="text" name="quantity" value={item.quantity} onChange={handleItemDataChange}/>
+        <button onClick={saveItem}>{t("save_item")}</button>
+        <button onClick={removeItem}>{t("remove_item")}</button>
     </form>
 }
