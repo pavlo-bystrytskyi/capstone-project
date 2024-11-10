@@ -1,28 +1,42 @@
-import {FormEvent} from "react";
+import {FormEvent, useEffect, useState} from "react";
 import axios from "axios";
 import {useTranslation} from "react-i18next";
-import Item from "../../../../type/Item.tsx";
+import Item from "../../../../../type/Item.tsx";
+import {emptyItem} from "../../../../../type/EmptyItem.tsx";
+import ItemId from "../../../../../type/ItemId.tsx";
 
 export default function ItemComponent(
     {
-        item,
-        removeItem
+        itemId,
+        removeItemId
     }: {
-        item: Item,
-        readonly removeItem: (item: Item) => void
+        itemId: ItemId,
+        readonly removeItemId: (itemId: ItemId) => void
     }
 ) {
     const {t} = useTranslation();
+    const [item, setItem] = useState<Item>(emptyItem)
     const handleSubmit = function (event: FormEvent) {
         event.preventDefault();
-        axios.delete('/api/item/' + item.privateId)
+        axios.delete('/api/item/' + itemId.privateId)
             .then(() => {
-                removeItem(item);
+                removeItemId(itemId);
             })
             .catch(error => {
                 console.error('Error fetching data:', error);
             });
     }
+    const loadItem = function () {
+        axios.get<Item>("/api/item/" + itemId.privateId)
+            .then(result => {
+                    setItem(result.data);
+                }
+            ).catch(error => {
+            console.error('Error fetching data:', error);
+        });
+    }
+    useEffect(loadItem, [itemId]);
+
     return <form className="item-form" onSubmit={handleSubmit}>
         <label htmlFor="title">{t("item_name")}</label>
         <input type="text" name="title" disabled={true} value={item.product.title}/>

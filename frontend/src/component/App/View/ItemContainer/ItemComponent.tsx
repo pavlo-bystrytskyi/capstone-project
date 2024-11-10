@@ -19,7 +19,7 @@ export default function ItemComponent(
     const [item, setItem] = useState<Item>()
     const loadItem = function () {
         axios.get<Item>(
-            config.item.url + itemId
+            `${config.item.url}/${itemId}`
         ).then(
             result => setItem(result.data)
         ).catch(
@@ -33,7 +33,7 @@ export default function ItemComponent(
         if (!item) return;
         const {value} = event.target;
         item.status = value as ItemStatus;
-        axios.put<Item>(config.item.url + item[config.item.idField as keyof Item], item).then(
+        axios.put<Item>(`${config.item.url}/${item[config.item.idField as keyof Item]}`, item).then(
             (response) => setItem(response.data)
         ).catch(error => {
             console.error('Error fetching data:', error);

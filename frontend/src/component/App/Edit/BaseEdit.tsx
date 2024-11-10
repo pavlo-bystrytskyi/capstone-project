@@ -3,10 +3,10 @@ import {ChangeEvent, FormEvent, useEffect, useState} from "react";
 import axios from "axios";
 import RegistryIdData from "../../../dto/RegistryIdData.tsx";
 import Registry from "../../../type/Registry.tsx";
-import ItemContainer from ".././BaseEdit/ItemContainer.tsx";
-import Item from "../../../type/Item.tsx";
+import ItemContainer from "./BaseEdit/ItemContainer.tsx";
 import {useParams} from "react-router-dom";
 import RegistryConfig from "../../../type/RegistryConfig.tsx";
+import ItemId from "../../../type/ItemId.tsx";
 
 export default function BaseEdit(
     {
@@ -28,16 +28,16 @@ export default function BaseEdit(
             publicItemIds: [],
         }
     );
-    const [itemList, setItemList] = useState<Item[]>([]);
+    const [itemIdList, setItemIdList] = useState<ItemId[]>([]);
     const handleSubmit = function (event: FormEvent) {
         event.preventDefault();
         const payload = {
             ...wishlist,
-            privateItemIds: itemList.map(
-                (item: Item) => item.privateId
+            privateItemIds: itemIdList.map(
+                (item: ItemId) => item.privateId
             ),
-            publicItemIds: itemList.map(
-                (item: Item) => item.publicId
+            publicItemIds: itemIdList.map(
+                (item: ItemId) => item.publicId
             ),
         }
         if (id) {
@@ -68,11 +68,23 @@ export default function BaseEdit(
     const loadWishlist = function () {
         if (!id) return;
         axios.get<Registry>(`${config.wishlist.url}/${id}`).then(
-            (response) => setWishlist(response.data)
+            (response) => {
+                setWishlist(response.data);
+                setInitialItems(response.data.privateItemIds);
+            }
         ).catch(error => {
             console.error('Error fetching data:', error);
         });
     }
+    const setInitialItems = function (privateIdList: string[]) {
+        setItemIdList(
+            privateIdList.map((privateItemId: string) => {
+                    return {privateId: privateItemId, publicId: ""};
+                }
+            )
+        );
+    }
+
     useEffect(
         loadWishlist,
         [id]
@@ -88,7 +100,7 @@ export default function BaseEdit(
                        onChange={(e) => handleDataChange(e)}/>
                 <button>{t("registry_save")}</button>
             </form>
-            <ItemContainer itemList={itemList} setItemList={setItemList}/>
+            <ItemContainer itemIdList={itemIdList} setItemIdList={setItemIdList}/>
         </>
     );
 }

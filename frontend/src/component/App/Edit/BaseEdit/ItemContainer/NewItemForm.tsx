@@ -1,15 +1,16 @@
 import {ChangeEvent, FormEvent, useRef, useState} from "react";
 import axios from "axios";
-import Item from "../../../../type/Item.tsx";
 import {useTranslation} from "react-i18next";
-import ItemIdContainer from "../../../../dto/ItemIdContainer.tsx";
-import {emptyItem} from "../../../../type/EmptyItem.tsx";
+import Item from "../../../../../type/Item.tsx";
+import {emptyItem} from "../../../../../type/EmptyItem.tsx";
+import ItemIdContainer from "../../../../../dto/ItemIdContainer.tsx";
+import ItemId from "../../../../../type/ItemId.tsx";
 
 export default function NewItemForm(
     {
-        addItem
+        addItemId
     }: {
-        readonly addItem: (item: Item) => void
+        readonly addItemId: (itemId: ItemId) => void,
     }
 ) {
     const {t} = useTranslation();
@@ -19,11 +20,7 @@ export default function NewItemForm(
         event.preventDefault();
         axios.post<ItemIdContainer>('/api/item', itemData)
             .then(response => {
-                addItem({
-                    ...itemData,
-                    publicId: response.data.publicId,
-                    privateId: response.data.privateId
-                });
+                addItemId({publicId: response.data.publicId, privateId: response.data.privateId});
                 formRef.current?.reset();
                 setItemData(emptyItem);
             })
