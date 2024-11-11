@@ -55,6 +55,6 @@ export default function NewItemForm(
         <input type="text" name="link" value={itemData.product.link} onChange={(e) => handleProductDataChange(e)}/>
         <label htmlFor="quantity">{t("item_quantity")}</label>
         <input type="text" name="quantity" value={itemData.quantity} onChange={(e) => handleItemDataChange(e)}/>
-        <button>{t("add_item")}</button>
+        <button>{t("item_add")}</button>
     </form>
 }

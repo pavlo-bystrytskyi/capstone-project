@@ -34,7 +34,7 @@ export default function BaseView({config}: { config: RegistryConfig }) {
             <input type="text" name="title" disabled={true} value={wishlist.title}/>
             <label htmlFor="description">{t("registry_description")}</label>
             <input type="text" name="description" disabled={true} value={wishlist.description}/>
-            <button hidden={!config.access.wishlist.edit}>{t("edit_registry")}</button>
+            <button hidden={!config.access.wishlist.edit}>{t("registry_edit")}</button>
         </form>
         <ItemContainer itemIdList={wishlist.itemIds} config={config}/>
     </>

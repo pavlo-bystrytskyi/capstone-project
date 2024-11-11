@@ -71,7 +71,7 @@ export default function ItemComponent(
         <input type="text" name="link" value={item.product.link} onChange={handleProductDataChange}/>
         <label htmlFor="quantity">{t("item_quantity")}</label>
         <input type="text" name="quantity" value={item.quantity} onChange={handleItemDataChange}/>
-        <button onClick={saveItem}>{t("save_item")}</button>
-        <button onClick={removeItem}>{t("remove_item")}</button>
+        <button onClick={saveItem}>{t("item_save")}</button>
+        <button onClick={removeItem}>{t("item_remove")}</button>
     </form>
 }
