@@ -4,6 +4,7 @@ import {useTranslation} from "react-i18next";
 import Item from "../../../../../type/Item.tsx";
 import {emptyItem} from "../../../../../type/EmptyItem.tsx";
 import ItemIdContainer from "../../../../../type/ItemIdContainer.tsx";
+import ItemStatus from "../../../../../type/ItemStatus.tsx";
 
 export default function ItemComponent(
     {
@@ -61,6 +62,13 @@ export default function ItemComponent(
             [name]: value,
         }));
     };
+    const handleItemStatusChange = (event: ChangeEvent<HTMLSelectElement>) => {
+        const {value} = event.target;
+        setItem((prevState) => ({
+            ...prevState,
+            status: value as ItemStatus,
+        }));
+    };
 
     return <form className="item-form">
         <label htmlFor="title">{t("item_name")}</label>
@@ -71,6 +79,12 @@ export default function ItemComponent(
         <input type="text" name="link" value={item.product.link} onChange={handleProductDataChange}/>
         <label htmlFor="quantity">{t("item_quantity")}</label>
         <input type="text" name="quantity" value={item.quantity} onChange={handleItemDataChange}/>
+        <select name="status" onChange={handleItemStatusChange}
+                value={item.status}>
+            <option value={ItemStatus.AVAILABLE}>{t("status_available")}</option>
+            <option value={ItemStatus.RESERVED}>{t("status_reserved")}</option>
+            <option value={ItemStatus.PURCHASED}>{t("status_purchased")}</option>
+        </select>
         <button onClick={saveItem}>{t("item_save")}</button>
         <button onClick={removeItem}>{t("item_remove")}</button>
     </form>
