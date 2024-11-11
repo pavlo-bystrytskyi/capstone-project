@@ -1,13 +1,13 @@
 import {useNavigate, useParams} from "react-router-dom";
-import ItemContainer from "././View/ItemContainer.tsx";
+import ItemContainer from "./ItemContainer.tsx";
 import {useTranslation} from "react-i18next";
 import {useEffect, useState} from "react";
 import axios from "axios";
-import Registry from "../../type/Registry.tsx";
-import {emptyRegistry} from "../../type/EmptyRegistry.tsx";
-import RegistryConfig from "../../type/RegistryConfig.tsx";
+import Registry from "../../../type/Registry.tsx";
+import {emptyRegistry} from "../../../type/EmptyRegistry.tsx";
+import RegistryConfig from "../../../type/RegistryConfig.tsx";
 
-export default function View({config}: { config: RegistryConfig }) {
+export default function BaseView({config}: { config: RegistryConfig }) {
     const {t} = useTranslation();
     const params = useParams();
     const id: string | undefined = params.id;
@@ -24,7 +24,6 @@ export default function View({config}: { config: RegistryConfig }) {
         loadWishlist,
         [id]
     );
-    const itemIdField = config.wishlist.itemIdField as keyof Registry;
     const openEditPage = function () {
         navigate("/edit-guest/" + id);
     }
@@ -35,9 +34,8 @@ export default function View({config}: { config: RegistryConfig }) {
             <input type="text" name="title" disabled={true} value={wishlist.title}/>
             <label htmlFor="description">{t("registry_description")}</label>
             <input type="text" name="description" disabled={true} value={wishlist.description}/>
-            <button hidden={!config.access.wishlist.edit}>{t("edit_registry")}</button>
+            <button hidden={!config.access.wishlist.edit}>{t("registry_edit")}</button>
         </form>
-        {wishlist?.[itemIdField] &&
-            <ItemContainer itemIdList={wishlist[itemIdField] as string[]} config={config}/>}
+        <ItemContainer itemIdList={wishlist.itemIds} config={config}/>
     </>
 }

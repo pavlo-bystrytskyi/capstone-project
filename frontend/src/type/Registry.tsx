@@ -1,8 +1,9 @@
+import ItemIdContainer from "./ItemIdContainer.tsx";
+
 type Registry = {
     title: string,
     description: string,
-    privateItemIds: string[],
-    publicItemIds: string[],
+    itemIds: ItemIdContainer[],
 }
 
 export default Registry

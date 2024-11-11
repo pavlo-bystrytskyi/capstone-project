@@ -1,15 +1,15 @@
 import {ChangeEvent, FormEvent, useRef, useState} from "react";
 import axios from "axios";
-import Item from "../../../../type/Item.tsx";
 import {useTranslation} from "react-i18next";
-import ItemIdContainer from "../../../../dto/ItemIdContainer.tsx";
-import {emptyItem} from "../../../../type/EmptyItem.tsx";
+import Item from "../../../../../type/Item.tsx";
+import {emptyItem} from "../../../../../type/EmptyItem.tsx";
+import ItemIdContainer from "../../../../../type/ItemIdContainer.tsx";
 
 export default function NewItemForm(
     {
-        addItem
+        addItemId
     }: {
-        readonly addItem: (item: Item) => void
+        readonly addItemId: (itemId: ItemIdContainer) => void,
     }
 ) {
     const {t} = useTranslation();
@@ -19,11 +19,7 @@ export default function NewItemForm(
         event.preventDefault();
         axios.post<ItemIdContainer>('/api/item', itemData)
             .then(response => {
-                addItem({
-                    ...itemData,
-                    publicId: response.data.publicId,
-                    privateId: response.data.privateId
-                });
+                addItemId({publicId: response.data.publicId, privateId: response.data.privateId});
                 formRef.current?.reset();
                 setItemData(emptyItem);
             })
@@ -59,6 +55,6 @@ export default function NewItemForm(
         <input type="text" name="link" value={itemData.product.link} onChange={(e) => handleProductDataChange(e)}/>
         <label htmlFor="quantity">{t("item_quantity")}</label>
         <input type="text" name="quantity" value={itemData.quantity} onChange={(e) => handleItemDataChange(e)}/>
-        <button>{t("add_item")}</button>
+        <button>{t("item_add")}</button>
     </form>
 }
