@@ -29,8 +29,8 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        if (authentication instanceof OAuth2AuthenticationToken oauthToken) {
-            OAuth2User oAuthUser = oauthToken.getPrincipal();
+        if (authentication instanceof OAuth2AuthenticationToken oAuthToken) {
+            OAuth2User oAuthUser = oAuthToken.getPrincipal();
             User user = googleOAuthUserService.convertToUser(oAuthUser);
             userService.saveUserIfNotExists(user);
         }
