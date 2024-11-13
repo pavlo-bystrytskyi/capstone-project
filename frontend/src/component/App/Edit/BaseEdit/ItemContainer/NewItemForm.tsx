@@ -1,12 +1,10 @@
 import {ChangeEvent, FormEvent, useRef, useState} from "react";
 import axios from "axios";
 import {useTranslation} from "react-i18next";
-import ItemIdContainer from "../../../../dto/ItemIdContainer.tsx";
-import {emptyItem} from "../../../../type/EmptyItem.tsx";
-import RegistryConfig from "../../../../type/RegistryConfig.tsx";
 import Item from "../../../../../type/Item.tsx";
 import {emptyItem} from "../../../../../type/EmptyItem.tsx";
 import ItemIdContainer from "../../../../../type/ItemIdContainer.tsx";
+import RegistryConfig from "../../../../../type/RegistryConfig.tsx";
 
 export default function NewItemForm(
     {
