@@ -2,20 +2,23 @@ import {FormEvent} from "react";
 import axios from "axios";
 import {useTranslation} from "react-i18next";
 import Item from "../../../../type/Item.tsx";
+import RegistryConfig from "../../../../type/RegistryConfig.tsx";
 
 export default function ItemComponent(
     {
+        config,
         item,
         removeItem
     }: {
-        item: Item,
+        readonly config: RegistryConfig
+        readonly item: Item,
         readonly removeItem: (item: Item) => void
     }
 ) {
     const {t} = useTranslation();
     const handleSubmit = function (event: FormEvent) {
         event.preventDefault();
-        axios.delete('/api/item/' + item.privateId)
+        axios.delete(`${config.item.url}/${item.privateId}`)
             .then(() => {
                 removeItem(item);
             })

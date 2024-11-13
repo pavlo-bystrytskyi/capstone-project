@@ -88,7 +88,7 @@ export default function BaseEdit(
                        onChange={(e) => handleDataChange(e)}/>
                 <button>{t("registry_save")}</button>
             </form>
-            <ItemContainer itemList={itemList} setItemList={setItemList}/>
+            <ItemContainer config={config} itemList={itemList} setItemList={setItemList}/>
         </>
     );
 }

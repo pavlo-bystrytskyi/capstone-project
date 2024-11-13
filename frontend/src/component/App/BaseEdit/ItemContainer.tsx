@@ -2,12 +2,15 @@ import NewItemForm from "./ItemContainer/NewItemForm.tsx";
 import Item from "../../../type/Item.tsx";
 import ItemComponent from "./ItemContainer/ItemComponent.tsx";
 import {useTranslation} from "react-i18next";
+import RegistryConfig from "../../../type/RegistryConfig.tsx";
 
 export default function ItemContainer(
     {
+        config,
         itemList,
         setItemList
     }: {
+        config: RegistryConfig,
         itemList: Item[],
         setItemList: (itemList: Item[]) => void
     }
@@ -29,7 +32,7 @@ export default function ItemContainer(
         {
             (Array.isArray(itemList) && itemList.length > 0) ?
                 itemList.map(
-                    (item) => <ItemComponent key={item.privateId} item={item} removeItem={removeItem}/>
+                    (item) => <ItemComponent config={config} key={item.privateId} item={item} removeItem={removeItem}/>
                 ) : <div>{t("add_some_products")}</div>
         }
     </>

@@ -13,6 +13,8 @@ import ViewPublic from "./App/View/ViewPublic.tsx";
 import ViewPrivate from "./App/View/ViewPrivate.tsx";
 import CreateGuest from "./App/Edit/CreateGuest.tsx";
 import EditGuest from "./App/Edit/EditGuest.tsx";
+import Header from "./App/Header.tsx";
+import Footer from "./App/Footer.tsx";
 
 function App() {
     const {i18n} = useTranslation();
@@ -36,17 +38,21 @@ function App() {
     }, [registryTypeCode]);
 
     return (
-        <Routes>
-            <Route path="/"
-                   element={<SelectLanguage languages={supportedLanguages} setLanguage={setLanguage}/>}/>
-            <Route path="/type"
-                   element={<SelectType types={registryTypes} setRegistryType={setRegistryTypeCode}/>}/>
-            <Route path="/new-guest" element={<CreateGuest onSuccess={redirectToSuccess}/>}/>
-            <Route path="/edit-guest/:id" element={<EditGuest onSuccess={redirectToSuccess}/>}/>
-            <Route path="/success-guest" element={<RegistrySuccess data={registryIdData}/>}/>
-            <Route path="/show-public/:id" element={<ViewPublic/>}/>
-            <Route path="/show-private/:id" element={<ViewPrivate/>}/>
-        </Routes>
+        <>
+            <Header/>
+            <Routes>
+                <Route path="/"
+                       element={<SelectLanguage languages={supportedLanguages} setLanguage={setLanguage}/>}/>
+                <Route path="/type"
+                       element={<SelectType types={registryTypes} setRegistryType={setRegistryTypeCode}/>}/>
+                <Route path="/new-guest" element={<CreateGuest onSuccess={redirectToSuccess}/>}/>
+                <Route path="/edit-guest/:id" element={<EditGuest onSuccess={redirectToSuccess}/>}/>
+                <Route path="/success-guest" element={<RegistrySuccess data={registryIdData}/>}/>
+                <Route path="/show-public/:id" element={<ViewPublic/>}/>
+                <Route path="/show-private/:id" element={<ViewPrivate/>}/>
+            </Routes>
+            <Footer/>
+        </>
     )
 }
 
