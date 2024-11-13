@@ -17,8 +17,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class GlobalExceptionHandlerTest {
 
-    private static final String PATH_UNKNOWN = "/api/some-endpoint";
-    private static final String PATH_ITEM = "/api/item";
+    private static final String PATH_UNKNOWN = "/api/guest/some-endpoint";
+    private static final String PATH_ITEM = "/api/guest/item";
 
     private static final String MESSAGE_UNKNOWN_RESOURCE = "No static resource %s.".formatted(PATH_UNKNOWN.substring(1));
 

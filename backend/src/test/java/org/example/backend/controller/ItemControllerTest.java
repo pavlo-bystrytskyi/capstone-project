@@ -40,9 +40,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @AutoConfigureMockMvc
 class ItemControllerTest {
 
-    private static final String URL_BASE = "/api/item";
-    private static final String URL_WITH_ID = "/api/item/{id}";
-    private static final String URL_PUBLIC_WITH_ID = "/api/item/public/{id}";
+    private static final String URL_BASE = "/api/guest/item";
+    private static final String URL_WITH_ID = "/api/guest/item/{id}";
+    private static final String URL_PUBLIC_WITH_ID = "/api/guest/item/public/{id}";
 
     private static final Double ITEM_QUANTITY_FIRST = 5.5;
     private static final Double ITEM_QUANTITY_SECOND = 10.1;

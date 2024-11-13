@@ -12,7 +12,7 @@ import org.example.backend.service.ItemService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/item")
+@RequestMapping("/api/guest/item")
 @RequiredArgsConstructor
 public class ItemController {
 

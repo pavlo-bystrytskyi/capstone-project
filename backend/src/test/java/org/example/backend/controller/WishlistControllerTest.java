@@ -38,9 +38,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @AutoConfigureMockMvc
 class WishlistControllerTest {
 
-    private static final String URL_BASE = "/api/wishlist";
-    private static final String URL_WITH_ID = "/api/wishlist/{id}";
-    private static final String URL_PUBLIC_WITH_ID = "/api/wishlist/public/{id}";
+    private static final String URL_BASE = "/api/guest/wishlist";
+    private static final String URL_WITH_ID = "/api/guest/wishlist/{id}";
+    private static final String URL_PUBLIC_WITH_ID = "/api/guest/wishlist/public/{id}";
 
     private static final String ID_FIRST = "some id 1";
     private static final String ID_SECOND = "some id 2";
