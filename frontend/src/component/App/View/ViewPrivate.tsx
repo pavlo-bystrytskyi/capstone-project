@@ -1,4 +1,4 @@
-import View from "../View.tsx";
+import BaseView from "./BaseView.tsx";
 import {useTranslation} from "react-i18next";
 import privateRegistryConfig from "../../../type/RegistryConfig/PrivateRegistryConfig.tsx";
 
@@ -8,6 +8,6 @@ export default function ViewPrivate() {
 
     return <div className="view-registry-private">
         <h2>{t("view_registry_private")}</h2>
-        <View config={privateRegistryConfig}/>
+        <BaseView config={privateRegistryConfig}/>
     </div>
 }

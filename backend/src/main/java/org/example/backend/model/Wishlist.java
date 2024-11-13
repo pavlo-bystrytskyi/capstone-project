@@ -3,6 +3,7 @@ package org.example.backend.model;
 import lombok.Builder;
 import lombok.Data;
 import lombok.With;
+import org.example.backend.model.wishlist.ItemIdStorage;
 import org.springframework.data.annotation.Id;
 
 import java.util.List;
@@ -17,9 +18,7 @@ public class Wishlist {
 
     private String publicId;
 
-    private List<String> publicItemIds;
-
-    private List<String> privateItemIds;
+    private List<ItemIdStorage> itemIds;
 
     private String title;
 

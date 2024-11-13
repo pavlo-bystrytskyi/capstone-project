@@ -5,13 +5,15 @@ import org.example.backend.model.Wishlist;
 
 import java.util.List;
 
-public record WishlistRequest(@NonNull List<String> privateItemIds, @NonNull List<String> publicItemIds,
-                              @NonNull String title, @NonNull String description) {
+public record WishlistRequest(
+        @NonNull List<ItemIdsRequest> itemIds,
+        @NonNull String title,
+        @NonNull String description
+) {
 
     public Wishlist toWishlist() {
         return Wishlist.builder()
-                .privateItemIds(privateItemIds)
-                .publicItemIds(publicItemIds)
+                .itemIds(itemIds.stream().map(ItemIdsRequest::toItemIdStorage).toList())
                 .title(title)
                 .description(description)
                 .build();

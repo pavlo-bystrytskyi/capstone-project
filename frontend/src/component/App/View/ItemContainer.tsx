@@ -1,12 +1,13 @@
 import ItemComponent from "./ItemContainer/ItemComponent.tsx";
 import RegistryConfig from "../../../type/RegistryConfig.tsx";
+import ItemIdContainer from "../../../type/ItemIdContainer.tsx";
 
 export default function ItemContainer(
     {
         itemIdList,
         config
     }: {
-        itemIdList: string[],
+        itemIdList: ItemIdContainer[],
         config: RegistryConfig
     }
 ) {
@@ -14,7 +15,7 @@ export default function ItemContainer(
         <h2>Item Container</h2>
         {
             itemIdList.map(
-                (itemId) => <ItemComponent key={itemId} itemId={itemId} config={config}/>
+                (itemId) => <ItemComponent key={itemId.publicId} itemIdContainer={itemId} config={config}/>
             )
         }
     </>

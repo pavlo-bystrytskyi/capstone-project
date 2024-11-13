@@ -4,6 +4,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.dto.IdResponse;
 import org.example.backend.dto.item.ItemRequest;
+import org.example.backend.dto.item.PrivateItemResponse;
 import org.example.backend.dto.item.PublicItemResponse;
 import org.example.backend.dto.item.ItemStatusRequest;
 import org.example.backend.model.Item;
@@ -52,10 +53,10 @@ public class ItemController {
     }
 
     @PutMapping("/{id}")
-    public PublicItemResponse updateById(@PathVariable @NonNull String id, @RequestBody @NonNull ItemRequest itemRequest) {
+    public PrivateItemResponse updateById(@PathVariable @NonNull String id, @RequestBody @NonNull ItemRequest itemRequest) {
         Item item = itemRequest.toItem();
         Item updatedItem = itemService.updateById(id, item);
 
-        return PublicItemResponse.of(updatedItem);
+        return PrivateItemResponse.of(updatedItem);
     }
 }

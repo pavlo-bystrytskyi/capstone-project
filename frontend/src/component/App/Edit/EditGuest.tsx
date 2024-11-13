@@ -13,7 +13,7 @@ export default function EditGuest({
 
     return (
         <div className="edit-registry-guest">
-            <h2>{t("edit_registry")}</h2>
+            <h2>{t("registry_edit")}</h2>
             <BaseEdit onSuccess={onSuccess} config={privateRegistryConfig}/>
         </div>
     );
