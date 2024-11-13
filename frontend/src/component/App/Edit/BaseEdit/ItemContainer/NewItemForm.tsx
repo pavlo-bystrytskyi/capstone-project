@@ -4,11 +4,14 @@ import {useTranslation} from "react-i18next";
 import Item from "../../../../../type/Item.tsx";
 import {emptyItem} from "../../../../../type/EmptyItem.tsx";
 import ItemIdContainer from "../../../../../type/ItemIdContainer.tsx";
+import RegistryConfig from "../../../../../type/RegistryConfig.tsx";
 
 export default function NewItemForm(
     {
+        config,
         addItemId
     }: {
+        readonly config: RegistryConfig,
         readonly addItemId: (itemId: ItemIdContainer) => void,
     }
 ) {
@@ -17,7 +20,7 @@ export default function NewItemForm(
     const [itemData, setItemData] = useState<Item>(emptyItem);
     const handleSubmit = function (event: FormEvent) {
         event.preventDefault();
-        axios.post<ItemIdContainer>('/api/item', itemData)
+        axios.post<ItemIdContainer>(config.item.url, itemData)
             .then(response => {
                 addItemId({publicId: response.data.publicId, privateId: response.data.privateId});
                 formRef.current?.reset();

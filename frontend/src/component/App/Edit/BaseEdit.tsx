@@ -1,7 +1,7 @@
 import {useTranslation} from "react-i18next";
 import {ChangeEvent, FormEvent, useEffect, useState} from "react";
 import axios from "axios";
-import RegistryIdData from "../../../dto/RegistryIdData.tsx";
+import RegistryIdData from "../../../type/RegistryIdData.tsx";
 import Registry from "../../../type/Registry.tsx";
 import ItemContainer from "./BaseEdit/ItemContainer.tsx";
 import {useParams} from "react-router-dom";
@@ -81,7 +81,7 @@ export default function BaseEdit(
                        onChange={handleDataChange}/>
                 <button>{t("registry_save")}</button>
             </form>
-            <ItemContainer itemIdList={itemIdList} setItemIdList={setItemIdList}/>
+            <ItemContainer config={config} itemIdList={itemIdList} setItemIdList={setItemIdList}/>
         </>
     );
 }

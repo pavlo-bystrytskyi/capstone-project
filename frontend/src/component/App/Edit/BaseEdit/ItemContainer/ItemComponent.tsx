@@ -5,13 +5,16 @@ import Item from "../../../../../type/Item.tsx";
 import {emptyItem} from "../../../../../type/EmptyItem.tsx";
 import ItemIdContainer from "../../../../../type/ItemIdContainer.tsx";
 import ItemStatus from "../../../../../type/ItemStatus.tsx";
+import RegistryConfig from "../../../../../type/RegistryConfig.tsx";
 
 export default function ItemComponent(
     {
+        config,
         itemId,
         removeItemId
     }: {
-        itemId: ItemIdContainer,
+        readonly config: RegistryConfig
+        readonly itemId: ItemIdContainer,
         readonly removeItemId: (itemId: ItemIdContainer) => void
     }
 ) {
@@ -19,7 +22,7 @@ export default function ItemComponent(
     const [item, setItem] = useState<Item>(emptyItem)
     const removeItem = function (event: FormEvent) {
         event.preventDefault();
-        axios.delete('/api/item/' + itemId.privateId)
+        axios.delete(`${config.item.url}/${itemId.privateId}`)
             .then(() => {
                 removeItemId(itemId);
             })
@@ -29,13 +32,13 @@ export default function ItemComponent(
     }
     const saveItem = function (event: FormEvent) {
         event.preventDefault();
-        axios.put('/api/item/' + itemId.privateId, item)
+        axios.put(`${config.item.url}/${itemId.privateId}`, item)
             .catch(error => {
                 console.error('Error fetching data:', error);
             });
     }
     const loadItem = function () {
-        axios.get<Item>("/api/item/" + itemId.privateId)
+        axios.get<Item>(`${config.item.url}/${itemId.privateId}`)
             .then(result => {
                     setItem(result.data);
                 }

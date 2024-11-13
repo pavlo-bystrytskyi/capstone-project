@@ -2,11 +2,11 @@ import RegistryConfig from "../RegistryConfig.tsx";
 
 const publicRegistryConfig: RegistryConfig = {
     wishlist: {
-        url: "/api/wishlist/public",
+        url: "/api/guest/wishlist/public",
         itemIdField: "publicItemIds"
     },
     item: {
-        url: "/api/item/public",
+        url: "/api/guest/item/public",
         idField: "publicId"
     },
     access: {
