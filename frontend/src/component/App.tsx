@@ -8,7 +8,7 @@ import {SupportedLanguageCode, supportedLanguages} from "../type/SupportedLangua
 import {RegistryTypeCode, registryTypes} from "../type/RegistryType.tsx";
 import {useEffect, useState} from "react";
 import RegistrySuccess from "./App/RegistrySuccess.tsx";
-import RegistryIdData from "../dto/RegistryIdData.tsx";
+import RegistryIdData from "../type/RegistryIdData.tsx";
 import ViewPublic from "./App/View/ViewPublic.tsx";
 import ViewPrivate from "./App/View/ViewPrivate.tsx";
 import CreateGuest from "./App/Edit/CreateGuest.tsx";

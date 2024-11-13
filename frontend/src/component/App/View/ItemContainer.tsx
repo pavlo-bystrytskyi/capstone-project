@@ -7,8 +7,8 @@ export default function ItemContainer(
         itemIdList,
         config
     }: {
-        itemIdList: ItemIdContainer[],
-        config: RegistryConfig
+        readonly itemIdList: ItemIdContainer[],
+        readonly config: RegistryConfig
     }
 ) {
     return <>

@@ -11,8 +11,8 @@ export default function ItemComponent(
         itemIdContainer,
         config
     }: {
-        itemIdContainer: ItemIdContainer,
-        config: RegistryConfig
+        readonly itemIdContainer: ItemIdContainer,
+        readonly config: RegistryConfig
     }
 ) {
     const {t} = useTranslation();

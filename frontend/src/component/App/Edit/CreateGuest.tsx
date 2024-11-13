@@ -1,5 +1,5 @@
 import BaseEdit from "./BaseEdit.tsx";
-import RegistryIdData from "../../../dto/RegistryIdData.tsx";
+import RegistryIdData from "../../../type/RegistryIdData.tsx";
 import {useTranslation} from "react-i18next";
 import privateRegistryConfig from "../../../type/RegistryConfig/PrivateRegistryConfig.tsx";
 
