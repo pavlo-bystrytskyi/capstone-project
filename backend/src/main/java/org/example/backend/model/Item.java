@@ -16,6 +16,8 @@ public class Item {
 
     private String publicId;
 
+    private String ownerId;
+
     private Product product;
 
     private double quantity;

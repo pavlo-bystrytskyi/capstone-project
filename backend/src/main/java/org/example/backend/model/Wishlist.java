@@ -18,6 +18,8 @@ public class Wishlist {
 
     private String publicId;
 
+    private String ownerId;
+
     private List<ItemIdStorage> itemIds;
 
     private String title;
