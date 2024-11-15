@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class WishlistControllerTest {
+class GuestWishlistControllerTest {
 
     private static final String URL_BASE = "/api/guest/wishlist";
     private static final String URL_WITH_ID = "/api/guest/wishlist/{id}";

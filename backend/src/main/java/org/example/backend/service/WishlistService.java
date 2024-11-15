@@ -4,6 +4,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.model.Wishlist;
 import org.example.backend.repository.WishlistRepository;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,23 +15,44 @@ public class WishlistService {
 
     private final IdService idService;
 
-    public Wishlist create(Wishlist wishlist) {
-        String id = idService.generateId();
+    private final UserService userService;
 
-        return wishlistRepository.save(wishlist.withPublicId(id));
+    public Wishlist create(@NonNull Wishlist wishlist) {
+        return create(wishlist, null);
+    }
+
+    public Wishlist create(@NonNull Wishlist wishlist, @Nullable String userId) {
+        String id = idService.generateId();
+        String publicId = idService.generateId();
+
+        return wishlistRepository.save(
+                wishlist
+                        .withId(id)
+                        .withPublicId(publicId)
+                        .withOwnerId(userId)
+        );
     }
 
     public Wishlist updateById(@NonNull String id, @NonNull Wishlist wishlist) {
-        Wishlist existingWishlist = getById(id);
+        return updateById(id, wishlist, null);
+    }
+
+    public Wishlist updateById(@NonNull String id, @NonNull Wishlist wishlist, @Nullable String userId) {
+        Wishlist existingWishlist = getById(id, userId);
         Wishlist updatedWishlist = wishlist
                 .withId(existingWishlist.getId())
-                .withPublicId(existingWishlist.getPublicId());
+                .withPublicId(existingWishlist.getPublicId())
+                .withOwnerId(existingWishlist.getOwnerId());
 
         return wishlistRepository.save(updatedWishlist);
     }
 
+    public Wishlist getById(@NonNull String id, @Nullable String userId) {
+        return wishlistRepository.findByIdAndOwnerId(id, userId).orElseThrow();
+    }
+
     public Wishlist getById(@NonNull String id) {
-        return wishlistRepository.findById(id).orElseThrow();
+        return getById(id, null);
     }
 
     public Wishlist getByPublicId(@NonNull String id) {
@@ -38,6 +60,10 @@ public class WishlistService {
     }
 
     public void deleteById(@NonNull String id) {
-        wishlistRepository.deleteById(id);
+        deleteById(id, null);
+    }
+
+    public void deleteById(@NonNull String id, @Nullable String userId) {
+        wishlistRepository.deleteByIdAndOwnerId(id, userId);
     }
 }

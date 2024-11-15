@@ -16,4 +16,8 @@ public class UserService {
         userRepository.findByExternalId(user.getExternalId())
                 .orElseGet(() -> userRepository.save(user));
     }
+
+    public User getUserByExternalId(@NonNull String externalId) {
+        return userRepository.findByExternalId(externalId).orElseThrow();
+    }
 }
