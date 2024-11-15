@@ -1,12 +1,12 @@
 package org.example.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.backend.dto.ErrorResponse;
-import org.example.backend.dto.IdResponse;
-import org.example.backend.dto.wishlist.PrivateItemIdsResponse;
-import org.example.backend.dto.wishlist.PrivateWishlistResponse;
-import org.example.backend.dto.wishlist.PublicItemIdsResponse;
-import org.example.backend.dto.wishlist.PublicWishlistResponse;
+import org.example.backend.dto.response.ErrorResponse;
+import org.example.backend.dto.response.IdResponse;
+import org.example.backend.dto.response.wishlist.PrivateItemIdsResponse;
+import org.example.backend.dto.response.wishlist.PrivateWishlistResponse;
+import org.example.backend.dto.response.wishlist.PublicItemIdsResponse;
+import org.example.backend.dto.response.wishlist.PublicWishlistResponse;
 import org.example.backend.mock.dto.ItemIdsRequestMock;
 import org.example.backend.mock.dto.WishlistRequestMock;
 import org.example.backend.model.Wishlist;
@@ -69,7 +69,7 @@ class GuestWishlistControllerTest {
     @Autowired
     private WishlistRepository wishlistRepository;
 
-    static Stream<Arguments> nullParamDataProvider() {
+    static Stream<Arguments> incorrectParamDataProvider() {
         WishlistRequestMock wishlistRequest = new WishlistRequestMock(
                 TITLE_FIRST,
                 DESCRIPTION_FIRST,
@@ -80,10 +80,16 @@ class GuestWishlistControllerTest {
         );
 
         return Stream.of(
-                Arguments.of("Empty wishlist title", wishlistRequest.withTitle(null)),
-                Arguments.of("Empty wishlist description", wishlistRequest.withDescription(null)),
-                Arguments.of("Empty item list", wishlistRequest.withItemIds(null)),
-                Arguments.of("Empty request", null)
+                Arguments.of("Empty wishlist title", wishlistRequest.withTitle(null), "title: must not be null"),
+                Arguments.of("Short wishlist title", wishlistRequest.withTitle("_".repeat(3)), "title: size must be between 4 and 255"),
+                Arguments.of("Long wishlist title", wishlistRequest.withTitle("_".repeat(256)), "title: size must be between 4 and 255"),
+                Arguments.of("Empty wishlist description", wishlistRequest.withDescription(null), "description: must not be null"),
+                Arguments.of("Long wishlist description", wishlistRequest.withDescription("_".repeat(4096)), "description: size must be between 0 and 4095"),
+                Arguments.of("Empty item list", wishlistRequest.withItemIds(null), "itemIds: must not be empty"),
+                Arguments.of("Zero length item list", wishlistRequest.withItemIds(List.of()), "itemIds: must not be empty"),
+                Arguments.of("No public id in item list", wishlistRequest.withItemIds(List.of(new ItemIdsRequestMock(PRIVATE_ITEM_ID_FIRST, null))), "itemIds[0].publicId: must not be blank"),
+                Arguments.of("No private id in item list", wishlistRequest.withItemIds(List.of(new ItemIdsRequestMock(null, PUBLIC_ITEM_ID_FIRST))), "itemIds[0].privateId: must not be blank"),
+                Arguments.of("Empty request", null, "Not readable request body")
         );
     }
 
@@ -139,16 +145,19 @@ class GuestWishlistControllerTest {
     @ParameterizedTest(name = "{0}")
     @DirtiesContext
     @DisplayName("Create - incorrect payload")
-    @MethodSource("nullParamDataProvider")
-    void create_nullParam(String name, WishlistRequestMock wishlistRequest) throws Exception {
-        mockMvc.perform(
+    @MethodSource("incorrectParamDataProvider")
+    void create_incorrectParam(String name, WishlistRequestMock wishlistRequest, String expectedMessage) throws Exception {
+        MvcResult mvcResult = mockMvc.perform(
                 post(URL_BASE)
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(wishlistRequest))
         ).andExpect(
                 MockMvcResultMatchers.status().is4xxClientError()
-        );
+        ).andReturn();
 
+        String response = mvcResult.getResponse().getContentAsString();
+        ErrorResponse errorResponse = objectMapper.readValue(response, ErrorResponse.class);
+        assertEquals(expectedMessage, errorResponse.message());
         List<Wishlist> wishlistList = wishlistRepository.findAll();
         assertTrue(wishlistList.isEmpty());
     }

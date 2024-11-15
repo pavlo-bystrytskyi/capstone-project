@@ -1,7 +1,7 @@
 package org.example.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.backend.dto.UserResponse;
+import org.example.backend.dto.response.UserResponse;
 import org.example.backend.model.User;
 import org.example.backend.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
