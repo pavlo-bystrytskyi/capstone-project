@@ -2,7 +2,6 @@ package org.example.backend.service;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.example.backend.model.User;
 import org.example.backend.model.Wishlist;
 import org.example.backend.repository.WishlistRepository;
 import org.springframework.lang.Nullable;
@@ -22,10 +21,9 @@ public class WishlistService {
         return create(wishlist, null);
     }
 
-    public Wishlist create(@NonNull Wishlist wishlist, @Nullable User user) {
+    public Wishlist create(@NonNull Wishlist wishlist, @Nullable String userId) {
         String id = idService.generateId();
         String publicId = idService.generateId();
-        String userId = userService.getUserId(user);
 
         return wishlistRepository.save(
                 wishlist
@@ -39,8 +37,8 @@ public class WishlistService {
         return updateById(id, wishlist, null);
     }
 
-    public Wishlist updateById(@NonNull String id, @NonNull Wishlist wishlist, @Nullable User user) {
-        Wishlist existingWishlist = getById(id, user);
+    public Wishlist updateById(@NonNull String id, @NonNull Wishlist wishlist, @Nullable String userId) {
+        Wishlist existingWishlist = getById(id, userId);
         Wishlist updatedWishlist = wishlist
                 .withId(existingWishlist.getId())
                 .withPublicId(existingWishlist.getPublicId())
@@ -49,9 +47,7 @@ public class WishlistService {
         return wishlistRepository.save(updatedWishlist);
     }
 
-    public Wishlist getById(@NonNull String id, @Nullable User user) {
-        String userId = userService.getUserId(user);
-
+    public Wishlist getById(@NonNull String id, @Nullable String userId) {
         return wishlistRepository.findByIdAndOwnerId(id, userId).orElseThrow();
     }
 
@@ -67,9 +63,7 @@ public class WishlistService {
         deleteById(id, null);
     }
 
-    public void deleteById(@NonNull String id, @Nullable User user) {
-        String userId = userService.getUserId(user);
-
+    public void deleteById(@NonNull String id, @Nullable String userId) {
         wishlistRepository.deleteByIdAndOwnerId(id, userId);
     }
 }

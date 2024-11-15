@@ -45,7 +45,7 @@ class AuthControllerTest {
     private UserRepository userRepository;
 
     @Test
-    @DisplayName("Get user - successful")
+    @DisplayName("Get user - registered user")
     @DirtiesContext
     void getMe_registeredUser() throws Exception {
         User user = createUserFirst();

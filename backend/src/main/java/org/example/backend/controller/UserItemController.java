@@ -2,7 +2,7 @@ package org.example.backend.controller;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.example.backend.annotation.CurrentUser;
+import org.example.backend.annotation.CurrentUserId;
 import org.example.backend.dto.IdResponse;
 import org.example.backend.dto.item.ItemRequest;
 import org.example.backend.dto.item.PrivateItemResponse;
@@ -20,29 +20,29 @@ public class UserItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public IdResponse create(@CurrentUser User user, @RequestBody @NonNull ItemRequest itemRequest) {
+    public IdResponse create(@CurrentUserId String userId, @RequestBody @NonNull ItemRequest itemRequest) {
         Item itemData = itemRequest.toItem();
-        Item item = itemService.create(itemData, user);
+        Item item = itemService.create(itemData, userId);
 
         return IdResponse.of(item.getPublicId(), item.getId());
     }
 
     @GetMapping("/{id}")
-    public PublicItemResponse getById(@CurrentUser User user, @PathVariable @NonNull String id) {
-        Item item = itemService.getById(id, user);
+    public PublicItemResponse getById(@CurrentUserId String userId, @PathVariable @NonNull String id) {
+        Item item = itemService.getById(id, userId);
 
         return PublicItemResponse.of(item);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteById(@CurrentUser User user, @PathVariable @NonNull String id) {
-        itemService.deleteById(id, user);
+    public void deleteById(@CurrentUserId String userId, @PathVariable @NonNull String id) {
+        itemService.deleteById(id, userId);
     }
 
     @PutMapping("/{id}")
-    public PrivateItemResponse updateById(@CurrentUser User user, @PathVariable @NonNull String id, @RequestBody @NonNull ItemRequest itemRequest) {
+    public PrivateItemResponse updateById(@CurrentUserId String userId, @PathVariable @NonNull String id, @RequestBody @NonNull ItemRequest itemRequest) {
         Item item = itemRequest.toItem();
-        Item updatedItem = itemService.updateById(id, item, user);
+        Item updatedItem = itemService.updateById(id, item, userId);
 
         return PrivateItemResponse.of(updatedItem);
     }

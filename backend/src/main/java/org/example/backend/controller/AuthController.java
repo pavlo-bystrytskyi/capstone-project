@@ -15,7 +15,6 @@ public class AuthController {
 
     @GetMapping("/me")
     public UserResponse getMe(@CurrentUser User user) {
-
         return user == null ? UserResponse.guest() : UserResponse.of(user);
     }
 }
