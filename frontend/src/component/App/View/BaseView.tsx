@@ -7,7 +7,7 @@ import Registry from "../../../type/Registry.tsx";
 import {emptyRegistry} from "../../../type/EmptyRegistry.tsx";
 import RegistryConfig from "../../../type/RegistryConfig.tsx";
 
-export default function BaseView({config}: {readonly config: RegistryConfig }) {
+export default function BaseView({config}: { readonly config: RegistryConfig }) {
     const {t} = useTranslation();
     const params = useParams();
     const id: string | undefined = params.id;
@@ -25,7 +25,7 @@ export default function BaseView({config}: {readonly config: RegistryConfig }) {
         [id]
     );
     const openEditPage = function () {
-        navigate("/edit-guest/" + id);
+        navigate(`${config.access.wishlist.edit.url}/${id}`);
     }
 
     return <>

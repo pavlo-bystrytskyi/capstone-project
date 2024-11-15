@@ -1,19 +1,19 @@
 import RegistryConfig from "../RegistryConfig.tsx";
 
-const privateRegistryConfig: RegistryConfig = {
+const userRegistryConfig: RegistryConfig = {
     wishlist: {
-        url: "/api/guest/wishlist",
+        url: "/api/user/wishlist",
         itemIdField: "privateItemIds"
     },
     item: {
-        url: "/api/guest/item",
+        url: "/api/user/item",
         idField: "privateId"
     },
     access: {
         wishlist: {
             edit: {
                 allowed: true,
-                url: "/edit-guest"
+                url: "/edit-user"
             }
         },
         item: {
@@ -26,4 +26,4 @@ const privateRegistryConfig: RegistryConfig = {
     }
 }
 
-export default privateRegistryConfig;
+export default userRegistryConfig;

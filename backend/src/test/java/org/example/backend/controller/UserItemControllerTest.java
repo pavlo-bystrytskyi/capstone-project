@@ -556,6 +556,7 @@ class UserItemControllerTest {
         Item actualItem = itemOptional.get();
         assertEquals(expectedItem.getId(), actualItem.getId());
         assertEquals(expectedItem.getPublicId(), actualItem.getPublicId());
+        assertEquals(expectedItem.getOwnerId(), actualItem.getOwnerId());
         assertEquals(expectedItem.getQuantity(), actualItem.getQuantity());
         assertEquals(expectedItem.getProduct(), actualItem.getProduct());
     }

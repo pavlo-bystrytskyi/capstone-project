@@ -9,11 +9,16 @@ export default interface RegistryConfig {
     },
     access: {
         wishlist: {
-            edit: boolean
+            edit: {
+                allowed: boolean,
+                url: string
+            }
         },
         item: {
             status: {
-                edit: boolean
+                edit: {
+                    allowed: boolean
+                }
             }
         }
     }

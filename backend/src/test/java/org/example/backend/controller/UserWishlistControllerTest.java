@@ -425,6 +425,7 @@ class UserWishlistControllerTest {
         assertTrue(optional.isPresent());
         Wishlist actual = optional.get();
         assertEquals(expected.getPublicId(), actual.getPublicId());
+        assertEquals(expected.getOwnerId(), actual.getOwnerId());
         assertEquals(expected.getTitle(), actual.getTitle());
         assertEquals(expected.getDescription(), actual.getDescription());
         assertWishlistItemEquality(expected.getItemIds(), actual.getItemIds());
