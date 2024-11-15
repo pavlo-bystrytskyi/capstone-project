@@ -37,7 +37,8 @@ public class ItemService {
         Item existingItem = getById(id, userId);
         Item updatedItem = item
                 .withId(existingItem.getId())
-                .withPublicId(existingItem.getPublicId());
+                .withPublicId(existingItem.getPublicId())
+                .withOwnerId(userId);
 
         return itemRepository.save(updatedItem);
     }

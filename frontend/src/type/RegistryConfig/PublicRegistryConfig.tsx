@@ -11,11 +11,16 @@ const publicRegistryConfig: RegistryConfig = {
     },
     access: {
         wishlist: {
-            edit: false
+            edit: {
+                allowed: false,
+                url: "/"
+            }
         },
         item: {
             status: {
-                edit: true
+                edit: {
+                    allowed: true
+                }
             }
         }
     }
