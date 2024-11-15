@@ -7,6 +7,8 @@ import org.example.backend.repository.WishlistRepository;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class WishlistService {
@@ -65,5 +67,9 @@ public class WishlistService {
 
     public void deleteById(@NonNull String id, @Nullable String userId) {
         wishlistRepository.deleteByIdAndOwnerId(id, userId);
+    }
+
+    public List<Wishlist> getByUserId(@NonNull String userId) {
+        return wishlistRepository.findAllByOwnerId(userId);
     }
 }

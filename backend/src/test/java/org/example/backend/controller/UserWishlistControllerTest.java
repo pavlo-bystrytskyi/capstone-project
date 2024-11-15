@@ -1,5 +1,6 @@
 package org.example.backend.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.backend.dto.ErrorResponse;
 import org.example.backend.dto.IdResponse;
@@ -45,8 +46,10 @@ class UserWishlistControllerTest {
 
     private static final String ID_FIRST = "some id 1";
     private static final String ID_SECOND = "some id 2";
+    private static final String ID_THIRD = "some id 3";
     private static final String PUBLIC_ID_FIRST = "some public id 1";
     private static final String PUBLIC_ID_SECOND = "some public id 2";
+    private static final String PUBLIC_ID_THIRD = "some public id 3";
     private static final String TITLE_FIRST = "some wishlist title 1";
     private static final String TITLE_SECOND = "some wishlist title 2";
     private static final String TITLE_THIRD = "some wishlist title 3";
@@ -667,5 +670,120 @@ class UserWishlistControllerTest {
         assertEquals(MESSAGE_NOT_FOUND, errorResponse.message());
         assertWishlistTableSize(1);
         assertWishlistInTable(wishlistFirst);
+    }
+
+    @Test
+    @DirtiesContext
+    @DisplayName("Get all - success")
+    void getAll_success() throws Exception {
+        String userIdFirst = createUser(EXTERNAL_ID_USER_FIRST);
+        String userIdSecond = createUser(EXTERNAL_ID_USER_SECOND);
+        Wishlist wishlistFirst = Wishlist.builder()
+                .id(ID_FIRST)
+                .publicId(PUBLIC_ID_FIRST)
+                .ownerId(userIdFirst)
+                .title(TITLE_FIRST)
+                .description(DESCRIPTION_FIRST)
+                .itemIds(
+                        List.of(
+                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_FIRST).publicId(PUBLIC_ITEM_ID_FIRST).build()
+                        )
+                )
+                .build();
+        Wishlist wishlistSecond = Wishlist.builder()
+                .id(ID_SECOND)
+                .publicId(PUBLIC_ID_SECOND)
+                .ownerId(userIdSecond)
+                .title(TITLE_SECOND)
+                .description(DESCRIPTION_SECOND)
+                .itemIds(
+                        List.of(
+                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_SECOND).publicId(PUBLIC_ITEM_ID_SECOND).build()
+                        )
+                )
+                .build();
+        Wishlist wishlistThird = Wishlist.builder()
+                .id(ID_THIRD)
+                .publicId(PUBLIC_ID_THIRD)
+                .ownerId(userIdFirst)
+                .title(TITLE_THIRD)
+                .description(DESCRIPTION_THIRD)
+                .itemIds(
+                        List.of(
+                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_THIRD).publicId(PUBLIC_ITEM_ID_THIRD).build()
+                        )
+                )
+                .build();
+        wishlistRepository.saveAll(
+                List.of(
+                        wishlistFirst,
+                        wishlistSecond,
+                        wishlistThird
+                )
+        );
+
+        MvcResult mvcResult = mockMvc.perform(
+                        get(URL_BASE)
+                                .with(mockUser())
+                ).andExpect(
+                        MockMvcResultMatchers.status().isOk()
+                )
+                .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+        List<PrivateWishlistResponse> wishlistResponse = objectMapper.readValue(response, new TypeReference<>() {});
+        assertEquals(2, wishlistResponse.size());
+        assertPrivateWishlistResponseInTable(wishlistResponse.get(0), wishlistFirst.getId());
+        assertPrivateWishlistResponseInTable(wishlistResponse.get(1), wishlistThird.getId());
+    }
+
+    @Test
+    @DirtiesContext
+    @DisplayName("Get all - no wishlists found")
+    void getAll_noWishlistsFound() throws Exception {
+        createUser(EXTERNAL_ID_USER_FIRST);
+        String userIdSecond = createUser(EXTERNAL_ID_USER_SECOND);
+        Wishlist wishlistFirst = Wishlist.builder()
+                .id(ID_FIRST)
+                .publicId(PUBLIC_ID_FIRST)
+                .ownerId(userIdSecond)
+                .title(TITLE_FIRST)
+                .description(DESCRIPTION_FIRST)
+                .itemIds(
+                        List.of(
+                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_FIRST).publicId(PUBLIC_ITEM_ID_FIRST).build()
+                        )
+                )
+                .build();
+        Wishlist wishlistSecond = Wishlist.builder()
+                .id(ID_SECOND)
+                .publicId(PUBLIC_ID_SECOND)
+                .ownerId(null)
+                .title(TITLE_SECOND)
+                .description(DESCRIPTION_SECOND)
+                .itemIds(
+                        List.of(
+                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_SECOND).publicId(PUBLIC_ITEM_ID_SECOND).build()
+                        )
+                )
+                .build();
+        wishlistRepository.saveAll(
+                List.of(
+                        wishlistFirst,
+                        wishlistSecond
+                )
+        );
+
+        MvcResult mvcResult = mockMvc.perform(
+                        get(URL_BASE)
+                                .with(mockUser())
+                ).andExpect(
+                        MockMvcResultMatchers.status().isOk()
+                )
+                .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+        List<PrivateWishlistResponse> wishlistResponse = objectMapper.readValue(response, new TypeReference<>() {});
+        assertEquals(0, wishlistResponse.size());
     }
 }

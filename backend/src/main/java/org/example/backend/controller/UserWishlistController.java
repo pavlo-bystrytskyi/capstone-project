@@ -6,10 +6,11 @@ import org.example.backend.annotation.CurrentUserId;
 import org.example.backend.dto.IdResponse;
 import org.example.backend.dto.wishlist.PrivateWishlistResponse;
 import org.example.backend.dto.wishlist.WishlistRequest;
-import org.example.backend.model.User;
 import org.example.backend.model.Wishlist;
 import org.example.backend.service.WishlistService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/user/wishlist")
@@ -24,6 +25,13 @@ public class UserWishlistController {
         Wishlist wishlist = wishlistService.create(wishlistData, userId);
 
         return IdResponse.of(wishlist.getPublicId(), wishlist.getId());
+    }
+
+    @GetMapping
+    public List<PrivateWishlistResponse> getAll(@CurrentUserId String userId) {
+        List<Wishlist> wishlistsList = wishlistService.getByUserId(userId);
+
+        return wishlistsList.stream().map(PrivateWishlistResponse::of).toList();
     }
 
     @GetMapping("/{id}")
