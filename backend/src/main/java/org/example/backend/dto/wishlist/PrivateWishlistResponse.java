@@ -8,6 +8,8 @@ import java.util.List;
 
 @Builder
 public record PrivateWishlistResponse(
+        @NonNull String privateId,
+        @NonNull String publicId,
         @NonNull List<PrivateItemIdsResponse> itemIds,
         @NonNull String title,
         @NonNull String description
@@ -15,6 +17,8 @@ public record PrivateWishlistResponse(
 
     public static PrivateWishlistResponse of(Wishlist wishlist) {
         return PrivateWishlistResponse.builder()
+                .privateId(wishlist.getId())
+                .publicId(wishlist.getPublicId())
                 .title(wishlist.getTitle())
                 .description(wishlist.getDescription())
                 .itemIds(wishlist.getItemIds().stream().map(PrivateItemIdsResponse::of).toList())

@@ -29,5 +29,8 @@
   "item_add": "Add",
   "item_remove": "Remove",
   "view_registry_private": "View Registry",
-  "view_registry_public": "View Registry"
+  "view_registry_public": "View Registry",
+  "view_registry_user": "View Registry",
+  "open_all_registries": "Your Registries",
+  "registry_list": "Your Registries:"
 }
