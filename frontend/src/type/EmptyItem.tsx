@@ -1,9 +1,7 @@
 import ItemStatus from "./ItemStatus.tsx";
-import Item from "./Item.tsx";
+import ItemRestricted from "./ItemRestricted.tsx";
 
-export const emptyItem: Item = {
-    publicId: "",
-    privateId: "",
+export const emptyItem: ItemRestricted = {
     status: ItemStatus.AVAILABLE,
     quantity: 1,
     product: {

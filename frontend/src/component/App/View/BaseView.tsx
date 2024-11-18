@@ -27,6 +27,7 @@ export default function BaseView({config}: { readonly config: RegistryConfig }) 
     const openEditPage = function () {
         navigate(`${config.access.wishlist.edit.url}/${id}`);
     }
+    const editAllowed: boolean = config.access.wishlist.edit.allowed;
 
     return <>
         <form className="registry-form" onSubmit={openEditPage}>
@@ -34,7 +35,7 @@ export default function BaseView({config}: { readonly config: RegistryConfig }) 
             <input type="text" name="title" disabled={true} value={wishlist.title}/>
             <label htmlFor="description">{t("registry_description")}</label>
             <input type="text" name="description" disabled={true} value={wishlist.description}/>
-            <button hidden={!config.access.wishlist.edit}>{t("registry_edit")}</button>
+            <button hidden={!editAllowed}>{t("registry_edit")}</button>
         </form>
         <ItemContainer itemIdList={wishlist.itemIds} config={config}/>
     </>
