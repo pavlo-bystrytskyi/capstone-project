@@ -1,4 +1,4 @@
-import Item from "../../../../type/Item.tsx";
+import ItemRestricted from "../../../../type/ItemRestricted.tsx";
 import {useTranslation} from "react-i18next";
 import ItemStatus from "../../../../type/ItemStatus.tsx";
 import RegistryConfig from "../../../../type/RegistryConfig.tsx";
@@ -16,10 +16,10 @@ export default function ItemComponent(
     }
 ) {
     const {t} = useTranslation();
-    const editStatusAllowed = config.access.item.status.edit;
-    const [item, setItem] = useState<Item>()
+    const editStatusAllowed: boolean = config.access.item.status.edit.allowed;
+    const [item, setItem] = useState<ItemRestricted>()
     const loadItem = function () {
-        axios.get<Item>(
+        axios.get<ItemRestricted>(
             `${config.item.url}/${itemIdContainer[config.item.idField as keyof ItemIdContainer]}`
         ).then(
             result => setItem(result.data)
@@ -34,7 +34,7 @@ export default function ItemComponent(
         if (!item) return;
         const {value} = event.target;
         item.status = value as ItemStatus;
-        axios.put<Item>(`${config.item.url}/${item[config.item.idField as keyof Item]}`, item).then(
+        axios.put<ItemRestricted>(`${config.item.url}/${item[config.item.idField as keyof ItemRestricted]}`, item).then(
             (response) => setItem(response.data)
         ).catch(error => {
             console.error('Error fetching data:', error);

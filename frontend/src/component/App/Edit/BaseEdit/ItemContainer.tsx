@@ -1,5 +1,5 @@
-import NewItemForm from "./ItemContainer/NewItemForm.tsx";
-import ItemComponent from "./ItemContainer/ItemComponent.tsx";
+import NewItemComponent from "./ItemContainer/NewItemComponent.tsx";
+import EditItemComponent from "./ItemContainer/EditItemComponent.tsx";
 import {useTranslation} from "react-i18next";
 import ItemIdContainer from "../../../../type/ItemIdContainer.tsx";
 import RegistryConfig from "../../../../type/RegistryConfig.tsx";
@@ -28,11 +28,11 @@ export default function ItemContainer(
 
     return <>
         <h2>Item Container</h2>
-        <NewItemForm config={config} addItemId={addItemId}/>
+        <NewItemComponent config={config} addItemId={addItemId}/>
         {
             (itemIdList.length > 0) ?
                 itemIdList.map(
-                    (itemId) => <ItemComponent config={config} key={itemId.privateId} itemId={itemId} removeItemId={removeItemId}/>
+                    (itemId) => <EditItemComponent config={config} key={itemId.privateId} itemId={itemId} removeItemId={removeItemId}/>
                 ) : <div>{t("add_some_products")}</div>
         }
     </>
