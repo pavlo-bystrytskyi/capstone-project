@@ -1,10 +1,10 @@
 package org.example.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.backend.dto.ErrorResponse;
-import org.example.backend.dto.IdResponse;
-import org.example.backend.dto.item.ProductResponse;
-import org.example.backend.dto.item.PublicItemResponse;
+import org.example.backend.dto.response.ErrorResponse;
+import org.example.backend.dto.response.IdResponse;
+import org.example.backend.dto.response.item.ProductResponse;
+import org.example.backend.dto.response.item.PublicItemResponse;
 import org.example.backend.mock.dto.ItemRequestMock;
 import org.example.backend.mock.dto.ProductRequestMock;
 import org.example.backend.model.Item;
@@ -74,7 +74,7 @@ class UserItemControllerTest {
     @Autowired
     private UserRepository userRepository;
 
-    static Stream<Arguments> nullParamDataProvider() {
+    static Stream<Arguments> incorrectParamDataProvider() {
         ProductRequestMock productRequest = new ProductRequestMock(
                 PRODUCT_TITLE_FIRST,
                 PRODUCT_DESCRIPTION_FIRST,
@@ -87,12 +87,18 @@ class UserItemControllerTest {
         );
 
         return Stream.of(
-                Arguments.of("Empty item quantity", itemRequest.withQuantity(null)),
-                Arguments.of("Empty product data", itemRequest.withProduct(null)),
-                Arguments.of("Empty product title", itemRequest.withProduct(productRequest.withTitle(null))),
-                Arguments.of("Empty product description", itemRequest.withProduct(productRequest.withDescription(null))),
-                Arguments.of("Empty product link", itemRequest.withProduct(productRequest.withLink(null))),
-                Arguments.of("Empty request", null)
+                Arguments.of("Empty item quantity", itemRequest.withQuantity(null), "quantity: must not be null"),
+                Arguments.of("Zero item quantity", itemRequest.withQuantity(0.0), "quantity: must be greater than 0"),
+                Arguments.of("Negative item quantity", itemRequest.withQuantity(-1.0), "quantity: must be greater than 0"),
+                Arguments.of("Empty product data", itemRequest.withProduct(null), "product: must not be null"),
+                Arguments.of("Empty product title", itemRequest.withProduct(productRequest.withTitle(null)), "product.title: must not be null"),
+                Arguments.of("Short product title", itemRequest.withProduct(productRequest.withTitle("_".repeat(3))), "product.title: size must be between 4 and 255"),
+                Arguments.of("Long product title", itemRequest.withProduct(productRequest.withTitle("_".repeat(256))), "product.title: size must be between 4 and 255"),
+                Arguments.of("Empty product description", itemRequest.withProduct(productRequest.withDescription(null)), "product.description: must not be null"),
+                Arguments.of("Long product description", itemRequest.withProduct(productRequest.withDescription("_".repeat(4096))), "product.description: size must be between 0 and 4095"),
+                Arguments.of("Empty product link", itemRequest.withProduct(productRequest.withLink(null)), "product.link: must not be null"),
+                Arguments.of("Incorrect product link", itemRequest.withProduct(productRequest.withLink("null")), "product.link: must be a valid URL"),
+                Arguments.of("Empty request", null, "Not readable request body")
         );
     }
 
@@ -178,18 +184,21 @@ class UserItemControllerTest {
     @ParameterizedTest(name = "{0}")
     @DirtiesContext
     @DisplayName("Create - incorrect payload")
-    @MethodSource("nullParamDataProvider")
-    void create_nullParam(String name, ItemRequestMock itemRequest) throws Exception {
+    @MethodSource("incorrectParamDataProvider")
+    void create_incorrectParam(String name, ItemRequestMock itemRequest, String expectedMessage) throws Exception {
         createUser(EXTERNAL_ID_USER_FIRST);
-        mockMvc.perform(
+        MvcResult mvcResult = mockMvc.perform(
                 post(URL_BASE)
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(itemRequest))
                         .with(mockUser())
         ).andExpect(
                 MockMvcResultMatchers.status().is4xxClientError()
-        );
+        ).andReturn();
 
+        String response = mvcResult.getResponse().getContentAsString();
+        ErrorResponse errorResponse = objectMapper.readValue(response, ErrorResponse.class);
+        assertEquals(expectedMessage, errorResponse.message());
         List<Item> itemList = itemRepository.findAll();
         assertTrue(itemList.isEmpty());
     }
