@@ -2,7 +2,7 @@ package org.example.backend.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.backend.annotation.CurrentUser;
-import org.example.backend.dto.UserResponse;
+import org.example.backend.dto.response.UserResponse;
 import org.example.backend.model.User;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

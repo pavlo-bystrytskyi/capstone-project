@@ -1,11 +1,12 @@
-package org.example.backend.dto.wishlist;
+package org.example.backend.dto.request.wishlist;
 
-import lombok.NonNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.example.backend.model.wishlist.ItemIdStorage;
 
 public record ItemIdsRequest(
-        @NonNull String privateId,
-        @NonNull String publicId
+        @NotBlank String privateId,
+        @NotBlank String publicId
 ) {
 
     public ItemIdStorage toItemIdStorage() {

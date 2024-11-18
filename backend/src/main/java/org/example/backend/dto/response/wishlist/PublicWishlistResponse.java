@@ -1,4 +1,4 @@
-package org.example.backend.dto.wishlist;
+package org.example.backend.dto.response.wishlist;
 
 import lombok.Builder;
 import lombok.NonNull;

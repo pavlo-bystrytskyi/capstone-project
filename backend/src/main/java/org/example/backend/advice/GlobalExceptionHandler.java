@@ -1,15 +1,19 @@
 package org.example.backend.advice;
 
 import lombok.extern.log4j.Log4j2;
-import org.example.backend.dto.ErrorResponse;
+import org.example.backend.dto.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Log4j2
@@ -40,6 +44,21 @@ public class GlobalExceptionHandler {
         log.info(exception);
 
         return new ErrorResponse(exception.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+        log.info(exception);
+
+        return new ErrorResponse(
+                exception.getBindingResult().getAllErrors().stream().map(
+                        (ObjectError fieldError) -> "%s: %s".formatted(
+                                ((FieldError) fieldError).getField(),
+                                fieldError.getDefaultMessage()
+                        )
+                ).collect(Collectors.joining(";"))
+        );
     }
 
     @ExceptionHandler
