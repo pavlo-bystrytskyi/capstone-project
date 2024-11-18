@@ -264,8 +264,6 @@ class UserWishlistControllerTest {
                 .andReturn();
 
         String response = mvcResult.getResponse().getContentAsString();
-        assertFalse(response.contains(wishlistFirst.getId()));
-        assertFalse(response.contains(wishlistFirst.getPublicId()));
         PrivateWishlistResponse wishlistResponse = objectMapper.readValue(response, PrivateWishlistResponse.class);
         assertPrivateWishlistResponseInTable(wishlistResponse, wishlistFirst.getId());
     }
@@ -274,6 +272,8 @@ class UserWishlistControllerTest {
         Optional<Wishlist> optional = wishlistRepository.findById(id);
         assertTrue(optional.isPresent());
         Wishlist expected = optional.get();
+        assertEquals(expected.getId(), actual.privateId());
+        assertEquals(expected.getPublicId(), actual.publicId());
         assertEquals(expected.getTitle(), actual.title());
         assertEquals(expected.getDescription(), actual.description());
         assertPrivateResponseItemEquality(expected.getItemIds(), actual.itemIds());

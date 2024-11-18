@@ -19,10 +19,15 @@ import GuestSuccess from "./App/RegistrySuccess/GuestSuccess.tsx";
 import UserSuccess from "./App/RegistrySuccess/UserSuccess.tsx";
 import ViewUser from "./App/View/ViewUser.tsx";
 import EditUser from "./App/Edit/EditUser.tsx";
+import ViewList from "./App/View/ViewList.tsx";
+import axios from "axios";
+import User from "../type/User.tsx";
+import emptyUser from "../type/EmptyUser.tsx";
 
 function App() {
     const {i18n} = useTranslation();
     const navigate = useNavigate();
+    const [user, setUser] = useState<User>(emptyUser);
     const [registryTypeCode, setRegistryTypeCode] = useState<RegistryTypeCode>();
     const [registryIdData, setRegistryIdData] = useState<RegistryIdData>()
     const setLanguage = function (languageCode: SupportedLanguageCode) {
@@ -42,14 +47,28 @@ function App() {
         navigate("/success-user");
     }
 
+    const loadUser = () => {
+        axios.get<User>('/api/auth/me')
+            .then(response => {
+                setUser(response.data);
+            })
+            .catch(() => {
+                setUser(emptyUser);
+            })
+    }
+
     useEffect(() => {
         if (registryTypeCode && registryTypeCode === RegistryTypeCode.GUEST) navigate("/new-guest");
         if (registryTypeCode && registryTypeCode === RegistryTypeCode.CUSTOMER) navigate("/new-user");
     }, [registryTypeCode]);
 
+    useEffect(() => {
+        loadUser()
+    }, []);
+
     return (
         <>
-            <Header/>
+            <Header user={user}/>
             <Routes>
                 <Route path="/"
                        element={<SelectLanguage languages={supportedLanguages} setLanguage={setLanguage}/>}/>
@@ -64,6 +83,7 @@ function App() {
                 <Route path="/show-public/:id" element={<ViewPublic/>}/>
                 <Route path="/show-private/:id" element={<ViewPrivate/>}/>
                 <Route path="/show-user/:id" element={<ViewUser/>}/>
+                <Route path="/show-all" element={<ViewList user={user}/>}/>
             </Routes>
             <Footer/>
         </>
