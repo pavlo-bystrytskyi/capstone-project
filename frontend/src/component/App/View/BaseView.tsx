@@ -1,11 +1,16 @@
-import {useNavigate, useParams} from "react-router-dom";
-import ItemContainer from "./ItemContainer.tsx";
-import {useTranslation} from "react-i18next";
 import {useEffect, useState} from "react";
+import {useForm} from "react-hook-form";
+import {yupResolver} from "@hookform/resolvers/yup";
 import axios from "axios";
+import {useTranslation} from "react-i18next";
+import {useNavigate, useParams} from "react-router-dom";
+import RegistryConfig from "../../../type/RegistryConfig.tsx";
+import registryFormSchema from "../../../schema/RegistryFormSchema.tsx";
+import RegistryRestricted from "../../../type/RegistryRestricted.tsx";
+import {Button, Col, Form, Row} from "react-bootstrap";
 import Registry from "../../../type/Registry.tsx";
 import {emptyRegistry} from "../../../type/EmptyRegistry.tsx";
-import RegistryConfig from "../../../type/RegistryConfig.tsx";
+import ItemContainer from "./ItemContainer.tsx";
 
 export default function BaseView({config}: { readonly config: RegistryConfig }) {
     const {t} = useTranslation();
@@ -29,14 +34,58 @@ export default function BaseView({config}: { readonly config: RegistryConfig }) 
     }
     const editAllowed: boolean = config.access.wishlist.edit.allowed;
 
-    return <>
-        <form className="registry-form" onSubmit={openEditPage}>
-            <label htmlFor="title">{t("registry_name")}</label>
-            <input type="text" name="title" disabled={true} value={wishlist.title}/>
-            <label htmlFor="description">{t("registry_description")}</label>
-            <input type="text" name="description" disabled={true} value={wishlist.description}/>
-            <button hidden={!editAllowed}>{t("registry_edit")}</button>
-        </form>
-        <ItemContainer itemIdList={wishlist.itemIds} config={config}/>
-    </>
+    useForm<RegistryRestricted>({
+        resolver: yupResolver(registryFormSchema),
+        defaultValues: wishlist,
+    });
+
+    useEffect(loadWishlist, [id]);
+
+    return (
+        <Row
+            className="w-100 justify-content-center"
+            style={{maxWidth: '80%', height: 'auto'}}
+        >
+            <Col>
+                <div className="p-3 shadow-lg rounded bg-white">
+                    <Form className="registry-form" onSubmit={openEditPage}>
+                        <Form.Group as={Row} controlId="title" className="mb-3 align-items-center">
+                            <Form.Label column sm={2} className="text-end">
+                                {t("registry_name")}
+                            </Form.Label>
+                            <Col sm={10}>
+                                <Form.Control
+                                    type="text"
+                                    value={wishlist?.title}
+                                    disabled
+                                />
+                            </Col>
+                        </Form.Group>
+                        <Form.Group as={Row} controlId="description" className="mb-3 align-items-center">
+                            <Form.Label column sm={2} className="text-end">
+                                {t("registry_description")}
+                            </Form.Label>
+                            <Col sm={10}>
+                                <Form.Control
+                                    as="textarea"
+                                    rows={3}
+                                    value={wishlist?.description}
+                                    disabled
+                                />
+                            </Col>
+                        </Form.Group>
+                        <Row className="mb-3">
+                            <Col sm={{span: 10, offset: 2}}>
+                                {editAllowed && (
+                                    <Button variant="primary" type="submit">
+                                        {t("registry_edit")}
+                                    </Button>
+                                )}
+                            </Col>
+                        </Row>
+                    </Form>
+                    <ItemContainer itemIdList={wishlist.itemIds} config={config}/></div>
+            </Col>
+        </Row>
+    );
 }

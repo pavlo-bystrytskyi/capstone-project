@@ -1,6 +1,8 @@
 import ItemComponent from "./ItemContainer/ItemComponent.tsx";
 import RegistryConfig from "../../../type/RegistryConfig.tsx";
 import ItemIdContainer from "../../../type/ItemIdContainer.tsx";
+import {Alert, Card, Col, Row} from "react-bootstrap";
+import {useTranslation} from "react-i18next";
 
 export default function ItemContainer(
     {
@@ -11,12 +13,30 @@ export default function ItemContainer(
         readonly config: RegistryConfig
     }
 ) {
-    return <>
-        <h2>Item Container</h2>
-        {
-            itemIdList.map(
-                (itemId) => <ItemComponent key={itemId.publicId} itemIdContainer={itemId} config={config}/>
-            )
-        }
-    </>
+    const {t} = useTranslation();
+
+    return (
+        <>
+            <Card className="mb-3">
+                <Card.Header className="bg-primary text-white">
+                    {t("item_list")}
+                </Card.Header>
+                <Card.Body>
+                    <Row className="align-items-center">
+                        {itemIdList.length > 0 ? (
+                            itemIdList.map(
+                                (itemId) => (
+                                    <Col sm={4}>
+                                        <ItemComponent itemIdContainer={itemId} config={config}/>
+                                    </Col>
+                                )
+                            )
+                        ) : (
+                            <Alert variant="info" className="mb-3">{t("no_products_found")}</Alert>
+                        )}
+                    </Row>
+                </Card.Body>
+            </Card>
+        </>
+    );
 }
