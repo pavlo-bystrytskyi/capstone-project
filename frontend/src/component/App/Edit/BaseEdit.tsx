@@ -11,6 +11,8 @@ import ItemContainer from "./BaseEdit/ItemContainer.tsx";
 import registryFormSchema from "../../../schema/RegistryFormSchema.tsx";
 import RegistryRestricted from "../../../type/RegistryRestricted.tsx";
 import {Alert, Button, Col, Form, Row} from "react-bootstrap";
+import ToastVariant from "../../../context/toast/ToastVariant.tsx";
+import useToast from "../../../context/toast/UseToast.tsx";
 
 export default function BaseEdit(
     {
@@ -21,6 +23,8 @@ export default function BaseEdit(
         readonly config: RegistryConfig;
     }) {
     const {t} = useTranslation();
+
+    const {addToast} = useToast();
 
     const params = useParams();
 
@@ -40,9 +44,11 @@ export default function BaseEdit(
         request
             .then((response) => {
                 onSuccess(response.data);
+                addToast(t("toast_registry_save_successful"), ToastVariant.SUCCESS);
             })
             .catch((error) => {
                 console.error('Error fetching data:', error);
+                addToast(t("toast_registry_save_failed"), ToastVariant.ERROR);
             });
     };
 
@@ -54,7 +60,8 @@ export default function BaseEdit(
             reset(response.data);
             setItemIdList(response.data.itemIds);
         }).catch((error) => {
-            console.error('Error fetching data:', error);
+            console.error('Error fetching data:', error)
+            addToast(t("toast_registry_load_failed"), ToastVariant.ERROR);
         });
     };
 

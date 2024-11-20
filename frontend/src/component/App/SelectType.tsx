@@ -1,7 +1,7 @@
 import RegistryType, {RegistryTypeCode} from "../../type/RegistryType.tsx";
 import TypeSelector from "./SelectType/TypeSelector.tsx";
 import {Button, Col, Row} from "react-bootstrap";
-import useAuth from "../../context/UserAuth.tsx";
+import useAuth from "../../context/auth/UserAuth.tsx";
 import {useTranslation} from "react-i18next";
 
 export default function SelectType(

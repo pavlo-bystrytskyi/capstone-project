@@ -72,5 +72,14 @@
   "modal_restricted_title": "Zugriff verweigert",
   "modal_restricted_body": "Bitte melden Sie sich an, um den Inhalt zu sehen",
   "modal_restricted_button": "Schließen",
-  "hint_restricted": "Bitte melden Sie sich an, um zu benutzen"
+  "hint_restricted": "Bitte melden Sie sich an, um zu benutzen",
+  "toast_user_load_failed": "Fehler beim Laden der Benutzerdaten",
+  "toast_item_save_successful": "Artikel erfolgreich gespeichert",
+  "toast_item_save_failed": "Fehler beim Speichern des Artikels",
+  "toast_item_load_failed": "Fehler beim Laden des Artikels",
+  "toast_registry_load_failed": "Fehler beim Laden der Geschenkliste",
+  "toast_item_deletion_successful": "Artikel erfolgreich gelöscht",
+  "toast_item_deletion_failed": "Fehler beim Löschen des Artikels",
+  "toast_registry_save_failed": "Fehler beim Speichern der Geschenkliste",
+  "toast_registry_save_successful": "Geschenkliste erfolgreich gespeichert"
 }

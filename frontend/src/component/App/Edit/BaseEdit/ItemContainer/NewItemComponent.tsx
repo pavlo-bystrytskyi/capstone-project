@@ -10,6 +10,8 @@ import itemFormSchema from "../../../../../schema/ItemFormSchema.tsx";
 import {Button, Col, Form, Row} from "react-bootstrap";
 import ItemStatus from "../../../../../type/ItemStatus.tsx";
 import {useEffect, useRef, useState} from "react";
+import useToast from "../../../../../context/toast/UseToast.tsx";
+import ToastVariant from "../../../../../context/toast/ToastVariant.tsx";
 
 export default function NewItemComponent(
     {
@@ -33,6 +35,8 @@ export default function NewItemComponent(
         resolver: yupResolver(itemFormSchema),
         defaultValues: emptyItem,
     });
+
+    const {addToast} = useToast();
     const onProductLinkChange = () => {
         if (!linkValue && !isMounted.current) return;
         isMounted.current = true;
@@ -55,10 +59,13 @@ export default function NewItemComponent(
                 isMounted.current = false;
                 setProductLinkRequired(true);
                 reset();
+                addToast(t("toast_item_save_successful"), ToastVariant.SUCCESS);
             })
-            .catch(error => {
-                console.error('Error fetching data:', error);
-            });
+            .catch(
+                error => {
+                    console.error("Error fetching data:", error);
+                    addToast(t("toast_item_save_failed"), ToastVariant.ERROR);
+                });
     };
 
     useEffect(onProductLinkChange, [linkValue, errors.product?.link?.message]);

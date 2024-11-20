@@ -10,6 +10,8 @@ import {emptyItem} from "../../../../../type/EmptyItem.tsx";
 import ItemRestricted from "../../../../../type/ItemRestricted.tsx";
 import itemFormSchema from "../../../../../schema/ItemFormSchema.tsx";
 import {Button, Col, Form, Row} from "react-bootstrap";
+import ToastVariant from "../../../../../context/toast/ToastVariant.tsx";
+import useToast from "../../../../../context/toast/UseToast.tsx";
 
 export default function EditItemComponent(
     {
@@ -35,7 +37,7 @@ export default function EditItemComponent(
         resolver: yupResolver(itemFormSchema),
         defaultValues: emptyItem,
     });
-
+    const {addToast} = useToast();
     const onProductLinkChange = () => {
         trigger("product.link").then((result) => {
             setProductLinkRequired(!result);
@@ -57,6 +59,7 @@ export default function EditItemComponent(
             })
             .catch((error) => {
                 console.error("Error fetching data:", error);
+                addToast(t("toast_item_load_failed"), ToastVariant.ERROR);
             });
     }
     const removeItem = () => {
@@ -64,9 +67,11 @@ export default function EditItemComponent(
             .delete(`${config.item.url}/${itemId.privateId}`)
             .then(() => {
                 removeItemId(itemId);
+                addToast(t("toast_item_deletion_successful"), ToastVariant.SUCCESS);
             })
             .catch((error) => {
                 console.error("Error deleting item:", error);
+                addToast(t("toast_item_deletion_failed"), ToastVariant.ERROR);
             });
     };
     const saveItem: SubmitHandler<ItemRestricted> = (data) => {
@@ -74,9 +79,11 @@ export default function EditItemComponent(
             .put(`${config.item.url}/${itemId.privateId}`, data)
             .then(() => {
                 console.log("ItemRestricted saved successfully");
+                addToast(t("toast_item_save_successful"), ToastVariant.SUCCESS);
             })
             .catch((error) => {
                 console.error("Error saving item:", error);
+                addToast(t("toast_item_save_failed"), ToastVariant.ERROR);
             });
     };
 

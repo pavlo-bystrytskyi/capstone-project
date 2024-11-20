@@ -11,9 +11,12 @@ import {Button, Col, Form, Row} from "react-bootstrap";
 import Registry from "../../../type/Registry.tsx";
 import {emptyRegistry} from "../../../type/EmptyRegistry.tsx";
 import ItemContainer from "./ItemContainer.tsx";
+import useToast from "../../../context/toast/UseToast.tsx";
+import ToastVariant from "../../../context/toast/ToastVariant.tsx";
 
 export default function BaseView({config}: { readonly config: RegistryConfig }) {
     const {t} = useTranslation();
+    const {addToast} = useToast();
     const params = useParams();
     const id: string | undefined = params.id;
     const navigate = useNavigate();
@@ -21,8 +24,9 @@ export default function BaseView({config}: { readonly config: RegistryConfig }) 
     const loadWishlist = function () {
         axios.get<Registry>(`${config.wishlist.url}/${id}`).then(
             (response) => setWishlist(response.data)
-        ).catch(error => {
+        ).catch((error) => {
             console.error('Error fetching data:', error);
+            addToast(t("toast_registry_load_failed"), ToastVariant.ERROR);
         });
     }
     useEffect(
