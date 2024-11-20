@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import LoginModal from "./LoginModal.tsx";
-import useAuth from "../context/UserAuth.tsx";
+import useAuth from "../context/auth/UserAuth.tsx";
 import {useLocation, useNavigate} from "react-router-dom";
 
 export default function ProtectedComponent(

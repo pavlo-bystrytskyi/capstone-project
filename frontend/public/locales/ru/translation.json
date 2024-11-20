@@ -72,5 +72,14 @@
   "modal_restricted_title": "Доступ запрещён",
   "modal_restricted_body": "Пожалуйста, войдите, чтобы увидеть содержимое",
   "modal_restricted_button": "Закрыть",
-  "hint_restricted": "Войдите, чтобы использовать"
+  "hint_restricted": "Войдите, чтобы использовать",
+  "toast_user_load_failed": "Не удалось загрузить данные пользователя",
+  "toast_item_save_successful": "Товар успешно сохранён",
+  "toast_item_save_failed": "Не удалось сохранить товар",
+  "toast_item_load_failed": "Не удалось загрузить товар",
+  "toast_registry_load_failed": "Не удалось загрузить список",
+  "toast_item_deletion_successful": "Товар успешно удалён",
+  "toast_item_deletion_failed": "Не удалось удалить товар",
+  "toast_registry_save_failed": "Не удалось сохранить список",
+  "toast_registry_save_successful": "Список успешно сохранён"
 }

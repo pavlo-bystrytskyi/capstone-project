@@ -6,6 +6,8 @@ import {ChangeEvent, useEffect, useState} from "react";
 import axios from "axios";
 import ItemIdContainer from "../../../../type/ItemIdContainer.tsx";
 import {Col, Form, Row} from "react-bootstrap";
+import useToast from "../../../../context/toast/UseToast.tsx";
+import ToastVariant from "../../../../context/toast/ToastVariant.tsx";
 
 export default function ItemComponent(
     {
@@ -17,15 +19,21 @@ export default function ItemComponent(
     }
 ) {
     const {t} = useTranslation();
+    const {addToast} = useToast();
     const editStatusAllowed: boolean = config.access.item.status.edit.allowed;
     const [item, setItem] = useState<ItemRestricted>()
     const loadItem = function () {
         axios.get<ItemRestricted>(
             `${config.item.url}/${itemIdContainer[config.item.idField as keyof ItemIdContainer]}`
         ).then(
-            result => setItem(result.data)
+            (result) => {
+                setItem(result.data);
+            }
         ).catch(
-            error => console.error('Error fetching data:', error)
+            (error) => {
+                console.error('Error fetching data:', error);
+                addToast(t("toast_item_load_failed"), ToastVariant.ERROR);
+            }
         );
     }
     useEffect(
@@ -36,10 +44,16 @@ export default function ItemComponent(
         const {value} = event.target;
         item.status = value as ItemStatus;
         axios.put<ItemRestricted>(`${config.item.url}/${item[config.item.idField as keyof ItemRestricted]}`, item).then(
-            (response) => setItem(response.data)
-        ).catch(error => {
-            console.error('Error fetching data:', error);
-        });
+            (response) => {
+                setItem(response.data);
+                addToast(t("toast_item_save_successful"), ToastVariant.SUCCESS);
+            }
+        ).catch(
+            (error) => {
+                console.error('Error fetching data:', error);
+                addToast(t("toast_item_save_failed"), ToastVariant.ERROR);
+            }
+        );
     };
 
     return (

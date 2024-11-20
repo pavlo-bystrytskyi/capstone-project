@@ -1,4 +1,4 @@
-import User from "../type/User.tsx";
+import User from "../../type/User.tsx";
 
 export default interface AuthContextType {
     user: User;

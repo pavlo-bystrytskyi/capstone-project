@@ -1,7 +1,7 @@
 import {useTranslation} from "react-i18next";
 import {Button, Container, Image, Nav, Navbar} from "react-bootstrap";
 import SelectLanguage from "./SelectLanguage.tsx";
-import useAuth from "../../context/UserAuth.tsx";
+import useAuth from "../../context/auth/UserAuth.tsx";
 
 export default function Header() {
     const {t} = useTranslation();

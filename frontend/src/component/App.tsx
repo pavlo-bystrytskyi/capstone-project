@@ -19,7 +19,8 @@ import EditUser from "./App/Edit/EditUser.tsx";
 import ViewList from "./App/View/ViewList.tsx";
 import {Container} from "react-bootstrap";
 import Home from "./App/Home.tsx";
-import AuthProvider from "../context/AuthProvider.tsx";
+import AuthProvider from "../context/auth/AuthProvider.tsx";
+import ToastProvider from "../context/toast/ToastProvider.tsx";
 
 function App() {
     const navigate = useNavigate();
@@ -36,37 +37,38 @@ function App() {
         navigate("/success-user");
     }
 
-
     useEffect(() => {
         if (registryTypeCode && registryTypeCode === RegistryTypeCode.GUEST) navigate("/new-guest");
         if (registryTypeCode && registryTypeCode === RegistryTypeCode.CUSTOMER) navigate("/new-user");
     }, [registryTypeCode]);
 
     return (
-        <AuthProvider>
-            <Header/>
-            <Container
-                fluid
-                className="d-flex justify-content-center mt-5"
-                style={{overflowY: 'visible'}}
-            >
-                <Routes>
-                    <Route path="/" element={<Home/>}/>
-                    <Route path="/select-type"
-                           element={<SelectType types={registryTypes} setRegistryType={setRegistryTypeCode}/>}/>
-                    <Route path="/new-guest" element={<CreateGuest onSuccess={redirectToSuccessGuest}/>}/>
-                    <Route path="/new-user" element={<CreateUser onSuccess={redirectToSuccessUser}/>}/>
-                    <Route path="/edit-guest/:id" element={<EditGuest onSuccess={redirectToSuccessGuest}/>}/>
-                    <Route path="/edit-user/:id" element={<EditUser onSuccess={redirectToSuccessUser}/>}/>
-                    <Route path="/success-guest" element={<GuestSuccess data={registryIdData}/>}/>
-                    <Route path="/success-user" element={<UserSuccess data={registryIdData}/>}/>
-                    <Route path="/show-public/:id" element={<ViewPublic/>}/>
-                    <Route path="/show-private/:id" element={<ViewPrivate/>}/>
-                    <Route path="/show-user/:id" element={<ViewUser/>}/>
-                    <Route path="/show-all" element={<ViewList/>}/>
-                </Routes>
-            </Container>
-        </AuthProvider>
+        <ToastProvider>
+            <AuthProvider>
+                <Header/>
+                <Container
+                    fluid
+                    className="d-flex justify-content-center mt-5"
+                    style={{overflowY: 'visible'}}
+                >
+                    <Routes>
+                        <Route path="/" element={<Home/>}/>
+                        <Route path="/select-type"
+                               element={<SelectType types={registryTypes} setRegistryType={setRegistryTypeCode}/>}/>
+                        <Route path="/new-guest" element={<CreateGuest onSuccess={redirectToSuccessGuest}/>}/>
+                        <Route path="/new-user" element={<CreateUser onSuccess={redirectToSuccessUser}/>}/>
+                        <Route path="/edit-guest/:id" element={<EditGuest onSuccess={redirectToSuccessGuest}/>}/>
+                        <Route path="/edit-user/:id" element={<EditUser onSuccess={redirectToSuccessUser}/>}/>
+                        <Route path="/success-guest" element={<GuestSuccess data={registryIdData}/>}/>
+                        <Route path="/success-user" element={<UserSuccess data={registryIdData}/>}/>
+                        <Route path="/show-public/:id" element={<ViewPublic/>}/>
+                        <Route path="/show-private/:id" element={<ViewPrivate/>}/>
+                        <Route path="/show-user/:id" element={<ViewUser/>}/>
+                        <Route path="/show-all" element={<ViewList/>}/>
+                    </Routes>
+                </Container>
+            </AuthProvider>
+        </ToastProvider>
     )
 }
 

@@ -4,11 +4,14 @@ import Registry from "../../../type/Registry.tsx";
 import axios from "axios";
 import ListElement from "../ViewList/ListElement.tsx";
 import {Col, Row} from "react-bootstrap";
-import useAuth from "../../../context/UserAuth.tsx";
+import useAuth from "../../../context/auth/UserAuth.tsx";
 import ProtectedComponent from "../../ProtectedComponent.tsx";
+import ToastVariant from "../../../context/toast/ToastVariant.tsx";
+import useToast from "../../../context/toast/UseToast.tsx";
 
 export default function ViewList() {
     const {t} = useTranslation();
+    const {addToast} = useToast();
     const [registryList, setRegistryList] = useState<Registry[]>([]);
     const {user} = useAuth();
     const loadRegistryList = function () {
@@ -18,6 +21,7 @@ export default function ViewList() {
             )
             .catch(error => {
                 console.error('Error fetching data:', error);
+                addToast(t("toast_registry_load_failed"), ToastVariant.ERROR);
             });
     }
     useEffect(loadRegistryList, [user]);

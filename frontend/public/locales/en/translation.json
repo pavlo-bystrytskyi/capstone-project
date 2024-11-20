@@ -72,5 +72,14 @@
   "modal_restricted_title": "Access denied",
   "modal_restricted_body": "Please log in to see the content",
   "modal_restricted_button": "Close",
-  "hint_restricted": "Please log in to use"
+  "hint_restricted": "Please log in to use",
+  "toast_user_load_failed": "User data could not be loaded",
+  "toast_item_save_successful": "Item successfully saved",
+  "toast_item_save_failed": "Failed to save item",
+  "toast_item_load_failed": "Failed to load item",
+  "toast_registry_load_failed": "Failed to load registry",
+  "toast_item_deletion_successful": "Item successfully deleted",
+  "toast_item_deletion_failed": "Failed to delete item",
+  "toast_registry_save_failed": "Failed to save registry",
+  "toast_registry_save_successful": "Registry successfully saved"
 }
