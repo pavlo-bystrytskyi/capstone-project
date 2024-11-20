@@ -68,5 +68,9 @@
   "item_quantity_positive": "Количество товара должно быть положительным",
   "item_quantity_integer": "Количество товара должно быть целым числом",
   "item_status_invalid": "Статус товара недействителен",
-  "item_status_required": "Статус товара обязателен"
+  "item_status_required": "Статус товара обязателен",
+  "modal_restricted_title": "Доступ запрещён",
+  "modal_restricted_body": "Пожалуйста, войдите, чтобы увидеть содержимое",
+  "modal_restricted_button": "Закрыть",
+  "hint_restricted": "Войдите, чтобы использовать"
 }

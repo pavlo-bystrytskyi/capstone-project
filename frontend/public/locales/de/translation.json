@@ -68,5 +68,9 @@
   "item_quantity_positive": "Produktanzahl muss eine positive Zahl sein",
   "item_quantity_integer": "Produktanzahl muss eine ganze Zahl sein",
   "item_status_invalid": "Produktstatus ist ungültig",
-  "item_status_required": "Produktstatus ist erforderlich"
+  "item_status_required": "Produktstatus ist erforderlich",
+  "modal_restricted_title": "Zugriff verweigert",
+  "modal_restricted_body": "Bitte melden Sie sich an, um den Inhalt zu sehen",
+  "modal_restricted_button": "Schließen",
+  "hint_restricted": "Bitte melden Sie sich an, um zu benutzen"
 }

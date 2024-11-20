@@ -68,5 +68,9 @@
   "item_quantity_positive": "The item quantity must be a positive number",
   "item_quantity_integer": "The item quantity must be an integer",
   "item_status_invalid": "The item status is invalid",
-  "item_status_required": "The item status is required"
+  "item_status_required": "The item status is required",
+  "modal_restricted_title": "Access denied",
+  "modal_restricted_body": "Please log in to see the content",
+  "modal_restricted_button": "Close",
+  "hint_restricted": "Please log in to use"
 }
