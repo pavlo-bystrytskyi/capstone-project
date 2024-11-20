@@ -1,6 +1,7 @@
 type RegistryType = {
     code: RegistryTypeCode,
-    description: string
+    description: string,
+    restricted: boolean
 }
 
 export enum RegistryTypeCode {
@@ -11,11 +12,13 @@ export enum RegistryTypeCode {
 export const registryTypes: RegistryType[] = [
     {
         code: RegistryTypeCode.GUEST,
-        description: "create_as_guest"
+        description: "create_as_guest",
+        restricted: false
     },
     {
         code: RegistryTypeCode.CUSTOMER,
-        description: "create_as_customer"
+        description: "create_as_customer",
+        restricted: true
     }
 ]
 

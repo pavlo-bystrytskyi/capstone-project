@@ -17,15 +17,12 @@ import UserSuccess from "./App/RegistrySuccess/UserSuccess.tsx";
 import ViewUser from "./App/View/ViewUser.tsx";
 import EditUser from "./App/Edit/EditUser.tsx";
 import ViewList from "./App/View/ViewList.tsx";
-import axios from "axios";
-import User from "../type/User.tsx";
-import emptyUser from "../type/EmptyUser.tsx";
 import {Container} from "react-bootstrap";
 import Home from "./App/Home.tsx";
+import AuthProvider from "../context/AuthProvider.tsx";
 
 function App() {
     const navigate = useNavigate();
-    const [user, setUser] = useState<User>(emptyUser);
     const [registryTypeCode, setRegistryTypeCode] = useState<RegistryTypeCode>();
     const [registryIdData, setRegistryIdData] = useState<RegistryIdData>()
 
@@ -39,28 +36,15 @@ function App() {
         navigate("/success-user");
     }
 
-    const loadUser = () => {
-        axios.get<User>('/api/auth/me')
-            .then(response => {
-                setUser(response.data);
-            })
-            .catch(() => {
-                setUser(emptyUser);
-            })
-    }
 
     useEffect(() => {
         if (registryTypeCode && registryTypeCode === RegistryTypeCode.GUEST) navigate("/new-guest");
         if (registryTypeCode && registryTypeCode === RegistryTypeCode.CUSTOMER) navigate("/new-user");
     }, [registryTypeCode]);
 
-    useEffect(() => {
-        loadUser()
-    }, []);
-
     return (
-        <>
-            <Header user={user}/>
+        <AuthProvider>
+            <Header/>
             <Container
                 fluid
                 className="d-flex justify-content-center mt-5"
@@ -79,10 +63,10 @@ function App() {
                     <Route path="/show-public/:id" element={<ViewPublic/>}/>
                     <Route path="/show-private/:id" element={<ViewPrivate/>}/>
                     <Route path="/show-user/:id" element={<ViewUser/>}/>
-                    <Route path="/show-all" element={<ViewList user={user}/>}/>
+                    <Route path="/show-all" element={<ViewList/>}/>
                 </Routes>
             </Container>
-        </>
+        </AuthProvider>
     )
 }
 

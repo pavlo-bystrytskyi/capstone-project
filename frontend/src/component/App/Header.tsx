@@ -1,22 +1,12 @@
 import {useTranslation} from "react-i18next";
-import User from "../../type/User.tsx";
 import {Button, Container, Image, Nav, Navbar} from "react-bootstrap";
 import SelectLanguage from "./SelectLanguage.tsx";
+import useAuth from "../../context/UserAuth.tsx";
 
-export default function Header({user}: { user: User }) {
+export default function Header() {
     const {t} = useTranslation();
-
+    const {user, login, logout} = useAuth();
     const isLoggedIn = !!user.email;
-
-    function login() {
-        const host = window.location.host === 'localhost:5173' ? 'http://localhost:8080' : window.location.origin
-        window.open(host + '/oauth2/authorization/google', '_self')
-    }
-
-    const logout = () => {
-        const host = window.location.host === 'localhost:5173' ? 'http://localhost:8080' : window.location.origin
-        window.open(host + "/api/auth/logout", '_self');
-    };
     const handleButtonClick = () => {
         if (isLoggedIn) {
             logout();

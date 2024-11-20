@@ -1,16 +1,12 @@
 .square-card {
     aspect-ratio: 1;
     display: inline-flex;
-    background-color: #e9ecef;
-    border: 1px solid #ddd;
     border-radius: 4px;
     transition: background-color 0.3s;
     cursor: pointer;
-    color: #007bff;
     font-weight: bold;
 }
 
 .square-card:hover {
-    background-color: #d1e7dd;
     transform: scale(1.05);
 }
