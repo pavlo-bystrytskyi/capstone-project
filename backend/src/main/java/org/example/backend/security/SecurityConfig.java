@@ -30,6 +30,7 @@ public class SecurityConfig {
                         a -> a
                                 .requestMatchers("/api/guest/**").permitAll()
                                 .requestMatchers("/api/auth/me").permitAll()
+                                .requestMatchers("/api/extraction/**").permitAll()
                                 .requestMatchers("/api/**").authenticated()
                                 .anyRequest().permitAll()
                 )
