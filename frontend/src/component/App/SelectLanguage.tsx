@@ -1,21 +1,37 @@
-import "../.././style/App/SelectLanguage.css";
 import LanguageSelector from "./SelectLanguage/LanguageSelector.tsx";
-import {SupportedLanguage, SupportedLanguageCode} from "../../type/SupportedLanguage.tsx";
+import {SupportedLanguageCode, supportedLanguages} from "../../type/SupportedLanguage.tsx";
+import { Dropdown, DropdownButton, ButtonGroup } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 
-export default function SelectLanguage({languages, setLanguage}: {
-    readonly languages: SupportedLanguage[],
-    readonly setLanguage: (code: SupportedLanguageCode) => void
-}) {
-    const languageSelectors = languages.map(
-        (language) => <button className="select-language-element" key={language.code}
-                          onClick={() => setLanguage(language.code)}>
-            <LanguageSelector language={language}/>
-        </button>
-    )
+export default function SelectLanguage() {
+    const { t, i18n } = useTranslation();
 
-    return <div className="select-language">
-        <ul className="select-language-list">
+    const setLanguage = (languageCode: SupportedLanguageCode) => {
+        if (languageCode !== i18n.resolvedLanguage && Object.values(SupportedLanguageCode).includes(languageCode)) {
+            i18n.changeLanguage(languageCode);
+        }
+    };
+
+    const languageSelectors = supportedLanguages.map((language) => (
+        <Dropdown.Item
+            key={language.code}
+            onClick={() => setLanguage(language.code)}
+            className="d-flex align-items-center"
+            style={{ width: 'auto' }}
+        >
+            <LanguageSelector language={language} />
+        </Dropdown.Item>
+    ));
+
+    return (
+        <DropdownButton
+            as={ButtonGroup}
+            id="dropdown-custom-components"
+            variant="outline-primary"
+            title={<span style={{ fontSize: '18px' }}>🌐 {t("change_language")}</span>} // Символ для обозначения языка
+            className="select-language ms-3"
+        >
             {languageSelectors}
-        </ul>
-    </div>
+        </DropdownButton>
+    );
 }
