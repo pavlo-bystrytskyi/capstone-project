@@ -7,19 +7,22 @@ import ItemIdContainer from "../../../../../type/ItemIdContainer";
 import RegistryConfig from "../../../../../type/RegistryConfig";
 import ItemRestricted from "../../../../../type/ItemRestricted.tsx";
 import itemFormSchema from "../../../../../schema/ItemFormSchema.tsx";
-import {Button, Col, Form, Row} from "react-bootstrap";
+import {Button, Col, Form, Row, Spinner} from "react-bootstrap";
 import ItemStatus from "../../../../../type/ItemStatus.tsx";
 import {useEffect, useRef, useState} from "react";
 import useToast from "../../../../../context/toast/UseToast.tsx";
 import ToastVariant from "../../../../../context/toast/ToastVariant.tsx";
+import Product from "../../../../../type/Product.tsx";
 
 export default function NewItemComponent(
     {
         config,
-        addItemId
+        addItemId,
+        isAiProcessingEnabled
     }: {
         readonly config: RegistryConfig,
         readonly addItemId: (itemId: ItemIdContainer) => void,
+        readonly isAiProcessingEnabled: boolean
     }
 ) {
     const {t} = useTranslation();
@@ -28,6 +31,7 @@ export default function NewItemComponent(
         register,
         handleSubmit,
         reset,
+        setValue,
         trigger,
         watch,
         formState: {errors},
@@ -35,13 +39,33 @@ export default function NewItemComponent(
         resolver: yupResolver(itemFormSchema),
         defaultValues: emptyItem,
     });
-
     const {addToast} = useToast();
+    const [showLoader, setShowLoader] = useState(false);
     const onProductLinkChange = () => {
         if (!linkValue && !isMounted.current) return;
         isMounted.current = true;
         trigger("product.link").then((result) => {
             setProductLinkRequired(!result);
+            if (result && isAiProcessingEnabled) {
+                setShowLoader(true);
+                const request = {
+                    url: linkValue
+                }
+                axios.post<Product>(
+                    "/api/extraction", request
+                ).then(
+                    result => {
+                        console.log(result.data);
+                        setValue("product", {...result.data, link: linkValue});
+                        addToast(t("toast_ai_processing_success"), ToastVariant.SUCCESS);
+                        setShowLoader(false);
+                    }
+                ).catch((error) => {
+                    console.error('Error fetching data:', error);
+                    addToast(t("toast_ai_processing_failed"), ToastVariant.INFO);
+                    setShowLoader(false);
+                });
+            }
         }).catch(() => {
             setProductLinkRequired(true);
         });
@@ -71,7 +95,7 @@ export default function NewItemComponent(
     useEffect(onProductLinkChange, [linkValue, errors.product?.link?.message]);
 
     return (
-        <Form className="new-item-form" onSubmit={handleSubmit(onSubmit)}>
+        <Form className="new-item-form" onSubmit={handleSubmit(onSubmit)} style={{position: 'relative'}}>
             <Row className="mb-3 align-items-center">
                 <Col sm={4} className="text-end">
                     <Form.Label>{t("item_link")}</Form.Label>
@@ -110,7 +134,7 @@ export default function NewItemComponent(
                 <Col sm={8}>
                     <Form.Control
                         as="textarea"
-                        rows={3}
+                        rows={10}
                         {...register("product.description")}
                         isInvalid={!!errors.product?.description?.message}
                         disabled={productLinkRequired}
@@ -163,6 +187,12 @@ export default function NewItemComponent(
                     </Button>
                 </Col>
             </Row>
+            {showLoader && (
+                <div
+                    className="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-light bg-opacity-50">
+                    <Spinner animation="border"/>
+                </div>
+            )}
         </Form>
     );
 }

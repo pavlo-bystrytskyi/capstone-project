@@ -81,5 +81,8 @@
   "toast_item_deletion_successful": "Artikel erfolgreich gelöscht",
   "toast_item_deletion_failed": "Fehler beim Löschen des Artikels",
   "toast_registry_save_failed": "Fehler beim Speichern der Geschenkliste",
-  "toast_registry_save_successful": "Geschenkliste erfolgreich gespeichert"
+  "toast_registry_save_successful": "Geschenkliste erfolgreich gespeichert",
+  "toast_ai_processing_success": "KI-Verarbeitung erfolgreich abgeschlossen",
+  "toast_ai_processing_failed": "KI-Verarbeitung fehlgeschlagen",
+  "enable_ai_hint": "KI-Linkverarbeitung aktivieren (kann langsam sein)"
 }

@@ -16,10 +16,10 @@ export const supportedLanguages: SupportedLanguage[] = [
     },
     {
         code: SupportedLanguageCode.DE,
-        description: "German"
+        description: "Deutsch"
     },
     {
         code: SupportedLanguageCode.RU,
-        description: "Russian"
+        description: "Русский"
     }
 ];
