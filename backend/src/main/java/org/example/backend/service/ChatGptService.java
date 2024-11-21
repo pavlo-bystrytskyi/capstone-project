@@ -41,12 +41,12 @@ public class ChatGptService {
 
     public String parsePage(String content) {
         String prompt = PROMPT_TEMPLATE.formatted(content);
+        ChatGptResponse response = complete(prompt);
+        if (response == null || response.choices() == null || response.choices().isEmpty()) {
+            throw new IllegalStateException();
+        }
 
-        return complete(prompt)
-                .choices()
-                .getFirst()
-                .message()
-                .content();
+        return response.choices().getFirst().message().content();
     }
 
     private ChatGptResponse complete(
