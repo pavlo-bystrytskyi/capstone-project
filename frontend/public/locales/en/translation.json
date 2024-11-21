@@ -81,5 +81,8 @@
   "toast_item_deletion_successful": "Item successfully deleted",
   "toast_item_deletion_failed": "Failed to delete item",
   "toast_registry_save_failed": "Failed to save registry",
-  "toast_registry_save_successful": "Registry successfully saved"
+  "toast_registry_save_successful": "Registry successfully saved",
+  "toast_ai_processing_success": "Обработка успешно завершена",
+  "toast_ai_processing_failed": "Обработка завершилась неудачей",
+  "enable_ai_hint": "Включить обработку ссылок с использованием ИИ (возможны задержки)"
 }

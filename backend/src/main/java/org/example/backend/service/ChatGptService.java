@@ -24,11 +24,16 @@ public class ChatGptService {
             """;
     public static final String REQUEST_URL = "https://api.openai.com/v1/chat/completions";
     public static final String REQUEST_ROLE = "user";
-    public static final String REQUEST_MODEL = "gpt-4o-mini";
     public static final String REQUEST_TYPE = "json_object";
     public static final String REQUEST_AUTHORIZATION_HEADER = "Bearer %s";
 
     private final RestClient restClient;
+
+    @Value("${chat.gpt.api.limit}")
+    private int chatGptCharLimit;
+
+    @Value("${chat.gpt.api.model}")
+    private String chatGptModel;
 
     public ChatGptService(
             RestClient.Builder restClientBuilder,
@@ -41,6 +46,7 @@ public class ChatGptService {
 
     public String parsePage(String content) {
         String prompt = PROMPT_TEMPLATE.formatted(content);
+        prompt = prompt.length() > chatGptCharLimit ? prompt.substring(0, chatGptCharLimit) : prompt;
         ChatGptResponse response = complete(prompt);
         if (response == null || response.choices() == null || response.choices().isEmpty()) {
             throw new IllegalStateException();
@@ -53,7 +59,7 @@ public class ChatGptService {
             String prompt
     ) {
         ChatGptRequestMessage message = new ChatGptRequestMessage(REQUEST_ROLE, prompt);
-        ChatGptRequest request = new ChatGptRequest(REQUEST_MODEL, List.of(message), new ChatGptResponseFormat(REQUEST_TYPE));
+        ChatGptRequest request = new ChatGptRequest(chatGptModel, List.of(message), new ChatGptResponseFormat(REQUEST_TYPE));
 
         RestClient.ResponseSpec response = restClient
                 .post()

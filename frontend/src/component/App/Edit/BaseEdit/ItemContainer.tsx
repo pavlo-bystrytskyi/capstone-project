@@ -9,11 +9,13 @@ export default function ItemContainer(
     {
         config,
         itemIdList,
-        setItemIdList
+        setItemIdList,
+        isAiProcessingEnabled
     }: {
         readonly config: RegistryConfig,
         readonly itemIdList: ItemIdContainer[],
-        readonly setItemIdList: (itemIdList: ItemIdContainer[]) => void
+        readonly setItemIdList: (itemIdList: ItemIdContainer[]) => void,
+        readonly isAiProcessingEnabled: boolean
     }
 ) {
     const {t} = useTranslation();
@@ -36,7 +38,7 @@ export default function ItemContainer(
                 <Card.Body>
                     <Row className="align-items-center">
                         <Col sm={4}>
-                            <NewItemComponent config={config} addItemId={addItemId}/>
+                            <NewItemComponent config={config} addItemId={addItemId} isAiProcessingEnabled={isAiProcessingEnabled}/>
                         </Col>
                         {itemIdList.length > 0 ? (
                             itemIdList.map(
@@ -46,6 +48,7 @@ export default function ItemContainer(
                                     config={config}
                                     itemId={itemId}
                                     removeItemId={removeItemId}
+                                    isAiProcessingEnabled={isAiProcessingEnabled}
                                 />
                             </Col>
                                 )

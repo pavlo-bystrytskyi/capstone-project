@@ -81,5 +81,8 @@
   "toast_item_deletion_successful": "Товар успешно удалён",
   "toast_item_deletion_failed": "Не удалось удалить товар",
   "toast_registry_save_failed": "Не удалось сохранить список",
-  "toast_registry_save_successful": "Список успешно сохранён"
+  "toast_registry_save_successful": "Список успешно сохранён",
+  "toast_ai_processing_success": "Обработка успешно завершена",
+  "toast_ai_processing_failed": "Обработка завершилась неудачей",
+  "enable_ai_hint": "Включить обработку ссылок с использованием ИИ (возможны задержки)"
 }

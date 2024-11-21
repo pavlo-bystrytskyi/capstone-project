@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import axios from "axios";
 import {useTranslation} from "react-i18next";
 import {SubmitHandler, useForm} from "react-hook-form";
@@ -9,19 +9,22 @@ import RegistryConfig from "../../../../../type/RegistryConfig.tsx";
 import {emptyItem} from "../../../../../type/EmptyItem.tsx";
 import ItemRestricted from "../../../../../type/ItemRestricted.tsx";
 import itemFormSchema from "../../../../../schema/ItemFormSchema.tsx";
-import {Button, Col, Form, Row} from "react-bootstrap";
+import {Button, Col, Form, Row, Spinner} from "react-bootstrap";
 import ToastVariant from "../../../../../context/toast/ToastVariant.tsx";
 import useToast from "../../../../../context/toast/UseToast.tsx";
+import Product from "../../../../../type/Product.tsx";
 
 export default function EditItemComponent(
     {
         config,
         itemId,
         removeItemId,
+        isAiProcessingEnabled
     }: {
-        readonly config: RegistryConfig;
-        readonly itemId: ItemIdContainer;
-        readonly removeItemId: (itemId: ItemIdContainer) => void;
+        readonly config: RegistryConfig,
+        readonly itemId: ItemIdContainer,
+        readonly removeItemId: (itemId: ItemIdContainer) => void,
+        readonly isAiProcessingEnabled: boolean
     }
 ) {
     const {t} = useTranslation();
@@ -38,14 +41,43 @@ export default function EditItemComponent(
         defaultValues: emptyItem,
     });
     const {addToast} = useToast();
+    const [showLoader, setShowLoader] = useState(false);
     const onProductLinkChange = () => {
+        if (!linkValue || linkValue == lastLink.current) return;
+        if (!lastLink.current) {
+            lastLink.current = linkValue;
+            setProductLinkRequired(false);
+            return;
+        }
+        lastLink.current = linkValue;
         trigger("product.link").then((result) => {
             setProductLinkRequired(!result);
+            if (result && isAiProcessingEnabled) {
+                setShowLoader(true)
+                const request = {
+                    url: linkValue
+                }
+                axios.post<Product>(
+                    "/api/extraction", request
+                ).then(
+                    result => {
+                        console.log(result.data);
+                        setValue("product", {...result.data, link: linkValue});
+                        addToast(t("toast_ai_processing_success"), ToastVariant.SUCCESS);
+                        setShowLoader(false);
+                    }
+                ).catch((error) => {
+                    console.error('Error fetching data:', error);
+                    addToast(t("toast_ai_processing_failed"), ToastVariant.INFO);
+                    setShowLoader(false);
+                });
+            }
         }).catch(() => {
             setProductLinkRequired(true);
         });
     }
     const linkValue = watch("product.link");
+    const lastLink = useRef<string>("");
 
     const loadItem = () => {
         axios
@@ -55,6 +87,7 @@ export default function EditItemComponent(
                 Object.entries(item).forEach(([key, value]) => {
                     setValue(key as keyof ItemRestricted, value);
                 });
+                setProductLinkRequired(false);
                 onProductLinkChange();
             })
             .catch((error) => {
@@ -91,7 +124,7 @@ export default function EditItemComponent(
     useEffect(onProductLinkChange, [linkValue, errors.product?.link?.message]);
 
     return (
-        <Form className="edit-item-form" onSubmit={handleSubmit(saveItem)}>
+        <Form className="edit-item-form" onSubmit={handleSubmit(saveItem)} style={{position: 'relative'}}>
             <Row className="mb-3 align-items-center">
                 <Col sm={4} className="text-end">
                     <Form.Label>{t("item_link")}</Form.Label>
@@ -130,7 +163,7 @@ export default function EditItemComponent(
                 <Col sm={8}>
                     <Form.Control
                         as="textarea"
-                        rows={3}
+                        rows={10}
                         {...register("product.description")}
                         isInvalid={!!errors.product?.description?.message}
                         disabled={productLinkRequired}
@@ -186,6 +219,12 @@ export default function EditItemComponent(
                     </Button>
                 </Col>
             </Row>
+            {showLoader && (
+                <div
+                    className="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-light bg-opacity-50">
+                    <Spinner animation="border"/>
+                </div>
+            )}
         </Form>
     );
 }

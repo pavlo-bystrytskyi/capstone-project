@@ -5,7 +5,7 @@ import RegistryConfig from "../../../../type/RegistryConfig.tsx";
 import {ChangeEvent, useEffect, useState} from "react";
 import axios from "axios";
 import ItemIdContainer from "../../../../type/ItemIdContainer.tsx";
-import {Col, Form, Row} from "react-bootstrap";
+import {Button, Col, Form, InputGroup, Row} from "react-bootstrap";
 import useToast from "../../../../context/toast/UseToast.tsx";
 import ToastVariant from "../../../../context/toast/ToastVariant.tsx";
 
@@ -56,6 +56,10 @@ export default function ItemComponent(
         );
     };
 
+    const openLink = () => {
+        window.open(item?.product.link);
+    }
+
     return (
         <Form className="edit-item-form">
             <Row className="mb-3 align-items-center">
@@ -63,11 +67,21 @@ export default function ItemComponent(
                     <Form.Label>{t("item_link")}</Form.Label>
                 </Col>
                 <Col sm={8}>
-                    <Form.Control
-                        type="text"
-                        value={item?.product.link}
-                        disabled
-                    />
+                    <InputGroup>
+                        <Form.Control
+                            type="text"
+                            value={item?.product.link}
+                            disabled
+                            className="rounded"
+                        />
+                        <Button
+                            variant="primary"
+                            className="rounded ms-2"
+                            onClick={openLink}
+                        >
+                            {t("open_link")}
+                        </Button>
+                    </InputGroup>
                 </Col>
             </Row>
             <Row className="mb-3 align-items-center">
