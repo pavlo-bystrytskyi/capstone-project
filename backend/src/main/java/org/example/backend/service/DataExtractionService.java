@@ -3,10 +3,10 @@ package org.example.backend.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.example.backend.WrapperException;
 import org.example.backend.dto.chatgpt.ParsedProductData;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.UnsatisfiedRequestParameterException;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ public class DataExtractionService {
             }
             return parsedContent;
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new WrapperException(e);
         }
     }
 

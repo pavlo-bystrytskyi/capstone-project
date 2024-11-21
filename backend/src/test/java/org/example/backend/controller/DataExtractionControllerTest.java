@@ -66,7 +66,7 @@ class DataExtractionControllerTest {
         }
     }
 
-    private void setUpChatGptMock(String response) throws Exception {
+    private void setUpChatGptMock(String response) {
         ChatGptResponse chatGptResponse = new ChatGptResponse(
                 List.of(
                         new ChatGptResponseChoice(
@@ -86,7 +86,7 @@ class DataExtractionControllerTest {
                 );
     }
 
-    private void setUpProductPageMock(String uri, String response) throws Exception {
+    private void setUpProductPageMock(String uri, String response) {
         when(
                 pageContentService.getPageContent(USER_AGENT_HEADER_VALUE, uri)
         ).thenReturn(
