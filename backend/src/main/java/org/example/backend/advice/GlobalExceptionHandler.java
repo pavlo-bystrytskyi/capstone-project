@@ -39,6 +39,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleIllegalArgumentException(IllegalArgumentException exception) {
+        log.info(exception);
+
+        return new ErrorResponse(exception.getMessage());
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNoSuchElementException(NoSuchElementException exception) {
         log.info(exception);
