@@ -1,7 +1,9 @@
 export default interface RegistryConfig {
     wishlist: {
         url: string,
-        itemIdField: string
+        itemIdField: string,
+        privateLinkTemplate: string | null,
+        publicLinkTemplate: string | null
     },
     item: {
         url: string,
