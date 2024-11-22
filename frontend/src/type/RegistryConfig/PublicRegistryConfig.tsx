@@ -3,7 +3,9 @@ import RegistryConfig from "../RegistryConfig.tsx";
 const publicRegistryConfig: RegistryConfig = {
     wishlist: {
         url: "/api/guest/wishlist/public",
-        itemIdField: "publicItemIds"
+        itemIdField: "publicItemIds",
+        publicLinkTemplate: null,
+        privateLinkTemplate: null,
     },
     item: {
         url: "/api/guest/item/public",

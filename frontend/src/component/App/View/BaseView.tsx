@@ -7,7 +7,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import RegistryConfig from "../../../type/RegistryConfig.tsx";
 import registryFormSchema from "../../../schema/RegistryFormSchema.tsx";
 import RegistryRestricted from "../../../type/RegistryRestricted.tsx";
-import {Button, Col, Form, Row} from "react-bootstrap";
+import {Button, Col, Form, InputGroup, Row} from "react-bootstrap";
 import Registry from "../../../type/Registry.tsx";
 import {emptyRegistry} from "../../../type/EmptyRegistry.tsx";
 import ItemContainer from "./ItemContainer.tsx";
@@ -21,9 +21,15 @@ export default function BaseView({config}: { readonly config: RegistryConfig }) 
     const id: string | undefined = params.id;
     const navigate = useNavigate();
     const [wishlist, setWishlist] = useState<Registry>(emptyRegistry);
+    const [publicLink, setPublicLink] = useState<string>("");
+    const [privateLink, setPrivateLink] = useState<string>("");
     const loadWishlist = function () {
         axios.get<Registry>(`${config.wishlist.url}/${id}`).then(
-            (response) => setWishlist(response.data)
+            (response) => {
+                setWishlist(response.data);
+                setPrivateLink(response.data.privateId ? config.wishlist.privateLinkTemplate + response.data.privateId : "");
+                setPublicLink(response.data.publicId ? config.wishlist.publicLinkTemplate + response.data.publicId : "");
+            }
         ).catch((error) => {
             console.error('Error fetching data:', error);
             addToast(t("toast_registry_load_failed"), ToastVariant.ERROR);
@@ -78,6 +84,53 @@ export default function BaseView({config}: { readonly config: RegistryConfig }) 
                                 />
                             </Col>
                         </Form.Group>
+                        {privateLink && (
+                            <Form.Group as={Row} controlId="privateId" className="mb-3 align-items-center">
+                                <Form.Label column sm={2} className="text-end">
+                                    {t("private_link")}
+                                </Form.Label>
+                                <Col sm={10}>
+                                    <InputGroup>
+                                        <Form.Control
+                                            type="text"
+                                            className="rounded"
+                                            disabled
+                                            value={privateLink}
+                                        />
+                                        <Button
+                                            variant="primary rounded ms-2"
+                                            onClick={() => navigator.clipboard.writeText(privateLink)}
+                                        >
+                                            {t("copy_link")}
+                                        </Button>
+                                    </InputGroup>
+                                </Col>
+                            </Form.Group>
+                        )}
+                        {publicLink && (
+                            <Form.Group as={Row} controlId="publicId" className="mb-3 align-items-center">
+                                <Form.Label column sm={2} className="text-end">
+                                    {t("public_link")}
+                                </Form.Label>
+                                <Col sm={10}>
+                                    <InputGroup>
+                                        <Form.Control
+                                            type="text"
+                                            className="rounded"
+                                            disabled
+                                            value={publicLink}
+                                        />
+                                        <Button
+                                            variant="primary rounded ms-2"
+                                            onClick={() => navigator.clipboard.writeText(publicLink)}
+                                        >
+                                            {t("copy_link")}
+                                        </Button>
+                                    </InputGroup>
+                                </Col>
+                            </Form.Group>
+                        )}
+
                         <Row className="mb-3">
                             <Col sm={{span: 10, offset: 2}}>
                                 {editAllowed && (
