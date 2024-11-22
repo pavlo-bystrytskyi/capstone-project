@@ -82,7 +82,7 @@
   "toast_item_deletion_failed": "Failed to delete item",
   "toast_registry_save_failed": "Failed to save registry",
   "toast_registry_save_successful": "Registry successfully saved",
-  "toast_ai_processing_success": "Обработка успешно завершена",
-  "toast_ai_processing_failed": "Обработка завершилась неудачей",
-  "enable_ai_hint": "Включить обработку ссылок с использованием ИИ (возможны задержки)"
+  "toast_ai_processing_success": "Data parsing completed successfully",
+  "toast_ai_processing_failed": "Data parsing failed",
+  "enable_ai_hint": "Enable AI data parsing (may be slow)"
 }
