@@ -20,7 +20,14 @@ public class DataExtractionService {
 
     private final PageContentService pageContentService;
 
+    private final CacheService cacheService;
+
     public ParsedProductData extract(String userAgent, String url) {
+        ParsedProductData cachedResult = cacheService.get(url);
+        if (cachedResult != null) {
+            return cachedResult;
+        }
+
         String rawContent = pageContentService.getPageContent(userAgent, url);
         String minifiedContent = minifyPageContent(rawContent);
         String rawParsedContent = chatGptService.parsePage(minifiedContent);
@@ -29,6 +36,8 @@ public class DataExtractionService {
             if (parsedContent.error() != null) {
                 throw new IllegalArgumentException(parsedContent.error());
             }
+            cacheService.save(url, parsedContent);
+
             return parsedContent;
         } catch (JsonProcessingException e) {
             throw new WrapperException(e);
