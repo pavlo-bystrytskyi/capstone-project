@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -96,6 +97,7 @@ class DataExtractionControllerTest {
 
     @Test
     @DisplayName("Extract product data - successful")
+    @DirtiesContext
     void extract_successful() throws Exception {
         ParsedProductData chatGptResponse = new ParsedProductData(PRODUCT_TITLE, PRODUCT_DESCRIPTION, null);
         String chatGptRawResponse = asJsonString(chatGptResponse);
