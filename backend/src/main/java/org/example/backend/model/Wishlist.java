@@ -21,9 +21,11 @@ public class Wishlist {
 
     private String publicId;
 
-    private Long ownerId;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "owner_id")
+    private User owner;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Item> items;
 
     private String title;

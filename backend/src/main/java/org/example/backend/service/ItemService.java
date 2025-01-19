@@ -3,16 +3,23 @@ package org.example.backend.service;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.model.Item;
+import org.example.backend.model.User;
+import org.example.backend.model.Wishlist;
 import org.example.backend.model.item.ItemStatus;
 import org.example.backend.repository.ItemRepository;
+import org.example.backend.repository.WishlistRepository;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class ItemService {
+
+    private final WishlistRepository wishlistRepository;
 
     private final ItemRepository itemRepository;
 
@@ -22,12 +29,12 @@ public class ItemService {
         return create(item, null);
     }
 
-    public Item create(@NonNull Item item, @Nullable Long userId) {
+    public Item create(@NonNull Item item, @Nullable User user) {
         return itemRepository.save(
                 item
                         .withPrivateId(idService.generateId())
                         .withPublicId(idService.generateId())
-                        .withOwnerId(userId)
+                        .withOwner(user)
         );
     }
 
@@ -35,19 +42,19 @@ public class ItemService {
         return updateByPrivateId(id, item, null);
     }
 
-    public Item updateByPrivateId(@NonNull String privateId, @NonNull Item item, @Nullable Long userId) {
-        Item existingItem = getByPrivateId(privateId, userId);
+    public Item updateByPrivateId(@NonNull String privateId, @NonNull Item item, @Nullable User user) {
+        Item existingItem = getByPrivateId(privateId, user);
         Item updatedItem = item
                 .withId(existingItem.getId())
                 .withPrivateId(existingItem.getPrivateId())
                 .withPublicId(existingItem.getPublicId())
-                .withOwnerId(userId);
+                .withOwner(user);
 
         return itemRepository.save(updatedItem);
     }
 
-    public Item getByPrivateId(@NonNull String id, @Nullable Long userId) {
-        return itemRepository.findByPrivateIdAndOwnerId(id, userId).orElseThrow();
+    public Item getByPrivateId(@NonNull String id, @Nullable User user) {
+        return itemRepository.findByPrivateIdAndOwner(id, user).orElseThrow();
     }
 
     public Item getByPrivateId(@NonNull String id) {
@@ -68,7 +75,12 @@ public class ItemService {
         deleteByPrivateId(privateId, null);
     }
 
-    public void deleteByPrivateId(@NonNull String privateId, @Nullable Long userId) {
-        itemRepository.deleteByPrivateIdAndOwnerId(privateId, userId);
+    public void deleteByPrivateId(@NonNull String privateId, @Nullable User user) {
+        Optional<Item> optional = itemRepository.findByPrivateIdAndOwner(privateId, user);
+        if (optional.isPresent()) {
+            Item item = optional.get();
+            Wishlist wishlist = wishlistRepository.findByItemId(item.getId()).orElseThrow();
+            wishlist.getItems().remove(item);
+        }
     }
 }

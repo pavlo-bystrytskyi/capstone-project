@@ -30,7 +30,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.example.backend.model.item.ItemStatus.AVAILABLE;
@@ -177,7 +176,7 @@ class GuestWishlistControllerTest {
     }
 
     private void assertWishlistRequestSaved(WishlistRequestMock expected, String id) {
-        Optional<Wishlist> optional = wishlistRepository.findByPrivateIdAndOwnerId(id, null);
+        Optional<Wishlist> optional = wishlistRepository.findByPrivateIdAndOwner(id, null);
         assertTrue(optional.isPresent());
         Wishlist actual = optional.get();
         assertEquals(expected.title(), actual.getTitle());
@@ -266,7 +265,7 @@ class GuestWishlistControllerTest {
     }
 
     private void assertPrivateWishlistResponseInTable(PrivateWishlistResponse actual, String id) {
-        Optional<Wishlist> optional = wishlistRepository.findByPrivateIdAndOwnerId(id, null);
+        Optional<Wishlist> optional = wishlistRepository.findByPrivateIdAndOwner(id, null);
         assertTrue(optional.isPresent());
         Wishlist expected = optional.get();
         assertEquals(expected.getPrivateId(), actual.privateId());
@@ -371,7 +370,7 @@ class GuestWishlistControllerTest {
     }
 
     private void assertPublicWishlistResponseInTable(PublicWishlistResponse actual, String id) {
-        Optional<Wishlist> optional = wishlistRepository.findByPrivateIdAndOwnerId(id, null);
+        Optional<Wishlist> optional = wishlistRepository.findByPrivateIdAndOwner(id, null);
         assertTrue(optional.isPresent());
         Wishlist expected = optional.get();
         assertEquals(expected.getTitle(), actual.title());
@@ -478,12 +477,12 @@ class GuestWishlistControllerTest {
     }
 
     private void assertWishlistNotInTable(Wishlist wishlist) {
-        Optional<Wishlist> optional = wishlistRepository.findByPrivateIdAndOwnerId(wishlist.getPrivateId(), null);
+        Optional<Wishlist> optional = wishlistRepository.findByPrivateIdAndOwner(wishlist.getPrivateId(), null);
         assertTrue(optional.isEmpty());
     }
 
     private void assertWishlistInTable(Wishlist expected) {
-        Optional<Wishlist> optional = wishlistRepository.findByPrivateIdAndOwnerId(expected.getPrivateId(), null);
+        Optional<Wishlist> optional = wishlistRepository.findByPrivateIdAndOwner(expected.getPrivateId(), null);
         assertTrue(optional.isPresent());
         Wishlist actual = optional.get();
         assertEquals(expected.getPublicId(), actual.getPublicId());

@@ -2,7 +2,10 @@ package org.example.backend.service;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.example.backend.model.Item;
+import org.example.backend.model.User;
 import org.example.backend.model.Wishlist;
+import org.example.backend.repository.ItemRepository;
 import org.example.backend.repository.WishlistRepository;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -15,6 +18,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WishlistService {
 
+    private final ItemRepository itemRepository;
+
     private final WishlistRepository wishlistRepository;
 
     private final IdService idService;
@@ -23,15 +28,18 @@ public class WishlistService {
         return create(wishlist, null);
     }
 
-    public Wishlist create(@NonNull Wishlist wishlist, @Nullable Long userId) {
+    public Wishlist create(@NonNull Wishlist wishlist, @Nullable User user) {
         String privateId = idService.generateId();
         String publicId = idService.generateId();
+        List<String> privateIds = wishlist.getItems().stream().map(Item::getPrivateId).toList();
+        List<Item> items = itemRepository.findAllByPrivateIds(privateIds);
 
         return wishlistRepository.save(
                 wishlist
                         .withPrivateId(privateId)
                         .withPublicId(publicId)
-                        .withOwnerId(userId)
+                        .withOwner(user)
+                        .withItems(items)
         );
     }
 
@@ -39,19 +47,23 @@ public class WishlistService {
         return updateById(id, wishlist, null);
     }
 
-    public Wishlist updateById(@NonNull String id, @NonNull Wishlist wishlist, @Nullable Long userId) {
-        Wishlist existingWishlist = getById(id, userId);
+    public Wishlist updateById(@NonNull String id, @NonNull Wishlist wishlist, @Nullable User user) {
+        Wishlist existingWishlist = getById(id, user);
+        List<String> privateIds = wishlist.getItems().stream().map(Item::getPrivateId).toList();
+        List<Item> items = itemRepository.findAllByPrivateIds(privateIds);
+
         Wishlist updatedWishlist = wishlist
                 .withId(existingWishlist.getId())
                 .withPrivateId(existingWishlist.getPrivateId())
                 .withPublicId(existingWishlist.getPublicId())
-                .withOwnerId(existingWishlist.getOwnerId());
+                .withOwner(existingWishlist.getOwner())
+                .withItems(items);
 
         return wishlistRepository.save(updatedWishlist);
     }
 
-    public Wishlist getById(@NonNull String id, @Nullable Long userId) {
-        return wishlistRepository.findByPrivateIdAndOwnerId(id, userId).orElseThrow();
+    public Wishlist getById(@NonNull String id, @Nullable User user) {
+        return wishlistRepository.findByPrivateIdAndOwner(id, user).orElseThrow();
     }
 
     public Wishlist getById(@NonNull String id) {
@@ -66,11 +78,11 @@ public class WishlistService {
         deleteById(id, null);
     }
 
-    public void deleteById(@NonNull String id, @Nullable Long userId) {
-        wishlistRepository.deleteByPrivateIdAndOwnerId(id, userId);
+    public void deleteById(@NonNull String id, @Nullable User user) {
+        wishlistRepository.deleteByPrivateIdAndOwner(id, user);
     }
 
-    public List<Wishlist> getByUserId(@NonNull Long userId) {
-        return wishlistRepository.findAllByOwnerId(userId);
+    public List<Wishlist> getByUser(@NonNull User user) {
+        return wishlistRepository.findAllByOwner(user);
     }
 }

@@ -26,34 +26,34 @@ public class UserWishlistController {
     @PostMapping
     public IdResponse create(@CurrentUser @NotNull User user, @RequestBody @Valid WishlistRequest wishlistRequest) {
         Wishlist wishlistData = wishlistRequest.toWishlist();
-        Wishlist wishlist = wishlistService.create(wishlistData, user.getId());
+        Wishlist wishlist = wishlistService.create(wishlistData, user);
 
         return IdResponse.of(wishlist.getPublicId(), wishlist.getPrivateId());
     }
 
     @GetMapping
     public List<PrivateWishlistResponse> getAll(@CurrentUser @NotNull User user) {
-        List<Wishlist> wishlistsList = wishlistService.getByUserId(user.getId());
+        List<Wishlist> wishlistsList = wishlistService.getByUser(user);
 
         return wishlistsList.stream().map(PrivateWishlistResponse::of).toList();
     }
 
     @GetMapping("/{privateId}")
     public PrivateWishlistResponse getByPrivateId(@CurrentUser @NotNull User user, @PathVariable @NotNull String privateId) {
-        Wishlist wishlist = wishlistService.getById(privateId, user.getId());
+        Wishlist wishlist = wishlistService.getById(privateId, user);
 
         return PrivateWishlistResponse.of(wishlist);
     }
 
     @DeleteMapping("/{privateId}")
     public void deleteByPrivateId(@CurrentUser @NotNull User user, @PathVariable @NotNull String privateId) {
-        wishlistService.deleteById(privateId, user.getId());
+        wishlistService.deleteById(privateId, user);
     }
 
     @PutMapping("/{privateId}")
     public IdResponse updateByPrivateId(@CurrentUser @NotNull User user, @PathVariable @NotNull String privateId, @RequestBody @Valid WishlistRequest wishlistRequest) {
         Wishlist wishlist = wishlistRequest.toWishlist();
-        Wishlist updatedWishlist = wishlistService.updateById(privateId, wishlist, user.getId());
+        Wishlist updatedWishlist = wishlistService.updateById(privateId, wishlist, user);
 
         return IdResponse.of(updatedWishlist.getPublicId(), updatedWishlist.getPrivateId());
     }

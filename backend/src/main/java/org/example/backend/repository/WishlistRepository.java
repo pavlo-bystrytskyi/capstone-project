@@ -1,6 +1,7 @@
 package org.example.backend.repository;
 
 import lombok.NonNull;
+import org.example.backend.model.User;
 import org.example.backend.model.Wishlist;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,11 +15,14 @@ public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
     @Query("SELECT w FROM Wishlist w LEFT JOIN FETCH w.items WHERE w.publicId = :publicId")
     Optional<Wishlist> findByPublicId(@NonNull String publicId);
 
-    @Query("SELECT w FROM Wishlist w LEFT JOIN FETCH w.items WHERE w.privateId = :privateId AND (:ownerId IS NULL OR w.ownerId = :ownerId)")
-    Optional<Wishlist> findByPrivateIdAndOwnerId(@NonNull String privateId, @Nullable Long ownerId);
+    @Query("SELECT w FROM Wishlist w LEFT JOIN FETCH w.items WHERE w.privateId = :privateId AND (:owner IS NULL OR w.owner = :owner)")
+    Optional<Wishlist> findByPrivateIdAndOwner(@NonNull String privateId, @Nullable User owner);
 
-    void deleteByPrivateIdAndOwnerId(@NonNull String privateId, @Nullable Long ownerId);
+    void deleteByPrivateIdAndOwner(@NonNull String privateId, @Nullable User owner);
 
-    @Query("SELECT w FROM Wishlist w LEFT JOIN FETCH w.items WHERE :ownerId IS NULL OR w.ownerId = :ownerId")
-    List<Wishlist> findAllByOwnerId(Long ownerId);
+    @Query("SELECT w FROM Wishlist w LEFT JOIN FETCH w.items WHERE w.owner = :owner")
+    List<Wishlist> findAllByOwner(User owner);
+
+    @Query("SELECT w FROM Wishlist w JOIN w.items i WHERE i.id = :itemId")
+    Optional<Wishlist> findByItemId( Long itemId);
 }
