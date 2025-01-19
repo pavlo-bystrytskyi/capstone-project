@@ -7,12 +7,14 @@ import org.example.backend.dto.chatgpt.ParsedProductData;
 import org.example.backend.dto.request.DataExtractionRequest;
 import org.example.backend.dto.response.DataExtractionResponse;
 import org.example.backend.service.DataExtractionService;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/extraction")
 @RequiredArgsConstructor
-public class DataExtractionController {
+@Validated
+public class ProductDataExtractionController {
 
     private final DataExtractionService dataExtractionService;
 

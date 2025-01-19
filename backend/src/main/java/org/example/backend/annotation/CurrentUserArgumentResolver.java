@@ -35,9 +35,9 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
     ) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof OAuth2User oAuth2User) {
-            String userId = oAuth2User.getAttributes().get("sub").toString();
+            String externalUserId = oAuth2User.getAttributes().get("sub").toString();
 
-            return userService.getUserByExternalId(userId);
+            return userService.getUserByExternalId(externalUserId);
         }
 
         return null;

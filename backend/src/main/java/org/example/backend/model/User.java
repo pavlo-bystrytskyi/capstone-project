@@ -1,16 +1,19 @@
 package org.example.backend.model;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.With;
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Builder
 @Data
 @With
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "users")
 public class User {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
 
     private String externalId;
 

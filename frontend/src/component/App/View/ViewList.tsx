@@ -38,11 +38,16 @@ export default function ViewList() {
                     </Row>
                     <Row className="private-data mb-4">
                         <Col>
-                            {registryList.map((registry: Registry) => (
-                                <Row key={registry.publicId}>
-                                    <ListElement registry={registry}/>
+                            {registryList.length > 0 ?
+                                registryList.map((registry: Registry) => (
+                                    <Row key={registry.publicId}>
+                                        <ListElement registry={registry}/>
+                                    </Row>
+                                ))
+                                : <Row>
+                                    {t("registry_list_empty")}
                                 </Row>
-                            ))}
+                            }
                         </Col>
                     </Row>
                 </Col>

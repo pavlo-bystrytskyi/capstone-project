@@ -1,26 +1,30 @@
 package org.example.backend.model;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.With;
-import org.example.backend.model.wishlist.ItemIdStorage;
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.List;
 
 @Builder
 @Data
 @With
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class Wishlist {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
+
+    private String privateId;
 
     private String publicId;
 
-    private String ownerId;
+    private Long ownerId;
 
-    private List<ItemIdStorage> itemIds;
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Item> items;
 
     private String title;
 

@@ -47,8 +47,8 @@ class UserItemControllerTest {
     private static final Double ITEM_QUANTITY_FIRST = 5.5;
     private static final Double ITEM_QUANTITY_SECOND = 10.1;
 
-    private static final String ID_FIRST = "some id 1";
-    private static final String ID_SECOND = "some id 2";
+    private static final String PRIVATE_ID_FIRST = "some id 1";
+    private static final String PRIVATE_ID_SECOND = "some id 2";
     private static final String PUBLIC_ID_FIRST = "some public id 1";
     private static final String PUBLIC_ID_SECOND = "some public id 2";
     private static final String PRODUCT_TITLE_FIRST = "some product title 1";
@@ -111,7 +111,7 @@ class UserItemControllerTest {
     @DisplayName("Create - successful")
     @DirtiesContext
     void create_successful() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_FIRST);
+        Long userId = createUser(EXTERNAL_ID_USER_FIRST);
         ProductRequestMock productRequest = new ProductRequestMock(
                 PRODUCT_TITLE_FIRST,
                 PRODUCT_DESCRIPTION_FIRST,
@@ -135,7 +135,7 @@ class UserItemControllerTest {
 
         IdResponse response = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), IdResponse.class);
 
-        Optional<Item> result = itemRepository.findById(response.privateId());
+        Optional<Item> result = itemRepository.findByPrivateId(response.privateId());
         assertTrue(result.isPresent());
         Item item = result.get();
         assertEquals(itemRequest.quantity(), item.getQuantity());
@@ -146,8 +146,8 @@ class UserItemControllerTest {
         assertOwnerIdSet(userId, response.privateId());
     }
 
-    private void assertOwnerIdSet(String userId, String itemPrivateId) {
-        Optional<Item> optional = itemRepository.findById(itemPrivateId);
+    private void assertOwnerIdSet(Long userId, String itemPrivateId) {
+        Optional<Item> optional = itemRepository.findByPrivateId(itemPrivateId);
         assertTrue(optional.isPresent());
         assertEquals(userId, optional.get().getOwnerId());
     }
@@ -203,7 +203,7 @@ class UserItemControllerTest {
         assertTrue(itemList.isEmpty());
     }
 
-    private String createUser(String externalId) {
+    private Long createUser(String externalId) {
         User user = User.builder().externalId(externalId).build();
 
         return userRepository.save(user).getId();
@@ -213,14 +213,14 @@ class UserItemControllerTest {
     @DirtiesContext
     @DisplayName("Get by id - successful")
     void getById_successful() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_FIRST);
+        Long userId = createUser(EXTERNAL_ID_USER_FIRST);
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
                 .description(PRODUCT_DESCRIPTION_FIRST)
                 .link(PRODUCT_LINK_FIRST)
                 .build();
         Item itemFirst = Item.builder()
-                .id(ID_FIRST)
+                .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
                 .ownerId(userId)
                 .status(AVAILABLE)
@@ -233,7 +233,7 @@ class UserItemControllerTest {
                 .link(PRODUCT_LINK_SECOND)
                 .build();
         Item itemSecond = Item.builder()
-                .id(ID_SECOND)
+                .privateId(PRIVATE_ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
                 .ownerId(userId)
                 .status(AVAILABLE)
@@ -248,7 +248,7 @@ class UserItemControllerTest {
         );
 
         MvcResult mvcResult = mockMvc.perform(
-                        get(URL_WITH_ID, itemFirst.getId())
+                        get(URL_WITH_ID, itemFirst.getPrivateId())
                                 .with(mockUser())
                 ).andExpect(
                         MockMvcResultMatchers.status().isOk()
@@ -256,7 +256,7 @@ class UserItemControllerTest {
                 .andReturn();
 
         String response = mvcResult.getResponse().getContentAsString();
-        assertFalse(response.contains(itemFirst.getId()));
+        assertFalse(response.contains(itemFirst.getPrivateId()));
         assertTrue(response.contains(itemFirst.getPublicId()));
         PublicItemResponse itemResponse = objectMapper.readValue(response, PublicItemResponse.class);
         assertEquals(itemFirst.getQuantity(), itemResponse.quantity());
@@ -270,14 +270,14 @@ class UserItemControllerTest {
     @DirtiesContext
     @DisplayName("Get by id - incorrect user")
     void getById_incorrectUser() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_SECOND);
+        Long userId = createUser(EXTERNAL_ID_USER_SECOND);
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
                 .description(PRODUCT_DESCRIPTION_FIRST)
                 .link(PRODUCT_LINK_FIRST)
                 .build();
         Item itemFirst = Item.builder()
-                .id(ID_FIRST)
+                .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
                 .ownerId(userId)
                 .status(AVAILABLE)
@@ -290,7 +290,7 @@ class UserItemControllerTest {
                 .link(PRODUCT_LINK_SECOND)
                 .build();
         Item itemSecond = Item.builder()
-                .id(ID_SECOND)
+                .privateId(PRIVATE_ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
                 .ownerId(userId)
                 .status(AVAILABLE)
@@ -305,7 +305,7 @@ class UserItemControllerTest {
         );
 
         mockMvc.perform(
-                        get(URL_WITH_ID, itemFirst.getId())
+                        get(URL_WITH_ID, itemFirst.getPrivateId())
                                 .with(mockUser())
                 ).andExpect(
                         MockMvcResultMatchers.status().is4xxClientError()
@@ -316,14 +316,14 @@ class UserItemControllerTest {
     @DirtiesContext
     @DisplayName("Get by id - not found")
     void getById_notFound() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_FIRST);
+        Long userId = createUser(EXTERNAL_ID_USER_FIRST);
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
                 .description(PRODUCT_DESCRIPTION_FIRST)
                 .link(PRODUCT_LINK_FIRST)
                 .build();
         Item itemFirst = Item.builder()
-                .id(ID_FIRST)
+                .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
                 .ownerId(userId)
                 .status(AVAILABLE)
@@ -337,7 +337,7 @@ class UserItemControllerTest {
         );
 
         MvcResult mvcResult = mockMvc.perform(
-                        get(URL_WITH_ID, ID_SECOND)
+                        get(URL_WITH_ID, PRIVATE_ID_SECOND)
                                 .with(mockUser())
                 ).andExpect(
                         MockMvcResultMatchers.status().is4xxClientError()
@@ -353,14 +353,14 @@ class UserItemControllerTest {
     @DirtiesContext
     @DisplayName("Delete by id - successful")
     void deleteById_successful() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_FIRST);
+        Long userId = createUser(EXTERNAL_ID_USER_FIRST);
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
                 .description(PRODUCT_DESCRIPTION_FIRST)
                 .link(PRODUCT_LINK_FIRST)
                 .build();
         Item itemFirst = Item.builder()
-                .id(ID_FIRST)
+                .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
                 .ownerId(userId)
                 .status(AVAILABLE)
@@ -373,7 +373,7 @@ class UserItemControllerTest {
                 .link(PRODUCT_LINK_SECOND)
                 .build();
         Item itemSecond = Item.builder()
-                .id(ID_SECOND)
+                .privateId(PRIVATE_ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
                 .ownerId(userId)
                 .status(AVAILABLE).product(productSecond)
@@ -387,7 +387,7 @@ class UserItemControllerTest {
         );
 
         mockMvc.perform(
-                delete(URL_WITH_ID, itemFirst.getId())
+                delete(URL_WITH_ID, itemFirst.getPrivateId())
                         .with(mockUser())
         ).andExpect(
                 MockMvcResultMatchers.status().isOk()
@@ -395,7 +395,7 @@ class UserItemControllerTest {
 
         List<Item> items = itemRepository.findAll();
         assertEquals(1, items.size());
-        Optional<Item> item = itemRepository.findById(itemFirst.getId());
+        Optional<Item> item = itemRepository.findByPrivateId(itemFirst.getPrivateId());
         assertTrue(item.isEmpty());
     }
 
@@ -403,14 +403,14 @@ class UserItemControllerTest {
     @DirtiesContext
     @DisplayName("Delete by id - not found")
     void deleteById_notFound() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_FIRST);
+        Long userId = createUser(EXTERNAL_ID_USER_FIRST);
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
                 .description(PRODUCT_DESCRIPTION_FIRST)
                 .link(PRODUCT_LINK_FIRST)
                 .build();
         Item itemFirst = Item.builder()
-                .id(ID_FIRST)
+                .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
                 .ownerId(userId)
                 .status(AVAILABLE)
@@ -424,7 +424,7 @@ class UserItemControllerTest {
         );
 
         mockMvc.perform(
-                delete(URL_WITH_ID, ID_SECOND)
+                delete(URL_WITH_ID, PRIVATE_ID_SECOND)
                         .with(mockUser())
         ).andExpect(
                 MockMvcResultMatchers.status().isOk()
@@ -432,7 +432,7 @@ class UserItemControllerTest {
 
         List<Item> items = itemRepository.findAll();
         assertEquals(1, items.size());
-        Optional<Item> item = itemRepository.findById(itemFirst.getId());
+        Optional<Item> item = itemRepository.findByPrivateId(itemFirst.getPrivateId());
         assertTrue(item.isPresent());
     }
 
@@ -440,14 +440,14 @@ class UserItemControllerTest {
     @DirtiesContext
     @DisplayName("Delete by id - incorrect user")
     void deleteById_incorrectUser() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_SECOND);
+        Long userId = createUser(EXTERNAL_ID_USER_SECOND);
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
                 .description(PRODUCT_DESCRIPTION_FIRST)
                 .link(PRODUCT_LINK_FIRST)
                 .build();
         Item itemFirst = Item.builder()
-                .id(ID_FIRST)
+                .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
                 .ownerId(userId)
                 .status(AVAILABLE)
@@ -461,7 +461,7 @@ class UserItemControllerTest {
         );
 
         mockMvc.perform(
-                delete(URL_WITH_ID, ID_SECOND)
+                delete(URL_WITH_ID, PRIVATE_ID_SECOND)
                         .with(mockUser())
         ).andExpect(
                 MockMvcResultMatchers.status().is4xxClientError()
@@ -469,7 +469,7 @@ class UserItemControllerTest {
 
         List<Item> items = itemRepository.findAll();
         assertEquals(1, items.size());
-        Optional<Item> item = itemRepository.findById(itemFirst.getId());
+        Optional<Item> item = itemRepository.findByPrivateId(itemFirst.getPrivateId());
         assertTrue(item.isPresent());
     }
 
@@ -477,14 +477,14 @@ class UserItemControllerTest {
     @DirtiesContext
     @DisplayName("Update by id - successful")
     void updateById_successful() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_FIRST);
+        Long userId = createUser(EXTERNAL_ID_USER_FIRST);
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
                 .description(PRODUCT_DESCRIPTION_FIRST)
                 .link(PRODUCT_LINK_FIRST)
                 .build();
         Item itemFirst = Item.builder()
-                .id(ID_FIRST)
+                .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
                 .ownerId(userId)
                 .status(AVAILABLE)
@@ -497,7 +497,7 @@ class UserItemControllerTest {
                 .link(PRODUCT_LINK_SECOND)
                 .build();
         Item itemSecond = Item.builder()
-                .id(ID_SECOND)
+                .privateId(PRIVATE_ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
                 .ownerId(userId)
                 .status(AVAILABLE)
@@ -520,7 +520,7 @@ class UserItemControllerTest {
                 AVAILABLE,
                 productRequest
         );
-        String updateId = itemSecond.getId();
+        String updateId = itemSecond.getPrivateId();
 
         MvcResult mvcResult = mockMvc.perform(
                         put(URL_WITH_ID, updateId)
@@ -552,7 +552,7 @@ class UserItemControllerTest {
     }
 
     private void assertItemRequestSaved(ItemRequestMock itemRequest, String updateId) {
-        Optional<Item> itemOptional = itemRepository.findById(updateId);
+        Optional<Item> itemOptional = itemRepository.findByPrivateId(updateId);
         assertTrue(itemOptional.isPresent());
         Item actualItem = itemOptional.get();
         assertEquals(itemRequest.quantity(), actualItem.getQuantity());
@@ -560,10 +560,10 @@ class UserItemControllerTest {
     }
 
     private void assertItemInTable(Item expectedItem) {
-        Optional<Item> itemOptional = itemRepository.findById(expectedItem.getId());
+        Optional<Item> itemOptional = itemRepository.findByPrivateId(expectedItem.getPrivateId());
         assertTrue(itemOptional.isPresent());
         Item actualItem = itemOptional.get();
-        assertEquals(expectedItem.getId(), actualItem.getId());
+        assertEquals(expectedItem.getPrivateId(), actualItem.getPrivateId());
         assertEquals(expectedItem.getPublicId(), actualItem.getPublicId());
         assertEquals(expectedItem.getOwnerId(), actualItem.getOwnerId());
         assertEquals(expectedItem.getQuantity(), actualItem.getQuantity());
@@ -586,14 +586,14 @@ class UserItemControllerTest {
     @DirtiesContext
     @DisplayName("Update by id - not found")
     void updateById_notFound() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_FIRST);
+        Long userId = createUser(EXTERNAL_ID_USER_FIRST);
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
                 .description(PRODUCT_DESCRIPTION_FIRST)
                 .link(PRODUCT_LINK_FIRST)
                 .build();
         Item itemFirst = Item.builder()
-                .id(ID_FIRST)
+                .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
                 .ownerId(userId)
                 .status(AVAILABLE)
@@ -617,7 +617,7 @@ class UserItemControllerTest {
         );
 
         MvcResult mvcResult = mockMvc.perform(
-                        put(URL_WITH_ID, ID_SECOND)
+                        put(URL_WITH_ID, PRIVATE_ID_SECOND)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(itemRequest))
                                 .with(mockUser())
@@ -637,14 +637,14 @@ class UserItemControllerTest {
     @DirtiesContext
     @DisplayName("Update by id - incorrect user")
     void updateById_incorrectUser() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_SECOND);
+        Long userId = createUser(EXTERNAL_ID_USER_SECOND);
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
                 .description(PRODUCT_DESCRIPTION_FIRST)
                 .link(PRODUCT_LINK_FIRST)
                 .build();
         Item itemFirst = Item.builder()
-                .id(ID_FIRST)
+                .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
                 .ownerId(userId)
                 .status(AVAILABLE)
@@ -668,7 +668,7 @@ class UserItemControllerTest {
         );
 
         MvcResult mvcResult = mockMvc.perform(
-                        put(URL_WITH_ID, ID_SECOND)
+                        put(URL_WITH_ID, PRIVATE_ID_SECOND)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(itemRequest))
                                 .with(mockUser())

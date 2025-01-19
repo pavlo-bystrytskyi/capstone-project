@@ -17,11 +17,11 @@ public record PrivateWishlistResponse(
 
     public static PrivateWishlistResponse of(Wishlist wishlist) {
         return PrivateWishlistResponse.builder()
-                .privateId(wishlist.getId())
+                .privateId(wishlist.getPrivateId())
                 .publicId(wishlist.getPublicId())
                 .title(wishlist.getTitle())
                 .description(wishlist.getDescription())
-                .itemIds(wishlist.getItemIds().stream().map(PrivateItemIdsResponse::of).toList())
+                .itemIds(wishlist.getItems().stream().map(PrivateItemIdsResponse::of).toList())
                 .build();
     }
 }
