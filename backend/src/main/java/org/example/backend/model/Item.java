@@ -20,7 +20,7 @@ public class Item {
 
     private String publicId;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "owner_id")
     private User owner;
 

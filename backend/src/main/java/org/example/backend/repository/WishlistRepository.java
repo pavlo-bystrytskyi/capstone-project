@@ -22,7 +22,4 @@ public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
 
     @Query("SELECT w FROM Wishlist w LEFT JOIN FETCH w.items WHERE w.owner = :owner")
     List<Wishlist> findAllByOwner(User owner);
-
-    @Query("SELECT w FROM Wishlist w JOIN w.items i WHERE i.id = :itemId")
-    Optional<Wishlist> findByItemId( Long itemId);
 }

@@ -14,6 +14,7 @@ import org.example.backend.model.Product;
 import org.example.backend.model.Wishlist;
 import org.example.backend.repository.ItemRepository;
 import org.example.backend.repository.WishlistRepository;
+import org.example.backend.service.WishlistService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -70,6 +71,7 @@ class GuestWishlistControllerTest {
     private static final String PRODUCT_LINK_SECOND = "https://example.com/some-product-link-2";
     private static final Double ITEM_QUANTITY_FIRST = 5.5;
     private static final Double ITEM_QUANTITY_SECOND = 10.1;
+    private static final Double ITEM_QUANTITY_THIRD = 3.3;
 
     private static final String MESSAGE_NOT_FOUND = "No value present";
 
@@ -84,6 +86,9 @@ class GuestWishlistControllerTest {
 
     @Autowired
     private WishlistRepository wishlistRepository;
+
+    @Autowired
+    private WishlistService wishlistService;
 
     static Stream<Arguments> incorrectParamDataProvider() {
         WishlistRequestMock wishlistRequest = new WishlistRequestMock(
@@ -168,11 +173,10 @@ class GuestWishlistControllerTest {
                 )
         );
 
-        List<ItemIdsRequestMock> ItemIdsRequestMockList = List.of(
+        return List.of(
                 new ItemIdsRequestMock(itemFirst.getPrivateId(), itemFirst.getPublicId()),
                 new ItemIdsRequestMock(itemSecond.getPrivateId(), itemSecond.getPublicId())
         );
-        return ItemIdsRequestMockList;
     }
 
     private void assertWishlistRequestSaved(WishlistRequestMock expected, String id) {
@@ -540,35 +544,54 @@ class GuestWishlistControllerTest {
     @DirtiesContext
     @DisplayName("Update by id - successful")
     void updateById_successful() throws Exception {
-        Wishlist wishlistFirst = Wishlist.builder()
-                .privateId(PRIVATE_ID_FIRST)
-                .publicId(PUBLIC_ID_FIRST)
-                .title(TITLE_FIRST)
-                .description(DESCRIPTION_FIRST)
-                .items(
-                        List.of(
-                                Item.builder().privateId(PRIVATE_ITEM_ID_FIRST).publicId(PUBLIC_ITEM_ID_FIRST).build(),
-                                Item.builder().privateId(PRIVATE_ITEM_ID_THIRD).publicId(PUBLIC_ITEM_ID_THIRD).build()
-                        )
-                )
+        Product productFirst = Product.builder()
+                .title(PRODUCT_TITLE_FIRST)
+                .description(PRODUCT_DESCRIPTION_FIRST)
+                .link(PRODUCT_LINK_FIRST)
                 .build();
-        Wishlist wishlistSecond = Wishlist.builder()
-                .privateId(PRIVATE_ID_SECOND)
-                .publicId(PUBLIC_ID_SECOND)
-                .title(TITLE_SECOND)
-                .description(DESCRIPTION_SECOND)
-                .items(
-                        List.of(
-                                Item.builder().privateId(PRIVATE_ITEM_ID_SECOND).publicId(PUBLIC_ITEM_ID_SECOND).build()
-                        )
-                )
+        Item itemFirst = Item.builder()
+                .privateId(PRIVATE_ITEM_ID_FIRST)
+                .publicId(PUBLIC_ITEM_ID_FIRST)
+                .status(AVAILABLE)
+                .product(productFirst)
+                .quantity(ITEM_QUANTITY_FIRST)
                 .build();
-        wishlistRepository.saveAll(
+        Product productSecond = Product.builder()
+                .title(PRODUCT_TITLE_SECOND)
+                .description(PRODUCT_DESCRIPTION_SECOND)
+                .link(PRODUCT_LINK_SECOND)
+                .build();
+        Item itemSecond = Item.builder()
+                .privateId(PRIVATE_ITEM_ID_SECOND)
+                .publicId(PUBLIC_ITEM_ID_SECOND)
+                .status(AVAILABLE)
+                .product(productSecond)
+                .quantity(ITEM_QUANTITY_SECOND)
+                .build();
+        Product productThird = Product.builder()
+                .title(PRODUCT_TITLE_SECOND)
+                .description(PRODUCT_DESCRIPTION_SECOND)
+                .link(PRODUCT_LINK_SECOND)
+                .build();
+        Item itemThird = Item.builder()
+                .privateId(PRIVATE_ITEM_ID_THIRD)
+                .publicId(PUBLIC_ITEM_ID_THIRD)
+                .status(AVAILABLE)
+                .product(productThird)
+                .quantity(ITEM_QUANTITY_THIRD)
+                .build();
+        itemRepository.saveAll(
                 List.of(
-                        wishlistFirst,
-                        wishlistSecond
+                        itemFirst,
+                        itemSecond,
+                        itemThird
                 )
         );
+
+        Wishlist wishlistFirst = createWishlist(TITLE_FIRST, DESCRIPTION_FIRST, List.of(itemFirst, itemSecond));
+        Wishlist wishlistSecond = createWishlist(TITLE_SECOND, DESCRIPTION_SECOND, List.of(itemThird));
+
+
         WishlistRequestMock wishlistRequest = new WishlistRequestMock(
                 TITLE_THIRD,
                 DESCRIPTION_THIRD,
@@ -593,6 +616,16 @@ class GuestWishlistControllerTest {
         assertWishlistTableSize(2);
         assertWishlistRequestSaved(wishlistRequest, editId);
         assertWishlistInTable(wishlistFirst);
+    }
+
+    private Wishlist createWishlist(String title, String description, List<Item> items) {
+        return wishlistService.create(
+                Wishlist.builder()
+                        .title(title)
+                        .description(description)
+                        .items(items)
+                        .build()
+        );
     }
 
     @Test

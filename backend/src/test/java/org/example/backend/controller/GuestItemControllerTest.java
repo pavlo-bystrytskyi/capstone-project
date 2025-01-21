@@ -3,15 +3,16 @@ package org.example.backend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.backend.dto.response.ErrorResponse;
 import org.example.backend.dto.response.IdResponse;
-import org.example.backend.dto.response.item.PublicItemResponse;
 import org.example.backend.dto.response.item.ProductResponse;
+import org.example.backend.dto.response.item.PublicItemResponse;
 import org.example.backend.mock.dto.ItemRequestMock;
-import org.example.backend.mock.dto.ProductRequestMock;
 import org.example.backend.mock.dto.ItemStatusRequestMock;
+import org.example.backend.mock.dto.ProductRequestMock;
 import org.example.backend.model.Item;
 import org.example.backend.model.Product;
 import org.example.backend.model.item.ItemStatus;
 import org.example.backend.repository.ItemRepository;
+import org.example.backend.util.TestDataInitializer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,6 +21,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
@@ -38,6 +40,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ComponentScan(basePackages = "org.example.backend.util")
 class GuestItemControllerTest {
 
     private static final String URL_BASE = "/api/guest/item";
@@ -68,6 +71,9 @@ class GuestItemControllerTest {
 
     @Autowired
     private ItemRepository itemRepository;
+
+    @Autowired
+    private TestDataInitializer testDataInitializer;
 
     static Stream<Arguments> incorrectParamDataProvider() {
         ProductRequestMock productRequest = new ProductRequestMock(
@@ -331,34 +337,27 @@ class GuestItemControllerTest {
     @DirtiesContext
     @DisplayName("Delete by id - successful")
     void deleteById_successful() throws Exception {
-        Product productFirst = Product.builder()
-                .title(PRODUCT_TITLE_FIRST)
-                .description(PRODUCT_DESCRIPTION_FIRST)
-                .link(PRODUCT_LINK_FIRST)
-                .build();
-        Item itemFirst = Item.builder()
-                .privateId(PRIVATE_ID_FIRST)
-                .publicId(PUBLIC_ID_FIRST)
-                .status(AVAILABLE)
-                .product(productFirst)
-                .quantity(ITEM_QUANTITY_FIRST)
-                .build();
-        Product productSecond = Product.builder()
-                .title(PRODUCT_TITLE_SECOND)
-                .description(PRODUCT_DESCRIPTION_SECOND)
-                .link(PRODUCT_LINK_SECOND)
-                .build();
-        Item itemSecond = Item.builder()
-                .privateId(PRIVATE_ID_SECOND)
-                .publicId(PUBLIC_ID_SECOND)
-                .status(AVAILABLE).product(productSecond)
-                .quantity(ITEM_QUANTITY_SECOND)
-                .build();
-        itemRepository.saveAll(
-                List.of(
-                        itemFirst,
-                        itemSecond
-                )
+        Product productFirst = testDataInitializer.createProduct(
+                PRODUCT_TITLE_FIRST,
+                PRODUCT_DESCRIPTION_FIRST,
+                PRODUCT_LINK_FIRST
+        );
+        Item itemFirst = testDataInitializer.createItem(
+                productFirst,
+                AVAILABLE,
+                ITEM_QUANTITY_FIRST,
+                null
+        );
+        Product productSecond = testDataInitializer.createProduct(
+                PRODUCT_TITLE_SECOND,
+                PRODUCT_DESCRIPTION_SECOND,
+                PRODUCT_LINK_SECOND
+        );
+        testDataInitializer.createItem(
+                productSecond,
+                AVAILABLE,
+                ITEM_QUANTITY_FIRST,
+                null
         );
 
         mockMvc.perform(

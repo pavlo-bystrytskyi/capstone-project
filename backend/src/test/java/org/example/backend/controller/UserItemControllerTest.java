@@ -11,7 +11,7 @@ import org.example.backend.model.Item;
 import org.example.backend.model.Product;
 import org.example.backend.model.User;
 import org.example.backend.repository.ItemRepository;
-import org.example.backend.repository.UserRepository;
+import org.example.backend.util.TestDataInitializer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,6 +20,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.annotation.DirtiesContext;
@@ -39,6 +40,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ComponentScan(basePackages = "org.example.backend.util")
 class UserItemControllerTest {
 
     private static final String URL_BASE = "/api/user/item";
@@ -72,7 +74,7 @@ class UserItemControllerTest {
     private ItemRepository itemRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private TestDataInitializer testDataInitializer;
 
     static Stream<Arguments> incorrectParamDataProvider() {
         ProductRequestMock productRequest = new ProductRequestMock(
@@ -102,16 +104,11 @@ class UserItemControllerTest {
         );
     }
 
-    private SecurityMockMvcRequestPostProcessors.OidcLoginRequestPostProcessor mockUser() {
-        return oidcLogin()
-                .idToken(idToken -> idToken.claim("sub", EXTERNAL_ID_USER_FIRST));
-    }
-
     @Test
     @DisplayName("Create - successful")
     @DirtiesContext
     void create_successful() throws Exception {
-        Long userId = createUser(EXTERNAL_ID_USER_FIRST);
+        User user = testDataInitializer.createUser(EXTERNAL_ID_USER_FIRST);
         ProductRequestMock productRequest = new ProductRequestMock(
                 PRODUCT_TITLE_FIRST,
                 PRODUCT_DESCRIPTION_FIRST,
@@ -143,20 +140,25 @@ class UserItemControllerTest {
         assertEquals(productRequest.title(), product.getTitle());
         assertEquals(productRequest.description(), product.getDescription());
         assertEquals(productRequest.link(), product.getLink());
-        assertOwnerIdSet(userId, response.privateId());
+        assertOwnerIdSet(user, response.privateId());
     }
 
-    private void assertOwnerIdSet(Long userId, String itemPrivateId) {
+    private SecurityMockMvcRequestPostProcessors.OidcLoginRequestPostProcessor mockUser() {
+        return oidcLogin()
+                .idToken(idToken -> idToken.claim("sub", EXTERNAL_ID_USER_FIRST));
+    }
+
+    private void assertOwnerIdSet(User user, String itemPrivateId) {
         Optional<Item> optional = itemRepository.findByPrivateId(itemPrivateId);
         assertTrue(optional.isPresent());
-        assertEquals(userId, optional.get().getOwnerId());
+        assertEquals(user, optional.get().getOwner());
     }
 
     @Test
     @DisplayName("Create - user does not exist")
     @DirtiesContext
     void create_noSuchUser() throws Exception {
-        createUser(EXTERNAL_ID_USER_SECOND);
+        testDataInitializer.createUser(EXTERNAL_ID_USER_SECOND);
         ProductRequestMock productRequest = new ProductRequestMock(
                 PRODUCT_TITLE_FIRST,
                 PRODUCT_DESCRIPTION_FIRST,
@@ -169,13 +171,13 @@ class UserItemControllerTest {
         );
 
         mockMvc.perform(
-                        post(URL_BASE)
-                                .contentType(APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(itemRequest))
-                                .with(mockUser())
-                ).andExpect(
-                        MockMvcResultMatchers.status().is4xxClientError()
-                );
+                post(URL_BASE)
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(itemRequest))
+                        .with(mockUser())
+        ).andExpect(
+                MockMvcResultMatchers.status().is4xxClientError()
+        );
 
         List<Item> itemList = itemRepository.findAll();
         assertTrue(itemList.isEmpty());
@@ -186,7 +188,7 @@ class UserItemControllerTest {
     @DisplayName("Create - incorrect payload")
     @MethodSource("incorrectParamDataProvider")
     void create_incorrectParam(String name, ItemRequestMock itemRequest, String expectedMessage) throws Exception {
-        createUser(EXTERNAL_ID_USER_FIRST);
+        testDataInitializer.createUser(EXTERNAL_ID_USER_FIRST);
         MvcResult mvcResult = mockMvc.perform(
                 post(URL_BASE)
                         .contentType(APPLICATION_JSON)
@@ -203,17 +205,11 @@ class UserItemControllerTest {
         assertTrue(itemList.isEmpty());
     }
 
-    private Long createUser(String externalId) {
-        User user = User.builder().externalId(externalId).build();
-
-        return userRepository.save(user).getId();
-    }
-
     @Test
     @DirtiesContext
     @DisplayName("Get by id - successful")
     void getById_successful() throws Exception {
-        Long userId = createUser(EXTERNAL_ID_USER_FIRST);
+        User user = testDataInitializer.createUser(EXTERNAL_ID_USER_FIRST);
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
                 .description(PRODUCT_DESCRIPTION_FIRST)
@@ -222,7 +218,7 @@ class UserItemControllerTest {
         Item itemFirst = Item.builder()
                 .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userId)
+                .owner(user)
                 .status(AVAILABLE)
                 .product(productFirst)
                 .quantity(ITEM_QUANTITY_FIRST)
@@ -235,7 +231,7 @@ class UserItemControllerTest {
         Item itemSecond = Item.builder()
                 .privateId(PRIVATE_ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
-                .ownerId(userId)
+                .owner(user)
                 .status(AVAILABLE)
                 .product(productSecond)
                 .quantity(ITEM_QUANTITY_SECOND)
@@ -270,7 +266,7 @@ class UserItemControllerTest {
     @DirtiesContext
     @DisplayName("Get by id - incorrect user")
     void getById_incorrectUser() throws Exception {
-        Long userId = createUser(EXTERNAL_ID_USER_SECOND);
+        User user = testDataInitializer.createUser(EXTERNAL_ID_USER_SECOND);
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
                 .description(PRODUCT_DESCRIPTION_FIRST)
@@ -279,7 +275,7 @@ class UserItemControllerTest {
         Item itemFirst = Item.builder()
                 .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userId)
+                .owner(user)
                 .status(AVAILABLE)
                 .product(productFirst)
                 .quantity(ITEM_QUANTITY_FIRST)
@@ -292,7 +288,7 @@ class UserItemControllerTest {
         Item itemSecond = Item.builder()
                 .privateId(PRIVATE_ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
-                .ownerId(userId)
+                .owner(user)
                 .status(AVAILABLE)
                 .product(productSecond)
                 .quantity(ITEM_QUANTITY_SECOND)
@@ -305,18 +301,18 @@ class UserItemControllerTest {
         );
 
         mockMvc.perform(
-                        get(URL_WITH_ID, itemFirst.getPrivateId())
-                                .with(mockUser())
-                ).andExpect(
-                        MockMvcResultMatchers.status().is4xxClientError()
-                );
+                get(URL_WITH_ID, itemFirst.getPrivateId())
+                        .with(mockUser())
+        ).andExpect(
+                MockMvcResultMatchers.status().is4xxClientError()
+        );
     }
 
     @Test
     @DirtiesContext
     @DisplayName("Get by id - not found")
     void getById_notFound() throws Exception {
-        Long userId = createUser(EXTERNAL_ID_USER_FIRST);
+        User user = testDataInitializer.createUser(EXTERNAL_ID_USER_FIRST);
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
                 .description(PRODUCT_DESCRIPTION_FIRST)
@@ -325,7 +321,7 @@ class UserItemControllerTest {
         Item itemFirst = Item.builder()
                 .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userId)
+                .owner(user)
                 .status(AVAILABLE)
                 .product(productFirst)
                 .quantity(ITEM_QUANTITY_FIRST)
@@ -353,7 +349,7 @@ class UserItemControllerTest {
     @DirtiesContext
     @DisplayName("Delete by id - successful")
     void deleteById_successful() throws Exception {
-        Long userId = createUser(EXTERNAL_ID_USER_FIRST);
+        User user = testDataInitializer.createUser(EXTERNAL_ID_USER_FIRST);
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
                 .description(PRODUCT_DESCRIPTION_FIRST)
@@ -362,7 +358,7 @@ class UserItemControllerTest {
         Item itemFirst = Item.builder()
                 .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userId)
+                .owner(user)
                 .status(AVAILABLE)
                 .product(productFirst)
                 .quantity(ITEM_QUANTITY_FIRST)
@@ -375,7 +371,7 @@ class UserItemControllerTest {
         Item itemSecond = Item.builder()
                 .privateId(PRIVATE_ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
-                .ownerId(userId)
+                .owner(user)
                 .status(AVAILABLE).product(productSecond)
                 .quantity(ITEM_QUANTITY_SECOND)
                 .build();
@@ -403,7 +399,7 @@ class UserItemControllerTest {
     @DirtiesContext
     @DisplayName("Delete by id - not found")
     void deleteById_notFound() throws Exception {
-        Long userId = createUser(EXTERNAL_ID_USER_FIRST);
+        User user = testDataInitializer.createUser(EXTERNAL_ID_USER_FIRST);
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
                 .description(PRODUCT_DESCRIPTION_FIRST)
@@ -412,7 +408,7 @@ class UserItemControllerTest {
         Item itemFirst = Item.builder()
                 .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userId)
+                .owner(user)
                 .status(AVAILABLE)
                 .product(productFirst)
                 .quantity(ITEM_QUANTITY_FIRST)
@@ -440,7 +436,7 @@ class UserItemControllerTest {
     @DirtiesContext
     @DisplayName("Delete by id - incorrect user")
     void deleteById_incorrectUser() throws Exception {
-        Long userId = createUser(EXTERNAL_ID_USER_SECOND);
+        User user = testDataInitializer.createUser(EXTERNAL_ID_USER_SECOND);
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
                 .description(PRODUCT_DESCRIPTION_FIRST)
@@ -449,7 +445,7 @@ class UserItemControllerTest {
         Item itemFirst = Item.builder()
                 .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userId)
+                .owner(user)
                 .status(AVAILABLE)
                 .product(productFirst)
                 .quantity(ITEM_QUANTITY_FIRST)
@@ -477,7 +473,7 @@ class UserItemControllerTest {
     @DirtiesContext
     @DisplayName("Update by id - successful")
     void updateById_successful() throws Exception {
-        Long userId = createUser(EXTERNAL_ID_USER_FIRST);
+        User user = testDataInitializer.createUser(EXTERNAL_ID_USER_FIRST);
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
                 .description(PRODUCT_DESCRIPTION_FIRST)
@@ -486,7 +482,7 @@ class UserItemControllerTest {
         Item itemFirst = Item.builder()
                 .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userId)
+                .owner(user)
                 .status(AVAILABLE)
                 .product(productFirst)
                 .quantity(ITEM_QUANTITY_FIRST)
@@ -499,7 +495,7 @@ class UserItemControllerTest {
         Item itemSecond = Item.builder()
                 .privateId(PRIVATE_ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
-                .ownerId(userId)
+                .owner(user)
                 .status(AVAILABLE)
                 .product(productSecond)
                 .quantity(ITEM_QUANTITY_SECOND)
@@ -565,7 +561,7 @@ class UserItemControllerTest {
         Item actualItem = itemOptional.get();
         assertEquals(expectedItem.getPrivateId(), actualItem.getPrivateId());
         assertEquals(expectedItem.getPublicId(), actualItem.getPublicId());
-        assertEquals(expectedItem.getOwnerId(), actualItem.getOwnerId());
+        assertEquals(expectedItem.getOwner(), actualItem.getOwner());
         assertEquals(expectedItem.getQuantity(), actualItem.getQuantity());
         assertEquals(expectedItem.getProduct(), actualItem.getProduct());
     }
@@ -586,7 +582,7 @@ class UserItemControllerTest {
     @DirtiesContext
     @DisplayName("Update by id - not found")
     void updateById_notFound() throws Exception {
-        Long userId = createUser(EXTERNAL_ID_USER_FIRST);
+        User user = testDataInitializer.createUser(EXTERNAL_ID_USER_FIRST);
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
                 .description(PRODUCT_DESCRIPTION_FIRST)
@@ -595,7 +591,7 @@ class UserItemControllerTest {
         Item itemFirst = Item.builder()
                 .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userId)
+                .owner(user)
                 .status(AVAILABLE)
                 .product(productFirst)
                 .quantity(ITEM_QUANTITY_FIRST)
@@ -637,7 +633,7 @@ class UserItemControllerTest {
     @DirtiesContext
     @DisplayName("Update by id - incorrect user")
     void updateById_incorrectUser() throws Exception {
-        Long userId = createUser(EXTERNAL_ID_USER_SECOND);
+        User user = testDataInitializer.createUser(EXTERNAL_ID_USER_SECOND);
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
                 .description(PRODUCT_DESCRIPTION_FIRST)
@@ -646,7 +642,7 @@ class UserItemControllerTest {
         Item itemFirst = Item.builder()
                 .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userId)
+                .owner(user)
                 .status(AVAILABLE)
                 .product(productFirst)
                 .quantity(ITEM_QUANTITY_FIRST)

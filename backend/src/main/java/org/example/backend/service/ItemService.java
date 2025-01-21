@@ -4,22 +4,16 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.model.Item;
 import org.example.backend.model.User;
-import org.example.backend.model.Wishlist;
 import org.example.backend.model.item.ItemStatus;
 import org.example.backend.repository.ItemRepository;
-import org.example.backend.repository.WishlistRepository;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class ItemService {
-
-    private final WishlistRepository wishlistRepository;
 
     private final ItemRepository itemRepository;
 
@@ -76,11 +70,8 @@ public class ItemService {
     }
 
     public void deleteByPrivateId(@NonNull String privateId, @Nullable User user) {
-        Optional<Item> optional = itemRepository.findByPrivateIdAndOwner(privateId, user);
-        if (optional.isPresent()) {
-            Item item = optional.get();
-            Wishlist wishlist = wishlistRepository.findByItemId(item.getId()).orElseThrow();
-            wishlist.getItems().remove(item);
-        }
+        itemRepository.findByPrivateIdAndOwner(privateId, user).ifPresent(
+                itemRepository::delete
+        );
     }
 }
