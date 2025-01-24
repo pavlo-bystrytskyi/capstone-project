@@ -6,6 +6,7 @@ import org.example.backend.model.Item;
 import org.example.backend.model.User;
 import org.example.backend.model.item.ItemStatus;
 import org.example.backend.repository.ItemRepository;
+import org.example.backend.repository.WishlistRepository;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,8 @@ public class ItemService {
     private final ItemRepository itemRepository;
 
     private final IdService idService;
+
+    private final WishlistRepository wishlistRepository;
 
     public Item create(@NonNull Item item) {
         return create(item, null);
@@ -70,8 +73,11 @@ public class ItemService {
     }
 
     public void deleteByPrivateId(@NonNull String privateId, @Nullable User user) {
-        itemRepository.findByPrivateIdAndOwner(privateId, user).ifPresent(
-                itemRepository::delete
-        );
+        itemRepository.findByPrivateIdAndOwner(privateId, user).ifPresent(item -> {
+            wishlistRepository.findAllByItemsContaining(item).forEach(
+                    wishlist -> wishlist.getItems().remove(item)
+            );
+            itemRepository.delete(item);
+        });
     }
 }

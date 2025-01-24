@@ -1,6 +1,7 @@
 package org.example.backend.repository;
 
 import lombok.NonNull;
+import org.example.backend.model.Item;
 import org.example.backend.model.User;
 import org.example.backend.model.Wishlist;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,4 +23,6 @@ public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
 
     @Query("SELECT w FROM Wishlist w LEFT JOIN FETCH w.items WHERE w.owner = :owner")
     List<Wishlist> findAllByOwner(User owner);
+
+    List<Wishlist> findAllByItemsContaining(Item item);
 }
