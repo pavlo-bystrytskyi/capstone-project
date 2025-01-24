@@ -1,6 +1,8 @@
 package org.example.backend.util;
 
 import jakarta.annotation.Nullable;
+import org.example.backend.dto.response.wishlist.PublicItemIdsResponse;
+import org.example.backend.dto.response.wishlist.PublicWishlistResponse;
 import org.example.backend.mock.dto.ItemIdsRequestMock;
 import org.example.backend.mock.dto.WishlistRequestMock;
 import org.example.backend.model.Item;
@@ -10,11 +12,12 @@ import org.example.backend.repository.WishlistRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestComponent
 public class TestResultVerifier {
@@ -33,7 +36,20 @@ public class TestResultVerifier {
         Wishlist actual = optional.get();
         assertEquals(expected.title(), actual.getTitle());
         assertEquals(expected.description(), actual.getDescription());
+        assertEquals(expected.active(), actual.getActive());
+        assertZonedDateTimeEquality(expected.deactivationDate(), actual.getDeactivationDate());
         assertRequestItemEquality(expected.itemIds(), actual.getItems());
+    }
+
+    private void assertZonedDateTimeEquality(ZonedDateTime expected, ZonedDateTime actual) {
+        if (expected == null && actual == null) {
+            return;
+        }
+        assertNotNull(expected);
+        assertNotNull(actual);
+        ZonedDateTime normalizedExpected = expected.withZoneSameInstant(ZoneOffset.UTC);
+        ZonedDateTime normalizedActual = actual.withZoneSameInstant(ZoneOffset.UTC);
+        assertEquals(normalizedExpected, normalizedActual);
     }
 
     private void assertRequestItemEquality(List<ItemIdsRequestMock> expected, List<Item> actual) {
@@ -75,4 +91,26 @@ public class TestResultVerifier {
         );
     }
 
+    public void assertPublicWishlistResponseInTable(PublicWishlistResponse actual, String id) {
+        Optional<Wishlist> optional = wishlistRepository.findByPrivateIdAndOwner(id, null);
+        assertTrue(optional.isPresent());
+        Wishlist expected = optional.get();
+        assertEquals(expected.getTitle(), actual.title());
+        assertEquals(expected.getDescription(), actual.description());
+        assertPublicResponseItemEquality(expected.getItems(), actual.itemIds());
+    }
+
+    private void assertPublicResponseItemEquality(List<Item> expected, List<PublicItemIdsResponse> actual) {
+        assertEquals(expected.size(), actual.size());
+        expected.forEach(
+                (Item Item) -> assertFalse(
+                        actual.stream().map(PublicItemIdsResponse::privateId).toList().contains(Item.getPrivateId())
+                )
+        );
+        assertTrue(
+                actual.stream().map(PublicItemIdsResponse::publicId).toList().containsAll(
+                        expected.stream().map(Item::getPublicId).toList()
+                )
+        );
+    }
 }

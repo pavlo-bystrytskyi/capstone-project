@@ -32,6 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -63,6 +64,8 @@ class UserWishlistControllerTest {
     private static final String WISHLIST_DESCRIPTION_FIRST = "some wishlist description 1";
     private static final String WISHLIST_DESCRIPTION_SECOND = "some wishlist description 2";
     private static final String WISHLIST_DESCRIPTION_THIRD = "some wishlist description 3";
+    private static final ZonedDateTime WISHLIST_DEACTIVATION_DATE_FIRST = ZonedDateTime.parse("2025-01-01T00:00:00+01:00[Europe/Berlin]");
+    private static final ZonedDateTime WISHLIST_DEACTIVATION_DATE_SECOND = ZonedDateTime.parse("2025-01-02T00:00:00+01:00[Europe/Berlin]");
     private static final String ITEM_PRIVATE_ID_FIRST = "some item id 1";
     private static final String ITEM_PRIVATE_ID_SECOND = "some item id 2";
     private static final String ITEM_PRIVATE_ID_THIRD = "some item id 3";
@@ -111,7 +114,9 @@ class UserWishlistControllerTest {
                 List.of(
                         new ItemIdsRequestMock(ITEM_PRIVATE_ID_FIRST, ITEM_PUBLIC_ID_FIRST),
                         new ItemIdsRequestMock(ITEM_PRIVATE_ID_SECOND, ITEM_PUBLIC_ID_SECOND)
-                )
+                ),
+                true,
+                null
         );
 
         return Stream.of(
@@ -124,6 +129,7 @@ class UserWishlistControllerTest {
                 Arguments.of("Zero length item list", wishlistRequest.withItemIds(List.of()), "itemIds: must not be empty"),
                 Arguments.of("No public id in item list", wishlistRequest.withItemIds(List.of(new ItemIdsRequestMock(ITEM_PRIVATE_ID_FIRST, null))), "itemIds[0].publicId: must not be blank"),
                 Arguments.of("No private id in item list", wishlistRequest.withItemIds(List.of(new ItemIdsRequestMock(null, ITEM_PUBLIC_ID_FIRST))), "itemIds[0].privateId: must not be blank"),
+                Arguments.of("No activity flag", wishlistRequest.withActive(null), "active: must not be null"),
                 Arguments.of("Empty request", null, "Not readable request body")
         );
     }
@@ -139,7 +145,9 @@ class UserWishlistControllerTest {
         WishlistRequestMock wishlistRequest = new WishlistRequestMock(
                 WISHLIST_TITLE_FIRST,
                 WISHLIST_DESCRIPTION_FIRST,
-                ItemIdsRequestMockList
+                ItemIdsRequestMockList,
+                true,
+                WISHLIST_DEACTIVATION_DATE_FIRST
         );
 
         MvcResult mvcResult = mockMvc.perform(
@@ -219,7 +227,9 @@ class UserWishlistControllerTest {
                 List.of(
                         new ItemIdsRequestMock(ITEM_PRIVATE_ID_FIRST, ITEM_PUBLIC_ID_FIRST),
                         new ItemIdsRequestMock(ITEM_PRIVATE_ID_SECOND, ITEM_PUBLIC_ID_SECOND)
-                )
+                ),
+                true,
+                null
         );
 
         mockMvc.perform(
@@ -274,6 +284,7 @@ class UserWishlistControllerTest {
                                 Item.builder().privateId(ITEM_PRIVATE_ID_SECOND).publicId(ITEM_PUBLIC_ID_SECOND).build()
                         )
                 )
+                .active(false)
                 .build();
         Wishlist wishlistSecond = Wishlist.builder()
                 .privateId(WISHLIST_PRIVATE_ID_SECOND)
@@ -285,6 +296,7 @@ class UserWishlistControllerTest {
                                 Item.builder().privateId(ITEM_PRIVATE_ID_THIRD).publicId(ITEM_PUBLIC_ID_THIRD).build()
                         )
                 )
+                .active(false)
                 .build();
         wishlistRepository.saveAll(
                 List.of(
@@ -574,15 +586,32 @@ class UserWishlistControllerTest {
                 user
         );
 
-        Wishlist wishlistFirst = testDataInitializer.createWishlist(WISHLIST_TITLE_FIRST, WISHLIST_DESCRIPTION_FIRST, List.of(itemFirst, itemSecond), user);
-        Wishlist wishlistSecond = testDataInitializer.createWishlist(WISHLIST_TITLE_SECOND, WISHLIST_DESCRIPTION_SECOND, List.of(itemThird), user);
+        Wishlist wishlistFirst = testDataInitializer.createWishlist(
+                WISHLIST_TITLE_FIRST,
+                WISHLIST_DESCRIPTION_FIRST,
+                List.of(itemFirst, itemSecond),
+                user,
+                true,
+                null
+        );
+
+        Wishlist wishlistSecond = testDataInitializer.createWishlist(
+                WISHLIST_TITLE_SECOND,
+                WISHLIST_DESCRIPTION_SECOND,
+                List.of(itemThird),
+                user,
+                true,
+                WISHLIST_DEACTIVATION_DATE_SECOND
+        );
 
         WishlistRequestMock wishlistRequest = new WishlistRequestMock(
                 WISHLIST_TITLE_THIRD,
                 WISHLIST_DESCRIPTION_THIRD,
                 List.of(
                         new ItemIdsRequestMock(itemThird.getPrivateId(), itemThird.getPublicId())
-                )
+                ),
+                false,
+                WISHLIST_DEACTIVATION_DATE_FIRST
         );
         String editId = wishlistSecond.getPrivateId();
 
@@ -631,7 +660,9 @@ class UserWishlistControllerTest {
                 WISHLIST_DESCRIPTION_THIRD,
                 List.of(
                         new ItemIdsRequestMock(ITEM_PRIVATE_ID_THIRD, ITEM_PUBLIC_ID_THIRD)
-                )
+                ),
+                true,
+                null
         );
         String editId = wishlist.getPrivateId();
 
@@ -679,7 +710,9 @@ class UserWishlistControllerTest {
                 WISHLIST_DESCRIPTION_THIRD,
                 List.of(
                         new ItemIdsRequestMock(ITEM_PRIVATE_ID_THIRD, ITEM_PUBLIC_ID_THIRD)
-                )
+                ),
+                true,
+                null
         );
 
         MvcResult mvcResult = mockMvc.perform(

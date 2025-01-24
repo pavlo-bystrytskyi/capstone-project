@@ -3,6 +3,7 @@ package org.example.backend.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Builder
@@ -31,4 +32,8 @@ public class Wishlist {
     private String title;
 
     private String description;
+
+    private Boolean active;
+
+    private ZonedDateTime deactivationDate;
 }
