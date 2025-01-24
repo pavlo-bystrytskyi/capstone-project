@@ -17,7 +17,7 @@ public record PublicWishlistResponse(
         return PublicWishlistResponse.builder()
                 .title(wishlist.getTitle())
                 .description(wishlist.getDescription())
-                .itemIds(wishlist.getItemIds().stream().map(PublicItemIdsResponse::of).toList())
+                .itemIds(wishlist.getItems().stream().map(PublicItemIdsResponse::of).toList())
                 .build();
     }
 }

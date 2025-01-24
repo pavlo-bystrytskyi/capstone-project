@@ -8,11 +8,14 @@ import org.example.backend.dto.response.wishlist.PrivateItemIdsResponse;
 import org.example.backend.dto.response.wishlist.PrivateWishlistResponse;
 import org.example.backend.mock.dto.ItemIdsRequestMock;
 import org.example.backend.mock.dto.WishlistRequestMock;
+import org.example.backend.model.Item;
+import org.example.backend.model.Product;
 import org.example.backend.model.User;
 import org.example.backend.model.Wishlist;
-import org.example.backend.model.wishlist.ItemIdStorage;
-import org.example.backend.repository.UserRepository;
+import org.example.backend.repository.ItemRepository;
 import org.example.backend.repository.WishlistRepository;
+import org.example.backend.util.TestDataInitializer;
+import org.example.backend.util.TestResultVerifier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,6 +24,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.annotation.DirtiesContext;
@@ -32,39 +36,54 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.example.backend.model.item.ItemStatus.AVAILABLE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ComponentScan(basePackages = "org.example.backend.util")
 class UserWishlistControllerTest {
 
     private static final String URL_BASE = "/api/user/wishlist";
     private static final String URL_WITH_ID = "/api/user/wishlist/{id}";
 
-    private static final String ID_FIRST = "some id 1";
-    private static final String ID_SECOND = "some id 2";
-    private static final String ID_THIRD = "some id 3";
-    private static final String PUBLIC_ID_FIRST = "some public id 1";
-    private static final String PUBLIC_ID_SECOND = "some public id 2";
-    private static final String PUBLIC_ID_THIRD = "some public id 3";
-    private static final String TITLE_FIRST = "some wishlist title 1";
-    private static final String TITLE_SECOND = "some wishlist title 2";
-    private static final String TITLE_THIRD = "some wishlist title 3";
-    private static final String DESCRIPTION_FIRST = "some wishlist description 1";
-    private static final String DESCRIPTION_SECOND = "some wishlist description 2";
-    private static final String DESCRIPTION_THIRD = "some wishlist description 3";
-    private static final String PRIVATE_ITEM_ID_FIRST = "some item id 1";
-    private static final String PRIVATE_ITEM_ID_SECOND = "some item id 2";
-    private static final String PRIVATE_ITEM_ID_THIRD = "some item id 3";
-    private static final String PUBLIC_ITEM_ID_FIRST = "some public item id 1";
-    private static final String PUBLIC_ITEM_ID_SECOND = "some public item id 2";
-    private static final String PUBLIC_ITEM_ID_THIRD = "some public item id 3";
-    private static final String EXTERNAL_ID_USER_FIRST = "some user external id 1";
-    private static final String EXTERNAL_ID_USER_SECOND = "some user external id 2";
+    private static final String WISHLIST_PRIVATE_ID_FIRST = "some wishlist id 1";
+    private static final String WISHLIST_PRIVATE_ID_SECOND = "some wishlist id 2";
+    private static final String WISHLIST_PRIVATE_ID_THIRD = "some wishlist id 3";
+    private static final String WISHLIST_PUBLIC_ID_FIRST = "some wishlist public id 1";
+    private static final String WISHLIST_PUBLIC_ID_SECOND = "some wishlist public id 2";
+    private static final String WISHLIST_PUBLIC_ID_THIRD = "some wishlist public id 3";
+    private static final String WISHLIST_TITLE_FIRST = "some wishlist title 1";
+    private static final String WISHLIST_TITLE_SECOND = "some wishlist title 2";
+    private static final String WISHLIST_TITLE_THIRD = "some wishlist title 3";
+    private static final String WISHLIST_DESCRIPTION_FIRST = "some wishlist description 1";
+    private static final String WISHLIST_DESCRIPTION_SECOND = "some wishlist description 2";
+    private static final String WISHLIST_DESCRIPTION_THIRD = "some wishlist description 3";
+    private static final String ITEM_PRIVATE_ID_FIRST = "some item id 1";
+    private static final String ITEM_PRIVATE_ID_SECOND = "some item id 2";
+    private static final String ITEM_PRIVATE_ID_THIRD = "some item id 3";
+    private static final String ITEM_PUBLIC_ID_FIRST = "some public item id 1";
+    private static final String ITEM_PUBLIC_ID_SECOND = "some public item id 2";
+    private static final String ITEM_PUBLIC_ID_THIRD = "some public item id 3";
+    private static final Double ITEM_QUANTITY_FIRST = 5.5;
+    private static final Double ITEM_QUANTITY_SECOND = 10.1;
+    private static final Double ITEM_QUANTITY_THIRD = 3.3;
+    private static final String USER_EXTERNAL_ID_FIRST = "some user external id 1";
+    private static final String USER_EXTERNAL_ID_SECOND = "some user external id 2";
 
+    private static final String PRODUCT_TITLE_FIRST = "some product title 1";
+    private static final String PRODUCT_TITLE_SECOND = "some product title 2";
+    private static final String PRODUCT_TITLE_THIRD = "some product title 3";
+    private static final String PRODUCT_DESCRIPTION_FIRST = "some product description 1";
+    private static final String PRODUCT_DESCRIPTION_SECOND = "some product description 2";
+    private static final String PRODUCT_DESCRIPTION_THIRD = "some product description 3";
+    private static final String PRODUCT_LINK_FIRST = "https://example.com/some-product-link-1";
+    private static final String PRODUCT_LINK_SECOND = "https://example.com/some-product-link-2";
+    private static final String PRODUCT_LINK_THIRD = "https://example.com/some-product-link-3";
     private static final String MESSAGE_NOT_FOUND = "No value present";
 
     @Autowired
@@ -72,18 +91,26 @@ class UserWishlistControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private TestDataInitializer testDataInitializer;
+
+    @Autowired
+    private TestResultVerifier testResultVerifier;
+
     @Autowired
     private WishlistRepository wishlistRepository;
+
     @Autowired
-    private UserRepository userRepository;
+    private ItemRepository itemRepository;
 
     static Stream<Arguments> incorrectParamDataProvider() {
         WishlistRequestMock wishlistRequest = new WishlistRequestMock(
-                TITLE_FIRST,
-                DESCRIPTION_FIRST,
+                WISHLIST_TITLE_FIRST,
+                WISHLIST_DESCRIPTION_FIRST,
                 List.of(
-                        new ItemIdsRequestMock(PRIVATE_ITEM_ID_FIRST, PUBLIC_ITEM_ID_FIRST),
-                        new ItemIdsRequestMock(PRIVATE_ITEM_ID_SECOND, PUBLIC_ITEM_ID_SECOND)
+                        new ItemIdsRequestMock(ITEM_PRIVATE_ID_FIRST, ITEM_PUBLIC_ID_FIRST),
+                        new ItemIdsRequestMock(ITEM_PRIVATE_ID_SECOND, ITEM_PUBLIC_ID_SECOND)
                 )
         );
 
@@ -95,8 +122,8 @@ class UserWishlistControllerTest {
                 Arguments.of("Long wishlist description", wishlistRequest.withDescription("_".repeat(4096)), "description: size must be between 0 and 4095"),
                 Arguments.of("Empty item list", wishlistRequest.withItemIds(null), "itemIds: must not be empty"),
                 Arguments.of("Zero length item list", wishlistRequest.withItemIds(List.of()), "itemIds: must not be empty"),
-                Arguments.of("No public id in item list", wishlistRequest.withItemIds(List.of(new ItemIdsRequestMock(PRIVATE_ITEM_ID_FIRST, null))), "itemIds[0].publicId: must not be blank"),
-                Arguments.of("No private id in item list", wishlistRequest.withItemIds(List.of(new ItemIdsRequestMock(null, PUBLIC_ITEM_ID_FIRST))), "itemIds[0].privateId: must not be blank"),
+                Arguments.of("No public id in item list", wishlistRequest.withItemIds(List.of(new ItemIdsRequestMock(ITEM_PRIVATE_ID_FIRST, null))), "itemIds[0].publicId: must not be blank"),
+                Arguments.of("No private id in item list", wishlistRequest.withItemIds(List.of(new ItemIdsRequestMock(null, ITEM_PUBLIC_ID_FIRST))), "itemIds[0].privateId: must not be blank"),
                 Arguments.of("Empty request", null, "Not readable request body")
         );
     }
@@ -105,14 +132,14 @@ class UserWishlistControllerTest {
     @DisplayName("Create - successful")
     @DirtiesContext
     void create_successful() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_FIRST);
+        User user = testDataInitializer.createUser(USER_EXTERNAL_ID_FIRST);
+
+        List<ItemIdsRequestMock> ItemIdsRequestMockList = prepareItemIdsRequestMocks();
+
         WishlistRequestMock wishlistRequest = new WishlistRequestMock(
-                TITLE_FIRST,
-                DESCRIPTION_FIRST,
-                List.of(
-                        new ItemIdsRequestMock(PRIVATE_ITEM_ID_FIRST, PUBLIC_ITEM_ID_FIRST),
-                        new ItemIdsRequestMock(PRIVATE_ITEM_ID_SECOND, PUBLIC_ITEM_ID_SECOND)
-                )
+                WISHLIST_TITLE_FIRST,
+                WISHLIST_DESCRIPTION_FIRST,
+                ItemIdsRequestMockList
         );
 
         MvcResult mvcResult = mockMvc.perform(
@@ -126,61 +153,72 @@ class UserWishlistControllerTest {
                 .andReturn();
 
         IdResponse response = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), IdResponse.class);
-        assertWishlistRequestSaved(wishlistRequest, response.privateId());
-        assertOwnerIdSet(userId, response.privateId());
+        testResultVerifier.assertWishlistRequestSaved(user, wishlistRequest, response.privateId());
+        assertOwnerIdSet(user, response.privateId());
     }
 
-    private String createUser(String externalId) {
-        User user = User.builder().externalId(externalId).build();
+    private List<ItemIdsRequestMock> prepareItemIdsRequestMocks() {
+        Product productFirst = Product.builder()
+                .title(PRODUCT_TITLE_FIRST)
+                .description(PRODUCT_DESCRIPTION_FIRST)
+                .link(PRODUCT_LINK_FIRST)
+                .build();
+        Item itemFirst = Item.builder()
+                .id(1)
+                .privateId(WISHLIST_PRIVATE_ID_FIRST)
+                .publicId(WISHLIST_PUBLIC_ID_FIRST)
+                .status(AVAILABLE)
+                .product(productFirst)
+                .quantity(ITEM_QUANTITY_FIRST)
+                .build();
+        Product productSecond = Product.builder()
+                .title(PRODUCT_TITLE_SECOND)
+                .description(PRODUCT_DESCRIPTION_SECOND)
+                .link(PRODUCT_LINK_SECOND)
+                .build();
+        Item itemSecond = Item.builder()
+                .id(2)
+                .privateId(WISHLIST_PRIVATE_ID_SECOND)
+                .publicId(WISHLIST_PUBLIC_ID_SECOND)
+                .status(AVAILABLE)
+                .product(productSecond)
+                .quantity(ITEM_QUANTITY_SECOND)
+                .build();
+        itemRepository.saveAll(
+                List.of(
+                        itemFirst,
+                        itemSecond
+                )
+        );
 
-        return userRepository.save(user).getId();
+        return List.of(
+                new ItemIdsRequestMock(itemFirst.getPrivateId(), itemFirst.getPublicId()),
+                new ItemIdsRequestMock(itemSecond.getPrivateId(), itemSecond.getPublicId())
+        );
     }
 
     private SecurityMockMvcRequestPostProcessors.OidcLoginRequestPostProcessor mockUser() {
         return oidcLogin()
-                .idToken(idToken -> idToken.claim("sub", EXTERNAL_ID_USER_FIRST));
+                .idToken(idToken -> idToken.claim("sub", USER_EXTERNAL_ID_FIRST));
     }
 
-    private void assertWishlistRequestSaved(WishlistRequestMock expected, String id) {
-        Optional<Wishlist> optional = wishlistRepository.findById(id);
+    private void assertOwnerIdSet(User user, String wishlistPrivateId) {
+        Optional<Wishlist> optional = wishlistRepository.findByPrivateIdAndOwner(wishlistPrivateId, user);
         assertTrue(optional.isPresent());
-        Wishlist actual = optional.get();
-        assertEquals(expected.title(), actual.getTitle());
-        assertEquals(expected.description(), actual.getDescription());
-        assertRequestItemEquality(expected.itemIds(), actual.getItemIds());
-    }
-
-    private void assertOwnerIdSet(String userId, String wishlistPrivateId) {
-        Optional<Wishlist> optional = wishlistRepository.findById(wishlistPrivateId);
-        assertTrue(optional.isPresent());
-        assertEquals(userId, optional.get().getOwnerId());
-    }
-
-    private void assertRequestItemEquality(List<ItemIdsRequestMock> expected, List<ItemIdStorage> actual) {
-        assertEquals(expected.size(), actual.size());
-        assertTrue(
-                actual.stream().map(ItemIdStorage::getPrivateId).toList().containsAll(
-                        expected.stream().map(ItemIdsRequestMock::privateId).toList()
-                )
-        );
-        assertTrue(
-                actual.stream().map(ItemIdStorage::getPublicId).toList().containsAll(
-                        expected.stream().map(ItemIdsRequestMock::publicId).toList()
-                )
-        );
+        assertEquals(user, optional.get().getOwner());
     }
 
     @Test
     @DisplayName("Create - user does not exist")
     @DirtiesContext
     void create_noSuchUser() throws Exception {
-        createUser(EXTERNAL_ID_USER_SECOND);
+        testDataInitializer.createUser(USER_EXTERNAL_ID_SECOND);
         WishlistRequestMock wishlistRequest = new WishlistRequestMock(
-                TITLE_FIRST,
-                DESCRIPTION_FIRST,
+                WISHLIST_TITLE_FIRST,
+                WISHLIST_DESCRIPTION_FIRST,
                 List.of(
-                        new ItemIdsRequestMock(PRIVATE_ITEM_ID_FIRST, PUBLIC_ITEM_ID_FIRST),
-                        new ItemIdsRequestMock(PRIVATE_ITEM_ID_SECOND, PUBLIC_ITEM_ID_SECOND)
+                        new ItemIdsRequestMock(ITEM_PRIVATE_ID_FIRST, ITEM_PUBLIC_ID_FIRST),
+                        new ItemIdsRequestMock(ITEM_PRIVATE_ID_SECOND, ITEM_PUBLIC_ID_SECOND)
                 )
         );
 
@@ -202,7 +240,7 @@ class UserWishlistControllerTest {
     @DisplayName("Create - incorrect payload")
     @MethodSource("incorrectParamDataProvider")
     void create_incorrectParam(String name, WishlistRequestMock wishlistRequest, String expectedMessage) throws Exception {
-        createUser(EXTERNAL_ID_USER_FIRST);
+        testDataInitializer.createUser(USER_EXTERNAL_ID_FIRST);
         MvcResult mvcResult = mockMvc.perform(
                 post(URL_BASE)
                         .contentType(APPLICATION_JSON)
@@ -223,28 +261,28 @@ class UserWishlistControllerTest {
     @DirtiesContext
     @DisplayName("Get by id - successful")
     void getById_successful() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_FIRST);
+        User user = testDataInitializer.createUser(USER_EXTERNAL_ID_FIRST);
         Wishlist wishlistFirst = Wishlist.builder()
-                .id(ID_FIRST)
-                .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userId)
-                .title(TITLE_FIRST)
-                .description(DESCRIPTION_FIRST)
-                .itemIds(
+                .privateId(WISHLIST_PRIVATE_ID_FIRST)
+                .publicId(WISHLIST_PUBLIC_ID_FIRST)
+                .owner(user)
+                .title(WISHLIST_TITLE_FIRST)
+                .description(WISHLIST_DESCRIPTION_FIRST)
+                .items(
                         List.of(
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_FIRST).publicId(PUBLIC_ITEM_ID_FIRST).build(),
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_SECOND).publicId(PUBLIC_ITEM_ID_SECOND).build()
+                                Item.builder().privateId(ITEM_PRIVATE_ID_FIRST).publicId(ITEM_PUBLIC_ID_FIRST).build(),
+                                Item.builder().privateId(ITEM_PRIVATE_ID_SECOND).publicId(ITEM_PUBLIC_ID_SECOND).build()
                         )
                 )
                 .build();
         Wishlist wishlistSecond = Wishlist.builder()
-                .id(ID_SECOND)
-                .publicId(PUBLIC_ID_SECOND)
-                .title(TITLE_SECOND)
-                .description(DESCRIPTION_SECOND)
-                .itemIds(
+                .privateId(WISHLIST_PRIVATE_ID_SECOND)
+                .publicId(WISHLIST_PUBLIC_ID_SECOND)
+                .title(WISHLIST_TITLE_SECOND)
+                .description(WISHLIST_DESCRIPTION_SECOND)
+                .items(
                         List.of(
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_THIRD).publicId(PUBLIC_ITEM_ID_THIRD).build()
+                                Item.builder().privateId(ITEM_PRIVATE_ID_THIRD).publicId(ITEM_PUBLIC_ID_THIRD).build()
                         )
                 )
                 .build();
@@ -256,7 +294,7 @@ class UserWishlistControllerTest {
         );
 
         MvcResult mvcResult = mockMvc.perform(
-                        get(URL_WITH_ID, wishlistFirst.getId())
+                        get(URL_WITH_ID, wishlistFirst.getPrivateId())
                                 .with(mockUser())
                 ).andExpect(
                         MockMvcResultMatchers.status().isOk()
@@ -265,30 +303,30 @@ class UserWishlistControllerTest {
 
         String response = mvcResult.getResponse().getContentAsString();
         PrivateWishlistResponse wishlistResponse = objectMapper.readValue(response, PrivateWishlistResponse.class);
-        assertPrivateWishlistResponseInTable(wishlistResponse, wishlistFirst.getId());
+        assertPrivateWishlistResponseInTable(user, wishlistResponse, wishlistFirst.getPrivateId());
     }
 
-    private void assertPrivateWishlistResponseInTable(PrivateWishlistResponse actual, String id) {
-        Optional<Wishlist> optional = wishlistRepository.findById(id);
+    private void assertPrivateWishlistResponseInTable(User owner, PrivateWishlistResponse actual, String privateId) {
+        Optional<Wishlist> optional = wishlistRepository.findByPrivateIdAndOwner(privateId, owner);
         assertTrue(optional.isPresent());
         Wishlist expected = optional.get();
-        assertEquals(expected.getId(), actual.privateId());
+        assertEquals(expected.getPrivateId(), actual.privateId());
         assertEquals(expected.getPublicId(), actual.publicId());
         assertEquals(expected.getTitle(), actual.title());
         assertEquals(expected.getDescription(), actual.description());
-        assertPrivateResponseItemEquality(expected.getItemIds(), actual.itemIds());
+        assertPrivateResponseItemEquality(expected.getItems(), actual.itemIds());
     }
 
-    private void assertPrivateResponseItemEquality(List<ItemIdStorage> expected, List<PrivateItemIdsResponse> actual) {
+    private void assertPrivateResponseItemEquality(List<Item> expected, List<PrivateItemIdsResponse> actual) {
         assertEquals(expected.size(), actual.size());
         assertTrue(
                 actual.stream().map(PrivateItemIdsResponse::privateId).toList().containsAll(
-                        expected.stream().map(ItemIdStorage::getPrivateId).toList()
+                        expected.stream().map(Item::getPrivateId).toList()
                 )
         );
         assertTrue(
                 actual.stream().map(PrivateItemIdsResponse::publicId).toList().containsAll(
-                        expected.stream().map(ItemIdStorage::getPublicId).toList()
+                        expected.stream().map(Item::getPublicId).toList()
                 )
         );
     }
@@ -297,28 +335,28 @@ class UserWishlistControllerTest {
     @DirtiesContext
     @DisplayName("Get by id - incorrect user")
     void getById_incorrectUser() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_SECOND);
+        User user = testDataInitializer.createUser(USER_EXTERNAL_ID_SECOND);
         Wishlist wishlistFirst = Wishlist.builder()
-                .id(ID_FIRST)
-                .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userId)
-                .title(TITLE_FIRST)
-                .description(DESCRIPTION_FIRST)
-                .itemIds(
+                .privateId(WISHLIST_PRIVATE_ID_FIRST)
+                .publicId(WISHLIST_PUBLIC_ID_FIRST)
+                .owner(user)
+                .title(WISHLIST_TITLE_FIRST)
+                .description(WISHLIST_DESCRIPTION_FIRST)
+                .items(
                         List.of(
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_FIRST).publicId(PUBLIC_ITEM_ID_FIRST).build(),
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_SECOND).publicId(PUBLIC_ITEM_ID_SECOND).build()
+                                Item.builder().privateId(ITEM_PRIVATE_ID_FIRST).publicId(ITEM_PUBLIC_ID_FIRST).build(),
+                                Item.builder().privateId(ITEM_PRIVATE_ID_SECOND).publicId(ITEM_PUBLIC_ID_SECOND).build()
                         )
                 )
                 .build();
         Wishlist wishlistSecond = Wishlist.builder()
-                .id(ID_SECOND)
-                .publicId(PUBLIC_ID_SECOND)
-                .title(TITLE_SECOND)
-                .description(DESCRIPTION_SECOND)
-                .itemIds(
+                .privateId(WISHLIST_PRIVATE_ID_SECOND)
+                .publicId(WISHLIST_PUBLIC_ID_SECOND)
+                .title(WISHLIST_TITLE_SECOND)
+                .description(WISHLIST_DESCRIPTION_SECOND)
+                .items(
                         List.of(
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_THIRD).publicId(PUBLIC_ITEM_ID_THIRD).build()
+                                Item.builder().privateId(ITEM_PRIVATE_ID_THIRD).publicId(ITEM_PUBLIC_ID_THIRD).build()
                         )
                 )
                 .build();
@@ -330,7 +368,7 @@ class UserWishlistControllerTest {
         );
 
         mockMvc.perform(
-                get(URL_WITH_ID, wishlistFirst.getId())
+                get(URL_WITH_ID, wishlistFirst.getPrivateId())
                         .with(mockUser())
         ).andExpect(
                 MockMvcResultMatchers.status().is4xxClientError()
@@ -341,17 +379,17 @@ class UserWishlistControllerTest {
     @DirtiesContext
     @DisplayName("Get by id - not found")
     void getById_notFound() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_FIRST);
+        User user = testDataInitializer.createUser(USER_EXTERNAL_ID_FIRST);
         Wishlist wishlistFirst = Wishlist.builder()
-                .id(ID_FIRST)
-                .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userId)
-                .title(TITLE_FIRST)
-                .description(DESCRIPTION_FIRST)
-                .itemIds(
+                .privateId(WISHLIST_PRIVATE_ID_FIRST)
+                .publicId(WISHLIST_PUBLIC_ID_FIRST)
+                .owner(user)
+                .title(WISHLIST_TITLE_FIRST)
+                .description(WISHLIST_DESCRIPTION_FIRST)
+                .items(
                         List.of(
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_FIRST).publicId(PUBLIC_ITEM_ID_FIRST).build(),
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_THIRD).publicId(PUBLIC_ITEM_ID_THIRD).build()
+                                Item.builder().privateId(ITEM_PRIVATE_ID_FIRST).publicId(ITEM_PUBLIC_ID_FIRST).build(),
+                                Item.builder().privateId(ITEM_PRIVATE_ID_THIRD).publicId(ITEM_PUBLIC_ID_THIRD).build()
                         )
                 )
                 .build();
@@ -362,7 +400,7 @@ class UserWishlistControllerTest {
         );
 
         MvcResult mvcResult = mockMvc.perform(
-                        get(URL_WITH_ID, ID_SECOND)
+                        get(URL_WITH_ID, WISHLIST_PRIVATE_ID_SECOND)
                                 .with(mockUser())
                 ).andExpect(
                         MockMvcResultMatchers.status().is4xxClientError()
@@ -378,28 +416,29 @@ class UserWishlistControllerTest {
     @DirtiesContext
     @DisplayName("Delete by id - successful")
     void deleteById_successful() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_FIRST);
+        User user = testDataInitializer.createUser(USER_EXTERNAL_ID_FIRST);
         Wishlist wishlistFirst = Wishlist.builder()
-                .id(ID_FIRST)
-                .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userId)
-                .title(TITLE_FIRST)
-                .description(DESCRIPTION_FIRST)
-                .itemIds(
+                .privateId(WISHLIST_PRIVATE_ID_FIRST)
+                .publicId(WISHLIST_PUBLIC_ID_FIRST)
+                .owner(user)
+                .title(WISHLIST_TITLE_FIRST)
+                .description(WISHLIST_DESCRIPTION_FIRST)
+                .items(
                         List.of(
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_FIRST).publicId(PUBLIC_ITEM_ID_FIRST).build(),
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_THIRD).publicId(PUBLIC_ITEM_ID_THIRD).build()
+                                Item.builder().privateId(ITEM_PRIVATE_ID_FIRST).publicId(ITEM_PUBLIC_ID_FIRST).build(),
+                                Item.builder().privateId(ITEM_PRIVATE_ID_THIRD).publicId(ITEM_PUBLIC_ID_THIRD).build()
                         )
                 )
                 .build();
         Wishlist wishlistSecond = Wishlist.builder()
-                .id(ID_SECOND)
-                .publicId(PUBLIC_ID_SECOND)
-                .title(TITLE_SECOND)
-                .description(DESCRIPTION_SECOND)
-                .itemIds(
+                .privateId(WISHLIST_PRIVATE_ID_SECOND)
+                .publicId(WISHLIST_PUBLIC_ID_SECOND)
+                .owner(user)
+                .title(WISHLIST_TITLE_SECOND)
+                .description(WISHLIST_DESCRIPTION_SECOND)
+                .items(
                         List.of(
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_SECOND).publicId(PUBLIC_ITEM_ID_SECOND).build()
+                                Item.builder().privateId(ITEM_PRIVATE_ID_SECOND).publicId(ITEM_PUBLIC_ID_SECOND).build()
                         )
                 )
                 .build();
@@ -411,67 +450,37 @@ class UserWishlistControllerTest {
         );
 
         mockMvc.perform(
-                delete(URL_WITH_ID, wishlistFirst.getId())
+                delete(URL_WITH_ID, wishlistFirst.getPrivateId())
                         .with(mockUser())
         ).andExpect(
                 MockMvcResultMatchers.status().isOk()
         );
 
-        assertWishlistTableSize(1);
-        assertWishlistNotInTable(wishlistFirst);
-        assertWishlistInTable(wishlistSecond);
+        testResultVerifier.assertWishlistTableSize(1);
+        assertWishlistNotInTable(user, wishlistFirst);
+        testResultVerifier.assertWishlistInTable(user, wishlistSecond);
     }
 
-    private void assertWishlistTableSize(int expectedSize) {
-        List<Wishlist> wishlists = wishlistRepository.findAll();
-        assertEquals(expectedSize, wishlists.size());
-    }
-
-    private void assertWishlistNotInTable(Wishlist wishlist) {
-        Optional<Wishlist> optional = wishlistRepository.findById(wishlist.getId());
+    private void assertWishlistNotInTable(User owner, Wishlist wishlist) {
+        Optional<Wishlist> optional = wishlistRepository.findByPrivateIdAndOwner(wishlist.getPrivateId(), owner);
         assertTrue(optional.isEmpty());
-    }
-
-    private void assertWishlistInTable(Wishlist expected) {
-        Optional<Wishlist> optional = wishlistRepository.findById(expected.getId());
-        assertTrue(optional.isPresent());
-        Wishlist actual = optional.get();
-        assertEquals(expected.getPublicId(), actual.getPublicId());
-        assertEquals(expected.getOwnerId(), actual.getOwnerId());
-        assertEquals(expected.getTitle(), actual.getTitle());
-        assertEquals(expected.getDescription(), actual.getDescription());
-        assertWishlistItemEquality(expected.getItemIds(), actual.getItemIds());
-    }
-
-    private void assertWishlistItemEquality(List<ItemIdStorage> expected, List<ItemIdStorage> actual) {
-        assertEquals(expected.size(), actual.size());
-        assertTrue(
-                actual.stream().map(ItemIdStorage::getPrivateId).toList().containsAll(
-                        expected.stream().map(ItemIdStorage::getPrivateId).toList()
-                )
-        );
-        assertTrue(
-                actual.stream().map(ItemIdStorage::getPublicId).toList().containsAll(
-                        expected.stream().map(ItemIdStorage::getPublicId).toList()
-                )
-        );
     }
 
     @Test
     @DirtiesContext
     @DisplayName("Delete by id - incorrect user")
     void deleteById_incorrectUser() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_SECOND);
+        User user = testDataInitializer.createUser(USER_EXTERNAL_ID_SECOND);
         Wishlist wishlist = Wishlist.builder()
-                .id(ID_FIRST)
-                .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userId)
-                .title(TITLE_FIRST)
-                .description(DESCRIPTION_FIRST)
-                .itemIds(
+                .privateId(WISHLIST_PRIVATE_ID_FIRST)
+                .publicId(WISHLIST_PUBLIC_ID_FIRST)
+                .owner(user)
+                .title(WISHLIST_TITLE_FIRST)
+                .description(WISHLIST_DESCRIPTION_FIRST)
+                .items(
                         List.of(
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_FIRST).publicId(PUBLIC_ITEM_ID_FIRST).build(),
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_THIRD).publicId(PUBLIC_ITEM_ID_THIRD).build()
+                                Item.builder().privateId(ITEM_PRIVATE_ID_FIRST).publicId(ITEM_PUBLIC_ID_FIRST).build(),
+                                Item.builder().privateId(ITEM_PRIVATE_ID_THIRD).publicId(ITEM_PUBLIC_ID_THIRD).build()
                         )
                 )
                 .build();
@@ -482,30 +491,30 @@ class UserWishlistControllerTest {
         );
 
         mockMvc.perform(
-                delete(URL_WITH_ID, wishlist.getId())
+                delete(URL_WITH_ID, wishlist.getPrivateId())
                         .with(mockUser())
         ).andExpect(
                 MockMvcResultMatchers.status().is4xxClientError()
         );
 
-        assertWishlistTableSize(1);
-        assertWishlistInTable(wishlist);
+        testResultVerifier.assertWishlistTableSize(1);
+        testResultVerifier.assertWishlistInTable(user, wishlist);
     }
 
     @Test
     @DirtiesContext
     @DisplayName("Delete by id - not found")
     void deleteById_notFound() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_FIRST);
+        User user = testDataInitializer.createUser(USER_EXTERNAL_ID_FIRST);
         Wishlist wishlistFirst = Wishlist.builder()
-                .id(ID_FIRST)
-                .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userId)
-                .title(TITLE_FIRST)
-                .description(DESCRIPTION_FIRST).itemIds(
+                .privateId(WISHLIST_PRIVATE_ID_FIRST)
+                .publicId(WISHLIST_PUBLIC_ID_FIRST)
+                .owner(user)
+                .title(WISHLIST_TITLE_FIRST)
+                .description(WISHLIST_DESCRIPTION_FIRST).items(
                         List.of(
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_FIRST).publicId(PUBLIC_ITEM_ID_FIRST).build(),
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_THIRD).publicId(PUBLIC_ITEM_ID_THIRD).build()
+                                Item.builder().privateId(ITEM_PRIVATE_ID_FIRST).publicId(ITEM_PUBLIC_ID_FIRST).build(),
+                                Item.builder().privateId(ITEM_PRIVATE_ID_THIRD).publicId(ITEM_PUBLIC_ID_THIRD).build()
                         )
                 )
                 .build();
@@ -516,58 +525,66 @@ class UserWishlistControllerTest {
         );
 
         mockMvc.perform(
-                delete(URL_WITH_ID, ID_SECOND)
+                delete(URL_WITH_ID, WISHLIST_PRIVATE_ID_SECOND)
                         .with(mockUser())
         ).andExpect(
                 MockMvcResultMatchers.status().isOk()
         );
 
-        assertWishlistTableSize(1);
-        assertWishlistInTable(wishlistFirst);
+        testResultVerifier.assertWishlistTableSize(1);
+        testResultVerifier.assertWishlistInTable(user, wishlistFirst);
     }
 
     @Test
     @DirtiesContext
     @DisplayName("Update by id - successful")
     void updateById_successful() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_FIRST);
-        Wishlist wishlistFirst = Wishlist.builder()
-                .id(ID_FIRST)
-                .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userId)
-                .title(TITLE_FIRST)
-                .description(DESCRIPTION_FIRST).itemIds(
-                        List.of(
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_FIRST).publicId(PUBLIC_ITEM_ID_FIRST).build(),
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_THIRD).publicId(PUBLIC_ITEM_ID_THIRD).build()
-                        )
-                )
-                .build();
-        Wishlist wishlistSecond = Wishlist.builder()
-                .id(ID_SECOND)
-                .publicId(PUBLIC_ID_SECOND)
-                .ownerId(userId)
-                .title(TITLE_SECOND)
-                .description(DESCRIPTION_SECOND).itemIds(
-                        List.of(
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_SECOND).publicId(PUBLIC_ITEM_ID_SECOND).build()
-                        )
-                )
-                .build();
-        wishlistRepository.saveAll(
-                List.of(
-                        wishlistFirst,
-                        wishlistSecond
-                )
+        User user = testDataInitializer.createUser(USER_EXTERNAL_ID_FIRST);
+        Product productFirst = testDataInitializer.createProduct(
+                PRODUCT_TITLE_FIRST,
+                PRODUCT_DESCRIPTION_FIRST,
+                PRODUCT_LINK_FIRST
         );
+        Item itemFirst = testDataInitializer.createItem(
+                productFirst,
+                AVAILABLE,
+                ITEM_QUANTITY_FIRST,
+                user
+        );
+        Product productSecond = testDataInitializer.createProduct(
+                PRODUCT_TITLE_SECOND,
+                PRODUCT_DESCRIPTION_SECOND,
+                PRODUCT_LINK_SECOND
+        );
+        Item itemSecond = testDataInitializer.createItem(
+                productSecond,
+                AVAILABLE,
+                ITEM_QUANTITY_SECOND,
+                user
+        );
+        Product productThird = testDataInitializer.createProduct(
+                PRODUCT_TITLE_THIRD,
+                PRODUCT_DESCRIPTION_THIRD,
+                PRODUCT_LINK_THIRD
+        );
+        Item itemThird = testDataInitializer.createItem(
+                productThird,
+                AVAILABLE,
+                ITEM_QUANTITY_THIRD,
+                user
+        );
+
+        Wishlist wishlistFirst = testDataInitializer.createWishlist(WISHLIST_TITLE_FIRST, WISHLIST_DESCRIPTION_FIRST, List.of(itemFirst, itemSecond), user);
+        Wishlist wishlistSecond = testDataInitializer.createWishlist(WISHLIST_TITLE_SECOND, WISHLIST_DESCRIPTION_SECOND, List.of(itemThird), user);
+
         WishlistRequestMock wishlistRequest = new WishlistRequestMock(
-                TITLE_THIRD,
-                DESCRIPTION_THIRD,
+                WISHLIST_TITLE_THIRD,
+                WISHLIST_DESCRIPTION_THIRD,
                 List.of(
-                        new ItemIdsRequestMock(PRIVATE_ITEM_ID_THIRD, PUBLIC_ITEM_ID_THIRD)
+                        new ItemIdsRequestMock(itemThird.getPrivateId(), itemThird.getPublicId())
                 )
         );
-        String editId = wishlistSecond.getId();
+        String editId = wishlistSecond.getPrivateId();
 
         MvcResult mvcResult = mockMvc.perform(
                         put(URL_WITH_ID, editId)
@@ -582,25 +599,25 @@ class UserWishlistControllerTest {
         String response = mvcResult.getResponse().getContentAsString();
         IdResponse idResponse = objectMapper.readValue(response, IdResponse.class);
         assertEquals(editId, idResponse.privateId());
-        assertWishlistTableSize(2);
-        assertWishlistRequestSaved(wishlistRequest, editId);
-        assertWishlistInTable(wishlistFirst);
+        testResultVerifier.assertWishlistTableSize(2);
+        testResultVerifier.assertWishlistRequestSaved(user, wishlistRequest, editId);
+        testResultVerifier.assertWishlistInTable(user, wishlistFirst);
     }
 
     @Test
     @DirtiesContext
     @DisplayName("Update by id - incorrect user")
     void updateById_incorrectUser() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_SECOND);
+        User user = testDataInitializer.createUser(USER_EXTERNAL_ID_SECOND);
         Wishlist wishlist = Wishlist.builder()
-                .id(ID_FIRST)
-                .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userId)
-                .title(TITLE_FIRST)
-                .description(DESCRIPTION_FIRST).itemIds(
+                .privateId(WISHLIST_PRIVATE_ID_FIRST)
+                .publicId(WISHLIST_PUBLIC_ID_FIRST)
+                .owner(user)
+                .title(WISHLIST_TITLE_FIRST)
+                .description(WISHLIST_DESCRIPTION_FIRST).items(
                         List.of(
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_FIRST).publicId(PUBLIC_ITEM_ID_FIRST).build(),
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_THIRD).publicId(PUBLIC_ITEM_ID_THIRD).build()
+                                Item.builder().privateId(ITEM_PRIVATE_ID_FIRST).publicId(ITEM_PUBLIC_ID_FIRST).build(),
+                                Item.builder().privateId(ITEM_PRIVATE_ID_THIRD).publicId(ITEM_PUBLIC_ID_THIRD).build()
                         )
                 )
                 .build();
@@ -610,13 +627,13 @@ class UserWishlistControllerTest {
                 )
         );
         WishlistRequestMock wishlistRequest = new WishlistRequestMock(
-                TITLE_THIRD,
-                DESCRIPTION_THIRD,
+                WISHLIST_TITLE_THIRD,
+                WISHLIST_DESCRIPTION_THIRD,
                 List.of(
-                        new ItemIdsRequestMock(PRIVATE_ITEM_ID_THIRD, PUBLIC_ITEM_ID_THIRD)
+                        new ItemIdsRequestMock(ITEM_PRIVATE_ID_THIRD, ITEM_PUBLIC_ID_THIRD)
                 )
         );
-        String editId = wishlist.getId();
+        String editId = wishlist.getPrivateId();
 
         MvcResult mvcResult = mockMvc.perform(
                         put(URL_WITH_ID, editId)
@@ -631,24 +648,24 @@ class UserWishlistControllerTest {
         String response = mvcResult.getResponse().getContentAsString();
         ErrorResponse errorResponse = objectMapper.readValue(response, ErrorResponse.class);
         assertEquals(MESSAGE_NOT_FOUND, errorResponse.message());
-        assertWishlistTableSize(1);
-        assertWishlistInTable(wishlist);
+        testResultVerifier.assertWishlistTableSize(1);
+        testResultVerifier.assertWishlistInTable(user, wishlist);
     }
 
     @Test
     @DirtiesContext
     @DisplayName("Update by id - not found")
     void updateById_notFound() throws Exception {
-        String userId = createUser(EXTERNAL_ID_USER_SECOND);
+        User user = testDataInitializer.createUser(USER_EXTERNAL_ID_SECOND);
         Wishlist wishlistFirst = Wishlist.builder()
-                .id(ID_FIRST)
-                .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userId)
-                .title(TITLE_FIRST)
-                .description(DESCRIPTION_FIRST).itemIds(
+                .privateId(WISHLIST_PRIVATE_ID_FIRST)
+                .publicId(WISHLIST_PUBLIC_ID_FIRST)
+                .owner(user)
+                .title(WISHLIST_TITLE_FIRST)
+                .description(WISHLIST_DESCRIPTION_FIRST).items(
                         List.of(
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_FIRST).publicId(PUBLIC_ITEM_ID_FIRST).build(),
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_THIRD).publicId(PUBLIC_ITEM_ID_THIRD).build()
+                                Item.builder().privateId(ITEM_PRIVATE_ID_FIRST).publicId(ITEM_PUBLIC_ID_FIRST).build(),
+                                Item.builder().privateId(ITEM_PRIVATE_ID_THIRD).publicId(ITEM_PUBLIC_ID_THIRD).build()
                         )
                 )
                 .build();
@@ -658,15 +675,15 @@ class UserWishlistControllerTest {
                 )
         );
         WishlistRequestMock wishlistRequest = new WishlistRequestMock(
-                TITLE_THIRD,
-                DESCRIPTION_THIRD,
+                WISHLIST_TITLE_THIRD,
+                WISHLIST_DESCRIPTION_THIRD,
                 List.of(
-                        new ItemIdsRequestMock(PRIVATE_ITEM_ID_THIRD, PUBLIC_ITEM_ID_THIRD)
+                        new ItemIdsRequestMock(ITEM_PRIVATE_ID_THIRD, ITEM_PUBLIC_ID_THIRD)
                 )
         );
 
         MvcResult mvcResult = mockMvc.perform(
-                        put(URL_WITH_ID, ID_SECOND)
+                        put(URL_WITH_ID, WISHLIST_PRIVATE_ID_SECOND)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(wishlistRequest))
                                 .with(mockUser())
@@ -678,49 +695,49 @@ class UserWishlistControllerTest {
         String response = mvcResult.getResponse().getContentAsString();
         ErrorResponse errorResponse = objectMapper.readValue(response, ErrorResponse.class);
         assertEquals(MESSAGE_NOT_FOUND, errorResponse.message());
-        assertWishlistTableSize(1);
-        assertWishlistInTable(wishlistFirst);
+        testResultVerifier.assertWishlistTableSize(1);
+        testResultVerifier.assertWishlistInTable(user, wishlistFirst);
     }
 
     @Test
     @DirtiesContext
     @DisplayName("Get all - success")
     void getAll_success() throws Exception {
-        String userIdFirst = createUser(EXTERNAL_ID_USER_FIRST);
-        String userIdSecond = createUser(EXTERNAL_ID_USER_SECOND);
+        User userFirst = testDataInitializer.createUser(USER_EXTERNAL_ID_FIRST);
+        User userSecond = testDataInitializer.createUser(USER_EXTERNAL_ID_SECOND);
         Wishlist wishlistFirst = Wishlist.builder()
-                .id(ID_FIRST)
-                .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userIdFirst)
-                .title(TITLE_FIRST)
-                .description(DESCRIPTION_FIRST)
-                .itemIds(
+                .privateId(WISHLIST_PRIVATE_ID_FIRST)
+                .publicId(WISHLIST_PUBLIC_ID_FIRST)
+                .owner(userFirst)
+                .title(WISHLIST_TITLE_FIRST)
+                .description(WISHLIST_DESCRIPTION_FIRST)
+                .items(
                         List.of(
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_FIRST).publicId(PUBLIC_ITEM_ID_FIRST).build()
+                                Item.builder().privateId(ITEM_PRIVATE_ID_FIRST).publicId(ITEM_PUBLIC_ID_FIRST).build()
                         )
                 )
                 .build();
         Wishlist wishlistSecond = Wishlist.builder()
-                .id(ID_SECOND)
-                .publicId(PUBLIC_ID_SECOND)
-                .ownerId(userIdSecond)
-                .title(TITLE_SECOND)
-                .description(DESCRIPTION_SECOND)
-                .itemIds(
+                .privateId(WISHLIST_PRIVATE_ID_SECOND)
+                .publicId(WISHLIST_PUBLIC_ID_SECOND)
+                .owner(userSecond)
+                .title(WISHLIST_TITLE_SECOND)
+                .description(WISHLIST_DESCRIPTION_SECOND)
+                .items(
                         List.of(
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_SECOND).publicId(PUBLIC_ITEM_ID_SECOND).build()
+                                Item.builder().privateId(ITEM_PRIVATE_ID_SECOND).publicId(ITEM_PUBLIC_ID_SECOND).build()
                         )
                 )
                 .build();
         Wishlist wishlistThird = Wishlist.builder()
-                .id(ID_THIRD)
-                .publicId(PUBLIC_ID_THIRD)
-                .ownerId(userIdFirst)
-                .title(TITLE_THIRD)
-                .description(DESCRIPTION_THIRD)
-                .itemIds(
+                .privateId(WISHLIST_PRIVATE_ID_THIRD)
+                .publicId(WISHLIST_PUBLIC_ID_THIRD)
+                .owner(userFirst)
+                .title(WISHLIST_TITLE_THIRD)
+                .description(WISHLIST_DESCRIPTION_THIRD)
+                .items(
                         List.of(
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_THIRD).publicId(PUBLIC_ITEM_ID_THIRD).build()
+                                Item.builder().privateId(ITEM_PRIVATE_ID_THIRD).publicId(ITEM_PUBLIC_ID_THIRD).build()
                         )
                 )
                 .build();
@@ -744,37 +761,37 @@ class UserWishlistControllerTest {
         List<PrivateWishlistResponse> wishlistResponse = objectMapper.readValue(response, new TypeReference<>() {
         });
         assertEquals(2, wishlistResponse.size());
-        assertPrivateWishlistResponseInTable(wishlistResponse.get(0), wishlistFirst.getId());
-        assertPrivateWishlistResponseInTable(wishlistResponse.get(1), wishlistThird.getId());
+        assertPrivateWishlistResponseInTable(userFirst, wishlistResponse.get(0), wishlistFirst.getPrivateId());
+        assertPrivateWishlistResponseInTable(userFirst, wishlistResponse.get(1), wishlistThird.getPrivateId());
     }
 
     @Test
     @DirtiesContext
     @DisplayName("Get all - no wishlists found")
     void getAll_noWishlistsFound() throws Exception {
-        createUser(EXTERNAL_ID_USER_FIRST);
-        String userIdSecond = createUser(EXTERNAL_ID_USER_SECOND);
+        testDataInitializer.createUser(USER_EXTERNAL_ID_FIRST);
+        User userSecond = testDataInitializer.createUser(USER_EXTERNAL_ID_SECOND);
         Wishlist wishlistFirst = Wishlist.builder()
-                .id(ID_FIRST)
-                .publicId(PUBLIC_ID_FIRST)
-                .ownerId(userIdSecond)
-                .title(TITLE_FIRST)
-                .description(DESCRIPTION_FIRST)
-                .itemIds(
+                .privateId(WISHLIST_PRIVATE_ID_FIRST)
+                .publicId(WISHLIST_PUBLIC_ID_FIRST)
+                .owner(userSecond)
+                .title(WISHLIST_TITLE_FIRST)
+                .description(WISHLIST_DESCRIPTION_FIRST)
+                .items(
                         List.of(
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_FIRST).publicId(PUBLIC_ITEM_ID_FIRST).build()
+                                Item.builder().privateId(ITEM_PRIVATE_ID_FIRST).publicId(ITEM_PUBLIC_ID_FIRST).build()
                         )
                 )
                 .build();
         Wishlist wishlistSecond = Wishlist.builder()
-                .id(ID_SECOND)
-                .publicId(PUBLIC_ID_SECOND)
-                .ownerId(null)
-                .title(TITLE_SECOND)
-                .description(DESCRIPTION_SECOND)
-                .itemIds(
+                .privateId(WISHLIST_PRIVATE_ID_SECOND)
+                .publicId(WISHLIST_PUBLIC_ID_SECOND)
+                .owner(null)
+                .title(WISHLIST_TITLE_SECOND)
+                .description(WISHLIST_DESCRIPTION_SECOND)
+                .items(
                         List.of(
-                                ItemIdStorage.builder().privateId(PRIVATE_ITEM_ID_SECOND).publicId(PUBLIC_ITEM_ID_SECOND).build()
+                                Item.builder().privateId(ITEM_PRIVATE_ID_SECOND).publicId(ITEM_PUBLIC_ID_SECOND).build()
                         )
                 )
                 .build();

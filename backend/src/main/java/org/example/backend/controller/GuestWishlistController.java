@@ -10,11 +10,13 @@ import org.example.backend.dto.request.wishlist.WishlistRequest;
 import org.example.backend.dto.response.wishlist.PublicWishlistResponse;
 import org.example.backend.model.Wishlist;
 import org.example.backend.service.WishlistService;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/guest/wishlist")
 @RequiredArgsConstructor
+@Validated
 public class GuestWishlistController {
 
     private final WishlistService wishlistService;
@@ -24,33 +26,33 @@ public class GuestWishlistController {
         Wishlist wishlistData = wishlistRequest.toWishlist();
         Wishlist wishlist = wishlistService.create(wishlistData);
 
-        return IdResponse.of(wishlist.getPublicId(), wishlist.getId());
+        return IdResponse.of(wishlist.getPublicId(), wishlist.getPrivateId());
     }
 
-    @GetMapping("/{id}")
-    public PrivateWishlistResponse getById(@PathVariable @NotNull String id) {
-        Wishlist wishlist = wishlistService.getById(id);
+    @GetMapping("/{privateId}")
+    public PrivateWishlistResponse getByPrivateId(@PathVariable @NotNull String privateId) {
+        Wishlist wishlist = wishlistService.getById(privateId);
 
         return PrivateWishlistResponse.of(wishlist);
     }
 
-    @GetMapping("/public/{id}")
-    public PublicWishlistResponse getByPublicId(@PathVariable @NotNull String id) {
-        Wishlist wishlist = wishlistService.getByPublicId(id);
+    @GetMapping("/public/{publicId}")
+    public PublicWishlistResponse getByPublicId(@PathVariable @NotNull String publicId) {
+        Wishlist wishlist = wishlistService.getByPublicId(publicId);
 
         return PublicWishlistResponse.of(wishlist);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteById(@PathVariable @NotNull String id) {
-        wishlistService.deleteById(id);
+    @DeleteMapping("/{privateId}")
+    public void deleteById(@PathVariable @NotNull String privateId) {
+        wishlistService.deleteById(privateId);
     }
 
-    @PutMapping("/{id}")
-    public IdResponse updateById(@PathVariable @NonNull String id, @RequestBody @Valid WishlistRequest wishlistRequest) {
+    @PutMapping("/{privateId}")
+    public IdResponse updateByPrivateId(@PathVariable @NonNull String privateId, @RequestBody @Valid WishlistRequest wishlistRequest) {
         Wishlist wishlist = wishlistRequest.toWishlist();
-        Wishlist updatedWishlist = wishlistService.updateById(id, wishlist);
+        Wishlist updatedWishlist = wishlistService.updateById(privateId, wishlist);
 
-        return IdResponse.of(updatedWishlist.getPublicId(), updatedWishlist.getId());
+        return IdResponse.of(updatedWishlist.getPublicId(), updatedWishlist.getPrivateId());
     }
 }

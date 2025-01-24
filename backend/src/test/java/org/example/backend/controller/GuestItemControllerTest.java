@@ -3,15 +3,16 @@ package org.example.backend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.backend.dto.response.ErrorResponse;
 import org.example.backend.dto.response.IdResponse;
-import org.example.backend.dto.response.item.PublicItemResponse;
 import org.example.backend.dto.response.item.ProductResponse;
+import org.example.backend.dto.response.item.PublicItemResponse;
 import org.example.backend.mock.dto.ItemRequestMock;
-import org.example.backend.mock.dto.ProductRequestMock;
 import org.example.backend.mock.dto.ItemStatusRequestMock;
+import org.example.backend.mock.dto.ProductRequestMock;
 import org.example.backend.model.Item;
 import org.example.backend.model.Product;
 import org.example.backend.model.item.ItemStatus;
 import org.example.backend.repository.ItemRepository;
+import org.example.backend.util.TestDataInitializer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,6 +21,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
@@ -38,6 +40,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ComponentScan(basePackages = "org.example.backend.util")
 class GuestItemControllerTest {
 
     private static final String URL_BASE = "/api/guest/item";
@@ -47,8 +50,8 @@ class GuestItemControllerTest {
     private static final Double ITEM_QUANTITY_FIRST = 5.5;
     private static final Double ITEM_QUANTITY_SECOND = 10.1;
 
-    private static final String ID_FIRST = "some id 1";
-    private static final String ID_SECOND = "some id 2";
+    private static final String PRIVATE_ID_FIRST = "some id 1";
+    private static final String PRIVATE_ID_SECOND = "some id 2";
     private static final String PUBLIC_ID_FIRST = "some public id 1";
     private static final String PUBLIC_ID_SECOND = "some public id 2";
     private static final String PRODUCT_TITLE_FIRST = "some product title 1";
@@ -68,6 +71,9 @@ class GuestItemControllerTest {
 
     @Autowired
     private ItemRepository itemRepository;
+
+    @Autowired
+    private TestDataInitializer testDataInitializer;
 
     static Stream<Arguments> incorrectParamDataProvider() {
         ProductRequestMock productRequest = new ProductRequestMock(
@@ -123,7 +129,7 @@ class GuestItemControllerTest {
 
         IdResponse response = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), IdResponse.class);
 
-        Optional<Item> result = itemRepository.findById(response.privateId());
+        Optional<Item> result = itemRepository.findByPrivateId(response.privateId());
         assertTrue(result.isPresent());
         Item item = result.get();
         assertEquals(itemRequest.quantity(), item.getQuantity());
@@ -163,7 +169,7 @@ class GuestItemControllerTest {
                 .link(PRODUCT_LINK_FIRST)
                 .build();
         Item itemFirst = Item.builder()
-                .id(ID_FIRST)
+                .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
                 .status(AVAILABLE)
                 .product(productFirst)
@@ -175,7 +181,7 @@ class GuestItemControllerTest {
                 .link(PRODUCT_LINK_SECOND)
                 .build();
         Item itemSecond = Item.builder()
-                .id(ID_SECOND)
+                .privateId(PRIVATE_ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
                 .status(AVAILABLE)
                 .product(productSecond)
@@ -189,14 +195,14 @@ class GuestItemControllerTest {
         );
 
         MvcResult mvcResult = mockMvc.perform(
-                        get(URL_WITH_ID, itemFirst.getId())
+                        get(URL_WITH_ID, itemFirst.getPrivateId())
                 ).andExpect(
                         MockMvcResultMatchers.status().isOk()
                 )
                 .andReturn();
 
         String response = mvcResult.getResponse().getContentAsString();
-        assertFalse(response.contains(itemFirst.getId()));
+        assertFalse(response.contains(itemFirst.getPrivateId()));
         assertTrue(response.contains(itemFirst.getPublicId()));
         PublicItemResponse itemResponse = objectMapper.readValue(response, PublicItemResponse.class);
         assertEquals(itemFirst.getQuantity(), itemResponse.quantity());
@@ -216,7 +222,7 @@ class GuestItemControllerTest {
                 .link(PRODUCT_LINK_FIRST)
                 .build();
         Item itemFirst = Item.builder()
-                .id(ID_FIRST)
+                .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
                 .status(AVAILABLE)
                 .product(productFirst)
@@ -229,7 +235,7 @@ class GuestItemControllerTest {
         );
 
         MvcResult mvcResult = mockMvc.perform(
-                        get(URL_WITH_ID, ID_SECOND)
+                        get(URL_WITH_ID, PRIVATE_ID_SECOND)
                 ).andExpect(
                         MockMvcResultMatchers.status().is4xxClientError()
                 )
@@ -250,7 +256,7 @@ class GuestItemControllerTest {
                 .link(PRODUCT_LINK_FIRST)
                 .build();
         Item itemFirst = Item.builder()
-                .id(ID_FIRST)
+                .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
                 .status(AVAILABLE)
                 .product(productFirst)
@@ -262,7 +268,7 @@ class GuestItemControllerTest {
                 .link(PRODUCT_LINK_SECOND)
                 .build();
         Item itemSecond = Item.builder()
-                .id(ID_SECOND)
+                .privateId(PRIVATE_ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
                 .status(AVAILABLE)
                 .product(productSecond)
@@ -283,7 +289,7 @@ class GuestItemControllerTest {
                 .andReturn();
 
         String response = mvcResult.getResponse().getContentAsString();
-        assertFalse(response.contains(itemFirst.getId()));
+        assertFalse(response.contains(itemFirst.getPrivateId()));
         assertTrue(response.contains(itemFirst.getPublicId()));
         PublicItemResponse itemResponse = objectMapper.readValue(response, PublicItemResponse.class);
         assertEquals(itemFirst.getQuantity(), itemResponse.quantity());
@@ -303,7 +309,7 @@ class GuestItemControllerTest {
                 .link(PRODUCT_LINK_FIRST)
                 .build();
         Item itemFirst = Item.builder()
-                .id(ID_FIRST)
+                .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
                 .status(AVAILABLE)
                 .product(productFirst)
@@ -331,45 +337,38 @@ class GuestItemControllerTest {
     @DirtiesContext
     @DisplayName("Delete by id - successful")
     void deleteById_successful() throws Exception {
-        Product productFirst = Product.builder()
-                .title(PRODUCT_TITLE_FIRST)
-                .description(PRODUCT_DESCRIPTION_FIRST)
-                .link(PRODUCT_LINK_FIRST)
-                .build();
-        Item itemFirst = Item.builder()
-                .id(ID_FIRST)
-                .publicId(PUBLIC_ID_FIRST)
-                .status(AVAILABLE)
-                .product(productFirst)
-                .quantity(ITEM_QUANTITY_FIRST)
-                .build();
-        Product productSecond = Product.builder()
-                .title(PRODUCT_TITLE_SECOND)
-                .description(PRODUCT_DESCRIPTION_SECOND)
-                .link(PRODUCT_LINK_SECOND)
-                .build();
-        Item itemSecond = Item.builder()
-                .id(ID_SECOND)
-                .publicId(PUBLIC_ID_SECOND)
-                .status(AVAILABLE).product(productSecond)
-                .quantity(ITEM_QUANTITY_SECOND)
-                .build();
-        itemRepository.saveAll(
-                List.of(
-                        itemFirst,
-                        itemSecond
-                )
+        Product productFirst = testDataInitializer.createProduct(
+                PRODUCT_TITLE_FIRST,
+                PRODUCT_DESCRIPTION_FIRST,
+                PRODUCT_LINK_FIRST
+        );
+        Item itemFirst = testDataInitializer.createItem(
+                productFirst,
+                AVAILABLE,
+                ITEM_QUANTITY_FIRST,
+                null
+        );
+        Product productSecond = testDataInitializer.createProduct(
+                PRODUCT_TITLE_SECOND,
+                PRODUCT_DESCRIPTION_SECOND,
+                PRODUCT_LINK_SECOND
+        );
+        testDataInitializer.createItem(
+                productSecond,
+                AVAILABLE,
+                ITEM_QUANTITY_FIRST,
+                null
         );
 
         mockMvc.perform(
-                delete(URL_WITH_ID, itemFirst.getId())
+                delete(URL_WITH_ID, itemFirst.getPrivateId())
         ).andExpect(
                 MockMvcResultMatchers.status().isOk()
         );
 
         List<Item> items = itemRepository.findAll();
         assertEquals(1, items.size());
-        Optional<Item> item = itemRepository.findById(itemFirst.getId());
+        Optional<Item> item = itemRepository.findByPrivateId(itemFirst.getPrivateId());
         assertTrue(item.isEmpty());
     }
 
@@ -383,7 +382,7 @@ class GuestItemControllerTest {
                 .link(PRODUCT_LINK_FIRST)
                 .build();
         Item itemFirst = Item.builder()
-                .id(ID_FIRST)
+                .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
                 .status(AVAILABLE)
                 .product(productFirst)
@@ -396,14 +395,14 @@ class GuestItemControllerTest {
         );
 
         mockMvc.perform(
-                delete(URL_WITH_ID, ID_SECOND)
+                delete(URL_WITH_ID, PRIVATE_ID_SECOND)
         ).andExpect(
                 MockMvcResultMatchers.status().isOk()
         );
 
         List<Item> items = itemRepository.findAll();
         assertEquals(1, items.size());
-        Optional<Item> item = itemRepository.findById(itemFirst.getId());
+        Optional<Item> item = itemRepository.findByPrivateId(itemFirst.getPrivateId());
         assertTrue(item.isPresent());
     }
 
@@ -417,7 +416,7 @@ class GuestItemControllerTest {
                 .link(PRODUCT_LINK_FIRST)
                 .build();
         Item itemFirst = Item.builder()
-                .id(ID_FIRST)
+                .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
                 .status(AVAILABLE)
                 .product(productFirst)
@@ -429,7 +428,7 @@ class GuestItemControllerTest {
                 .link(PRODUCT_LINK_SECOND)
                 .build();
         Item itemSecond = Item.builder()
-                .id(ID_SECOND)
+                .privateId(PRIVATE_ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
                 .status(AVAILABLE)
                 .product(productSecond)
@@ -451,7 +450,7 @@ class GuestItemControllerTest {
                 AVAILABLE,
                 productRequest
         );
-        String updateId = itemSecond.getId();
+        String updateId = itemSecond.getPrivateId();
 
         MvcResult mvcResult = mockMvc.perform(
                         put(URL_WITH_ID, updateId)
@@ -482,7 +481,7 @@ class GuestItemControllerTest {
     }
 
     private void assertItemRequestSaved(ItemRequestMock itemRequest, String updateId) {
-        Optional<Item> itemOptional = itemRepository.findById(updateId);
+        Optional<Item> itemOptional = itemRepository.findByPrivateId(updateId);
         assertTrue(itemOptional.isPresent());
         Item actualItem = itemOptional.get();
         assertEquals(itemRequest.quantity(), actualItem.getQuantity());
@@ -490,10 +489,10 @@ class GuestItemControllerTest {
     }
 
     private void assertItemInTable(Item expectedItem) {
-        Optional<Item> itemOptional = itemRepository.findById(expectedItem.getId());
+        Optional<Item> itemOptional = itemRepository.findByPrivateId(expectedItem.getPrivateId());
         assertTrue(itemOptional.isPresent());
         Item actualItem = itemOptional.get();
-        assertEquals(expectedItem.getId(), actualItem.getId());
+        assertEquals(expectedItem.getPrivateId(), actualItem.getPrivateId());
         assertEquals(expectedItem.getPublicId(), actualItem.getPublicId());
         assertEquals(expectedItem.getQuantity(), actualItem.getQuantity());
         assertEquals(expectedItem.getProduct(), actualItem.getProduct());
@@ -521,7 +520,7 @@ class GuestItemControllerTest {
                 .link(PRODUCT_LINK_FIRST)
                 .build();
         Item itemFirst = Item.builder()
-                .id(ID_FIRST)
+                .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
                 .status(AVAILABLE)
                 .product(productFirst)
@@ -544,7 +543,7 @@ class GuestItemControllerTest {
         );
 
         MvcResult mvcResult = mockMvc.perform(
-                        put(URL_WITH_ID, ID_SECOND)
+                        put(URL_WITH_ID, PRIVATE_ID_SECOND)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(itemRequest))
                 ).andExpect(
@@ -569,7 +568,7 @@ class GuestItemControllerTest {
                 .link(PRODUCT_LINK_FIRST)
                 .build();
         Item itemFirst = Item.builder()
-                .id(ID_FIRST)
+                .privateId(PRIVATE_ID_FIRST)
                 .publicId(PUBLIC_ID_FIRST)
                 .status(AVAILABLE)
                 .product(productFirst)
@@ -581,7 +580,7 @@ class GuestItemControllerTest {
                 .link(PRODUCT_LINK_SECOND)
                 .build();
         Item itemSecond = Item.builder()
-                .id(ID_SECOND)
+                .privateId(PRIVATE_ID_SECOND)
                 .publicId(PUBLIC_ID_SECOND)
                 .status(AVAILABLE)
                 .product(productSecond)

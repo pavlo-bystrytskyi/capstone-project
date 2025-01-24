@@ -17,7 +17,7 @@ public record WishlistRequest(
 
     public Wishlist toWishlist() {
         return Wishlist.builder()
-                .itemIds(itemIds.stream().map(ItemIdsRequest::toItemIdStorage).toList())
+                .items(itemIds.stream().map(ItemIdsRequest::toItem).toList())
                 .title(title)
                 .description(description)
                 .build();

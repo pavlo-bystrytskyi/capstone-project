@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @AutoConfigureMockRestServiceServer
-class DataExtractionControllerTest {
+class ProductDataExtractionControllerTest {
 
     private static final String PRODUCT_TITLE = "some title";
     private static final String PRODUCT_DESCRIPTION = "some description";

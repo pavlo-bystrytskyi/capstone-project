@@ -1,23 +1,30 @@
 package org.example.backend.model;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.With;
+import jakarta.persistence.*;
+import lombok.*;
 import org.example.backend.model.item.ItemStatus;
-import org.springframework.data.annotation.Id;
 
 @Builder
 @Data
 @With
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class Item {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    long id;
+
+    private String privateId;
 
     private String publicId;
 
-    private String ownerId;
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private User owner;
 
+    @ManyToOne(cascade = CascadeType.ALL)
     private Product product;
 
     private double quantity;

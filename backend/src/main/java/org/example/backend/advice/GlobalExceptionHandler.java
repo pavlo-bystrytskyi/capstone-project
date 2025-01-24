@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.NoSuchElementException;
@@ -21,6 +22,14 @@ public class GlobalExceptionHandler {
 
     private static final String ERROR_MESSAGE_GENERIC = "Something went wrong";
     private static final String ERROR_MESSAGE_NOT_READABLE = "Not readable request body";
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleHandlerMethodValidationException(HandlerMethodValidationException exception) {
+        log.info(exception);
+
+        return new ErrorResponse(exception.getReason());
+    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)

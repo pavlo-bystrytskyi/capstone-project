@@ -1,26 +1,40 @@
 package org.example.backend.model;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.With;
-import org.example.backend.model.wishlist.ItemIdStorage;
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.List;
 
 @Builder
 @Data
 @With
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class Wishlist {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
+
+    private String privateId;
 
     private String publicId;
 
-    private String ownerId;
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private User owner;
 
-    private List<ItemIdStorage> itemIds;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Item> items;
+
+//    @ManyToOne
+//    @JoinColumn(name = "user_id", nullable = true)
+//    private User owner;
+//
+//
+//    @OneToMany(mappedBy = "wishlist", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH, CascadeType.REMOVE}, orphanRemoval = true)
+//    private List<Item> items;
 
     private String title;
 

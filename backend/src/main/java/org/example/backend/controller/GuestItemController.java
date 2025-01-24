@@ -10,11 +10,13 @@ import org.example.backend.dto.response.item.PrivateItemResponse;
 import org.example.backend.dto.response.item.PublicItemResponse;
 import org.example.backend.model.Item;
 import org.example.backend.service.ItemService;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/guest/item")
 @RequiredArgsConstructor
+@Validated
 public class GuestItemController {
 
     private final ItemService itemService;
@@ -24,39 +26,39 @@ public class GuestItemController {
         Item itemData = itemRequest.toItem();
         Item item = itemService.create(itemData);
 
-        return IdResponse.of(item.getPublicId(), item.getId());
+        return IdResponse.of(item.getPublicId(), item.getPrivateId());
     }
 
-    @GetMapping("/{id}")
-    public PublicItemResponse getById(@PathVariable @NotNull String id) {
-        Item item = itemService.getById(id);
+    @GetMapping("/{privateId}")
+    public PublicItemResponse getByPrivateId(@PathVariable @NotNull String privateId) {
+        Item item = itemService.getByPrivateId(privateId);
 
         return PublicItemResponse.of(item);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteById(@PathVariable @NotNull String id) {
-        itemService.deleteById(id);
+    @DeleteMapping("/{privateId}")
+    public void deleteByPrivateId(@PathVariable @NotNull String privateId) {
+        itemService.deleteByPrivateId(privateId);
     }
 
-    @GetMapping("/public/{id}")
-    public PublicItemResponse getByPublicId(@PathVariable @NotNull String id) {
-        Item item = itemService.getByPublicId(id);
+    @GetMapping("/public/{publicId}")
+    public PublicItemResponse getByPublicId(@PathVariable @NotNull String publicId) {
+        Item item = itemService.getByPublicId(publicId);
 
         return PublicItemResponse.of(item);
     }
 
-    @PutMapping("/public/{id}")
-    public PublicItemResponse updateStatusByPublicId(@PathVariable @NotNull String id, @RequestBody @Valid ItemStatusRequest itemStatusRequest) {
-        Item item = itemService.updateStatusByPublicId(id, itemStatusRequest.status());
+    @PutMapping("/public/{publicId}")
+    public PublicItemResponse updateStatusByPublicId(@PathVariable @NotNull String publicId, @RequestBody @Valid ItemStatusRequest itemStatusRequest) {
+        Item item = itemService.updateStatusByPublicId(publicId, itemStatusRequest.status());
 
         return PublicItemResponse.of(item);
     }
 
-    @PutMapping("/{id}")
-    public PrivateItemResponse updateById(@PathVariable @NotNull String id, @RequestBody @Valid ItemRequest itemRequest) {
+    @PutMapping("/{privateId}")
+    public PrivateItemResponse updateById(@PathVariable @NotNull String privateId, @RequestBody @Valid ItemRequest itemRequest) {
         Item item = itemRequest.toItem();
-        Item updatedItem = itemService.updateById(id, item);
+        Item updatedItem = itemService.updateByPrivateId(privateId, item);
 
         return PrivateItemResponse.of(updatedItem);
     }

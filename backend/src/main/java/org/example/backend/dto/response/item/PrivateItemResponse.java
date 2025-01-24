@@ -16,7 +16,7 @@ public record PrivateItemResponse(
 
     public static PrivateItemResponse of(Item item) {
         return PrivateItemResponse.builder()
-                .privateId(item.getId())
+                .privateId(item.getPrivateId())
                 .publicId(item.getPublicId())
                 .product(ProductResponse.of(item.getProduct()))
                 .quantity(item.getQuantity())
