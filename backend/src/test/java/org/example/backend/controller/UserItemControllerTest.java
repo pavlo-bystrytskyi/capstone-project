@@ -10,8 +10,10 @@ import org.example.backend.mock.dto.ProductRequestMock;
 import org.example.backend.model.Item;
 import org.example.backend.model.Product;
 import org.example.backend.model.User;
+import org.example.backend.model.Wishlist;
 import org.example.backend.repository.ItemRepository;
 import org.example.backend.util.TestDataInitializer;
+import org.example.backend.util.TestResultVerifier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -61,6 +63,8 @@ class UserItemControllerTest {
     private static final String PRODUCT_LINK_SECOND = "https://example.com/some-product-link-2";
     private static final String EXTERNAL_ID_USER_FIRST = "some user external id 1";
     private static final String EXTERNAL_ID_USER_SECOND = "some user external id 2";
+    private static final String WISHLIST_TITLE_FIRST = "some wishlist title 1";
+    private static final String WISHLIST_DESCRIPTION_FIRST = "some wishlist description 1";
 
     private static final String MESSAGE_NOT_FOUND = "No value present";
 
@@ -75,6 +79,9 @@ class UserItemControllerTest {
 
     @Autowired
     private TestDataInitializer testDataInitializer;
+
+    @Autowired
+    private TestResultVerifier testResultVerifier;
 
     static Stream<Arguments> incorrectParamDataProvider() {
         ProductRequestMock productRequest = new ProductRequestMock(
@@ -347,8 +354,8 @@ class UserItemControllerTest {
 
     @Test
     @DirtiesContext
-    @DisplayName("Delete by id - successful")
-    void deleteById_successful() throws Exception {
+    @DisplayName("Delete by id - successful for orphaned item")
+    void deleteById_successfulOrphaned() throws Exception {
         User user = testDataInitializer.createUser(EXTERNAL_ID_USER_FIRST);
         Product productFirst = Product.builder()
                 .title(PRODUCT_TITLE_FIRST)
@@ -393,6 +400,32 @@ class UserItemControllerTest {
         assertEquals(1, items.size());
         Optional<Item> item = itemRepository.findByPrivateId(itemFirst.getPrivateId());
         assertTrue(item.isEmpty());
+    }
+
+    @Test
+    @DirtiesContext
+    @DisplayName("Delete by id - successful")
+    void deleteById_successful() throws Exception {
+        User user = testDataInitializer.createUser(EXTERNAL_ID_USER_FIRST);
+        Product productFirst = testDataInitializer.createProduct(PRODUCT_TITLE_FIRST, PRODUCT_DESCRIPTION_FIRST, PRODUCT_LINK_FIRST);
+        Item itemFirst = testDataInitializer.createItem(productFirst, AVAILABLE, ITEM_QUANTITY_FIRST, user);
+        Product productSecond = testDataInitializer.createProduct(PRODUCT_TITLE_SECOND, PRODUCT_DESCRIPTION_SECOND, PRODUCT_LINK_SECOND);
+        Item itemSecond = testDataInitializer.createItem(productSecond, AVAILABLE, ITEM_QUANTITY_SECOND, user);
+        Wishlist wishlist = testDataInitializer.createWishlist(WISHLIST_TITLE_FIRST, WISHLIST_DESCRIPTION_FIRST, List.of(itemFirst, itemSecond), user);
+
+        mockMvc.perform(
+                delete(URL_WITH_ID, itemFirst.getPrivateId())
+                        .with(mockUser())
+        ).andExpect(
+                MockMvcResultMatchers.status().isOk()
+        );
+
+        List<Item> items = itemRepository.findAll();
+        assertEquals(1, items.size());
+        Optional<Item> item = itemRepository.findByPrivateId(itemFirst.getPrivateId());
+        assertTrue(item.isEmpty());
+        Wishlist expectedWishlist = wishlist.withItems(List.of(itemSecond));
+        testResultVerifier.assertWishlistInTable(user, expectedWishlist);
     }
 
     @Test

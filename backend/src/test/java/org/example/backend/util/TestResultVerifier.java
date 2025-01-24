@@ -1,5 +1,6 @@
 package org.example.backend.util;
 
+import jakarta.annotation.Nullable;
 import org.example.backend.mock.dto.ItemIdsRequestMock;
 import org.example.backend.mock.dto.WishlistRequestMock;
 import org.example.backend.model.Item;
@@ -49,12 +50,12 @@ public class TestResultVerifier {
         );
     }
 
-    public void assertWishlistInTable(User owner, Wishlist expected) {
+    public void assertWishlistInTable(@Nullable User owner, Wishlist expected) {
         Optional<Wishlist> optional = wishlistRepository.findByPrivateIdAndOwner(expected.getPrivateId(), owner);
         assertTrue(optional.isPresent());
         Wishlist actual = optional.get();
         assertEquals(expected.getPublicId(), actual.getPublicId());
-        assertEquals(expected.getOwner().getId(), actual.getOwner().getId());
+        assertEquals(expected.getOwner(), actual.getOwner());
         assertEquals(expected.getTitle(), actual.getTitle());
         assertEquals(expected.getDescription(), actual.getDescription());
         assertWishlistItemEquality(expected.getItems(), actual.getItems());
