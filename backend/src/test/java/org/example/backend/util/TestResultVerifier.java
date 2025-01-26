@@ -103,8 +103,8 @@ public class TestResultVerifier {
     private void assertPublicResponseItemEquality(List<Item> expected, List<PublicItemIdsResponse> actual) {
         assertEquals(expected.size(), actual.size());
         expected.forEach(
-                (Item Item) -> assertFalse(
-                        actual.stream().map(PublicItemIdsResponse::privateId).toList().contains(Item.getPrivateId())
+                (Item item) -> assertFalse(
+                        actual.stream().map(PublicItemIdsResponse::privateId).toList().contains(item.getPrivateId())
                 )
         );
         assertTrue(
