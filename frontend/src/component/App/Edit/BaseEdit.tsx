@@ -52,6 +52,7 @@ export default function BaseEdit(
 
     const onSubmit: SubmitHandler<RegistryRestricted> = (data: RegistryRestricted) => {
         const payload = {...data};
+        payload.active = true;
 
         const request = id
             ? axios.put<RegistryIdData>(`${config.wishlist.url}/${id}`, payload)
