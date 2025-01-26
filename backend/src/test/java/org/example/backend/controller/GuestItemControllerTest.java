@@ -387,7 +387,14 @@ class GuestItemControllerTest {
         Item itemFirst = testDataInitializer.createItem(productFirst, AVAILABLE, ITEM_QUANTITY_FIRST, null);
         Product productSecond = testDataInitializer.createProduct(PRODUCT_TITLE_SECOND, PRODUCT_DESCRIPTION_SECOND, PRODUCT_LINK_SECOND);
         Item itemSecond = testDataInitializer.createItem(productSecond, AVAILABLE, ITEM_QUANTITY_SECOND, null);
-        Wishlist wishlist = testDataInitializer.createWishlist(WISHLIST_TITLE_FIRST, WISHLIST_DESCRIPTION_FIRST, List.of(itemFirst, itemSecond), null);
+        Wishlist wishlist = testDataInitializer.createWishlist(
+                WISHLIST_TITLE_FIRST,
+                WISHLIST_DESCRIPTION_FIRST,
+                List.of(itemFirst, itemSecond),
+                null,
+                true,
+                null
+        );
 
         mockMvc.perform(
                 delete(URL_WITH_ID, itemFirst.getPrivateId())

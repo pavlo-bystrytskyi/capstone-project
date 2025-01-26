@@ -70,8 +70,8 @@ public class WishlistService {
         return getById(id, null);
     }
 
-    public Wishlist getByPublicId(@NonNull String publicId) {
-        return wishlistRepository.findByPublicId(publicId).orElseThrow();
+    public Wishlist getActiveByPublicId(@NonNull String publicId) {
+        return wishlistRepository.findByPublicIdAndActiveIsTrue(publicId).orElseThrow();
     }
 
     public void deleteById(@NonNull String id) {

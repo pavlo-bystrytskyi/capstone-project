@@ -38,7 +38,7 @@ public class GuestWishlistController {
 
     @GetMapping("/public/{publicId}")
     public PublicWishlistResponse getByPublicId(@PathVariable @NotNull String publicId) {
-        Wishlist wishlist = wishlistService.getByPublicId(publicId);
+        Wishlist wishlist = wishlistService.getActiveByPublicId(publicId);
 
         return PublicWishlistResponse.of(wishlist);
     }

@@ -12,6 +12,7 @@ import org.example.backend.service.WishlistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @TestComponent
@@ -47,12 +48,14 @@ public class TestDataInitializer {
         return itemService.create(item, owner);
     }
 
-    public Wishlist createWishlist(String title, String description, List<Item> items, @Nullable User owner) {
+    public Wishlist createWishlist(String title, String description, List<Item> items, @Nullable User owner, Boolean active, @Nullable ZonedDateTime deactivationDate) {
         return wishlistService.create(
                 Wishlist.builder()
                         .title(title)
                         .description(description)
                         .items(items)
+                        .active(active)
+                        .deactivationDate(deactivationDate)
                         .build(),
                 owner
         );
