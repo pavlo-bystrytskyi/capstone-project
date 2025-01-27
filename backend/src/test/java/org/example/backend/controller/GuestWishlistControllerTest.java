@@ -220,34 +220,54 @@ class GuestWishlistControllerTest {
     @DirtiesContext
     @DisplayName("Get by id - successful")
     void getById_successful() throws Exception {
-        Wishlist wishlistFirst = Wishlist.builder()
-                .privateId(WISHLIST_PRIVATE_ID_FIRST)
-                .publicId(WISHLIST_PUBLIC_ID_FIRST)
-                .title(WISHLIST_TITLE_FIRST)
-                .description(WISHLIST_DESCRIPTION_FIRST)
-                .items(
-                        List.of(
-                                Item.builder().privateId(PRIVATE_ITEM_ID_FIRST).publicId(PUBLIC_ITEM_ID_FIRST).build(),
-                                Item.builder().privateId(PRIVATE_ITEM_ID_SECOND).publicId(PUBLIC_ITEM_ID_SECOND).build()
-                        )
-                )
-                .build();
-        Wishlist wishlistSecond = Wishlist.builder()
-                .privateId(WISHLIST_PRIVATE_ID_SECOND)
-                .publicId(WISHLIST_PUBLIC_ID_SECOND)
-                .title(WISHLIST_TITLE_SECOND)
-                .description(WISHLIST_DESCRIPTION_SECOND)
-                .items(
-                        List.of(
-                                Item.builder().privateId(PRIVATE_ITEM_ID_THIRD).publicId(PUBLIC_ITEM_ID_THIRD).build()
-                        )
-                )
-                .build();
-        wishlistRepository.saveAll(
-                List.of(
-                        wishlistFirst,
-                        wishlistSecond
-                )
+        Product productFirst = testDataInitializer.createProduct(
+                PRODUCT_TITLE_FIRST,
+                PRODUCT_DESCRIPTION_FIRST,
+                PRODUCT_LINK_FIRST
+        );
+        Item itemFirst = testDataInitializer.createItem(
+                productFirst,
+                AVAILABLE,
+                ITEM_QUANTITY_FIRST,
+                null
+        );
+        Product productSecond = testDataInitializer.createProduct(
+                PRODUCT_TITLE_SECOND,
+                PRODUCT_DESCRIPTION_SECOND,
+                PRODUCT_LINK_SECOND
+        );
+        Item itemSecond = testDataInitializer.createItem(
+                productSecond,
+                AVAILABLE,
+                ITEM_QUANTITY_SECOND,
+                null
+        );
+        Product productThird = testDataInitializer.createProduct(
+                PRODUCT_TITLE_THIRD,
+                PRODUCT_DESCRIPTION_THIRD,
+                PRODUCT_LINK_THIRD
+        );
+        Item itemThird = testDataInitializer.createItem(
+                productThird,
+                AVAILABLE,
+                ITEM_QUANTITY_THIRD,
+                null
+        );
+        Wishlist wishlistFirst = testDataInitializer.createWishlist(
+                WISHLIST_TITLE_FIRST,
+                WISHLIST_DESCRIPTION_FIRST,
+                List.of(itemFirst, itemSecond),
+                null,
+                true,
+                null
+        );
+        Wishlist wishlistSecond = testDataInitializer.createWishlist(
+                WISHLIST_TITLE_SECOND,
+                WISHLIST_DESCRIPTION_SECOND,
+                List.of(itemThird),
+                null,
+                true,
+                null
         );
 
         MvcResult mvcResult = mockMvc.perform(

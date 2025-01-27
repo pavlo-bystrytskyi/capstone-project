@@ -33,7 +33,7 @@ public class Wishlist {
 
     private String description;
 
-    private Boolean active;
+    private Boolean active = true;
 
     private ZonedDateTime deactivationDate;
 }
