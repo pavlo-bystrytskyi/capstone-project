@@ -90,5 +90,8 @@
   "active_hint": "Inactive Registries are viewable only by their owner",
   "auto_disable": "Auto-deactivation",
   "auto_disable_hint": "Automatically deactivate the Registry after a specific time",
-  "select_time": "Choose deactivation time"
+  "select_time": "Choose deactivation time",
+  "date_format": "MM/dd/yyyy hh:mm aa",
+  "time_caption": "Time",
+  "time_format": "hh:mm aa"
 }

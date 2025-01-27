@@ -89,5 +89,8 @@
   "active_hint": "Inaktive Geschenklisten sind nur für den Eigentümer sichtbar",
   "auto_disable": "Automatische Deaktivierung",
   "auto_disable_hint": "Deaktiviert die Geschenkliste automatisch nach einem bestimmten Uhrzeit",
-  "select_time": "Deaktivierungszeit auswählen"
+  "select_time": "Deaktivierungszeit auswählen",
+  "date_format": "dd.MM.yyyy HH:mm",
+  "time_caption": "Uhrzeit",
+  "time_format": "HH:mm"
 }

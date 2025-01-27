@@ -213,9 +213,9 @@ export default function BaseEdit(
                                                 minDate={new Date()}
                                                 minTime={new Date(new Date().setMinutes(0, 0, 0) + 60 * 60 * 1000)}
                                                 maxTime={new Date(new Date().setHours(23, 0, 0, 0))}
-                                                dateFormat="yyyy-MM-dd HH:mm"
-                                                timeCaption="Time"
-                                                timeFormat="HH:mm"
+                                                dateFormat={t("date_format")}
+                                                timeCaption={t("time_caption")}
+                                                timeFormat={t("time_format")}
                                                 showYearDropdown
                                                 showMonthDropdown
                                                 dropdownMode="select"
