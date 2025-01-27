@@ -37,7 +37,7 @@ class WishlistDeactivationServiceTest {
     @DirtiesContext
     @DisplayName("Deactivate expired - successful")
     void deactivateExpired_expiredDeactivated() {
-        ZonedDateTime dateExpired = ZonedDateTime.now().minusSeconds(1);
+        ZonedDateTime dateExpired = ZonedDateTime.now();
         ZonedDateTime dateInFuture = ZonedDateTime.now().plusDays(1);
 
         Wishlist testedWishlist = testDataInitializer.createWishlist(
@@ -68,7 +68,7 @@ class WishlistDeactivationServiceTest {
     @DirtiesContext
     @DisplayName("Deactivate expired - already inactive")
     void deactivateExpired_alreadyInactive() {
-        ZonedDateTime dateExpired = ZonedDateTime.now().minusSeconds(1);
+        ZonedDateTime dateExpired = ZonedDateTime.now();
         ZonedDateTime dateInFuture = ZonedDateTime.now().plusDays(1);
 
         Wishlist testedWishlist = testDataInitializer.createWishlist(
@@ -78,6 +78,36 @@ class WishlistDeactivationServiceTest {
                 null,
                 false,
                 dateExpired
+        );
+
+        Wishlist additionalWishlist = testDataInitializer.createWishlist(
+                WISHLIST_TITLE_SECOND,
+                WISHLIST_DESCRIPTION_SECOND,
+                List.of(),
+                null,
+                true,
+                dateInFuture
+        );
+
+        wishlistDeactivationService.deactivateExpired();
+
+        testResultVerifier.assertWishlistInTable(null, testedWishlist);
+        testResultVerifier.assertWishlistInTable(null, additionalWishlist);
+    }
+
+    @Test
+    @DirtiesContext
+    @DisplayName("Deactivate expired - no expiration date")
+    void deactivateExpired_noExpiration() {
+        ZonedDateTime dateInFuture = ZonedDateTime.now().plusDays(1);
+
+        Wishlist testedWishlist = testDataInitializer.createWishlist(
+                WISHLIST_TITLE_FIRST,
+                WISHLIST_DESCRIPTION_FIRST,
+                List.of(),
+                null,
+                true,
+                null
         );
 
         Wishlist additionalWishlist = testDataInitializer.createWishlist(

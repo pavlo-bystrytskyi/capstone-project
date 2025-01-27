@@ -738,48 +738,62 @@ class UserWishlistControllerTest {
     void getAll_success() throws Exception {
         User userFirst = testDataInitializer.createUser(USER_EXTERNAL_ID_FIRST);
         User userSecond = testDataInitializer.createUser(USER_EXTERNAL_ID_SECOND);
-        Wishlist wishlistFirst = Wishlist.builder()
-                .privateId(WISHLIST_PRIVATE_ID_FIRST)
-                .publicId(WISHLIST_PUBLIC_ID_FIRST)
-                .owner(userFirst)
-                .title(WISHLIST_TITLE_FIRST)
-                .description(WISHLIST_DESCRIPTION_FIRST)
-                .items(
-                        List.of(
-                                Item.builder().privateId(ITEM_PRIVATE_ID_FIRST).publicId(ITEM_PUBLIC_ID_FIRST).build()
-                        )
-                )
-                .build();
-        Wishlist wishlistSecond = Wishlist.builder()
-                .privateId(WISHLIST_PRIVATE_ID_SECOND)
-                .publicId(WISHLIST_PUBLIC_ID_SECOND)
-                .owner(userSecond)
-                .title(WISHLIST_TITLE_SECOND)
-                .description(WISHLIST_DESCRIPTION_SECOND)
-                .items(
-                        List.of(
-                                Item.builder().privateId(ITEM_PRIVATE_ID_SECOND).publicId(ITEM_PUBLIC_ID_SECOND).build()
-                        )
-                )
-                .build();
-        Wishlist wishlistThird = Wishlist.builder()
-                .privateId(WISHLIST_PRIVATE_ID_THIRD)
-                .publicId(WISHLIST_PUBLIC_ID_THIRD)
-                .owner(userFirst)
-                .title(WISHLIST_TITLE_THIRD)
-                .description(WISHLIST_DESCRIPTION_THIRD)
-                .items(
-                        List.of(
-                                Item.builder().privateId(ITEM_PRIVATE_ID_THIRD).publicId(ITEM_PUBLIC_ID_THIRD).build()
-                        )
-                )
-                .build();
-        wishlistRepository.saveAll(
-                List.of(
-                        wishlistFirst,
-                        wishlistSecond,
-                        wishlistThird
-                )
+        Product productFirst = testDataInitializer.createProduct(
+                PRODUCT_TITLE_FIRST,
+                PRODUCT_DESCRIPTION_FIRST,
+                PRODUCT_LINK_FIRST
+        );
+        Item itemFirst = testDataInitializer.createItem(
+                productFirst,
+                AVAILABLE,
+                ITEM_QUANTITY_FIRST,
+                null
+        );
+        Product productSecond = testDataInitializer.createProduct(
+                PRODUCT_TITLE_SECOND,
+                PRODUCT_DESCRIPTION_SECOND,
+                PRODUCT_LINK_SECOND
+        );
+        Item itemSecond = testDataInitializer.createItem(
+                productSecond,
+                AVAILABLE,
+                ITEM_QUANTITY_SECOND,
+                null
+        );
+        Product productThird = testDataInitializer.createProduct(
+                PRODUCT_TITLE_THIRD,
+                PRODUCT_DESCRIPTION_THIRD,
+                PRODUCT_LINK_THIRD
+        );
+        Item itemThird = testDataInitializer.createItem(
+                productThird,
+                AVAILABLE,
+                ITEM_QUANTITY_THIRD,
+                null
+        );
+        Wishlist wishlistFirst = testDataInitializer.createWishlist(
+                WISHLIST_TITLE_FIRST,
+                WISHLIST_DESCRIPTION_FIRST,
+                List.of(itemFirst),
+                userFirst,
+                true,
+                null
+        );
+        Wishlist wishlistSecond = testDataInitializer.createWishlist(
+                WISHLIST_TITLE_SECOND,
+                WISHLIST_DESCRIPTION_SECOND,
+                List.of(itemSecond),
+                userSecond,
+                true,
+                null
+        );
+        Wishlist wishlistThird = testDataInitializer.createWishlist(
+                WISHLIST_TITLE_THIRD,
+                WISHLIST_DESCRIPTION_THIRD,
+                List.of(itemThird),
+                userFirst,
+                true,
+                null
         );
 
         MvcResult mvcResult = mockMvc.perform(

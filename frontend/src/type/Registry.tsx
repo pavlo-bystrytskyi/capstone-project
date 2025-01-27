@@ -5,6 +5,8 @@ type Registry = {
     publicId: string,
     title: string,
     description: string,
+    active: boolean,
+    deactivationDate: Date | null
     itemIds: ItemIdContainer[],
 }
 

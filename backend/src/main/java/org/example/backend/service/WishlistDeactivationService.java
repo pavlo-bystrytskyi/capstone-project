@@ -22,7 +22,7 @@ public class WishlistDeactivationService {
                 .findByActiveTrueAndDeactivationDateBefore(now)
                 .stream()
                 .map(
-                        wishlist -> wishlist.withActive(false)
+                        wishlist -> wishlist.withActive(false).withDeactivationDate(null)
                 )
                 .toList();
 

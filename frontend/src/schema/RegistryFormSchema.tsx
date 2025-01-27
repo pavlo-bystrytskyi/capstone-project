@@ -10,6 +10,8 @@ const registryFormSchema = yup.object({
         .string()
         .max(4095, "wishlist_description_too_long")
         .default(""),
+    active: yup.boolean(),
+    deactivationDate: yup.date().nullable().optional(),
     itemIds: yup.array().of(
         yup.object({
             publicId: yup

@@ -70,7 +70,7 @@ export default function ItemComponent(
                     <InputGroup>
                         <Form.Control
                             type="text"
-                            value={item?.product.link}
+                            value={item?.product.link || ""}
                             disabled
                             className="rounded"
                         />
@@ -91,7 +91,7 @@ export default function ItemComponent(
                 <Col sm={8}>
                     <Form.Control
                         type="text"
-                        value={item?.product.title}
+                        value={item?.product.title || ""}
                         disabled
                     />
                 </Col>
@@ -104,7 +104,7 @@ export default function ItemComponent(
                     <Form.Control
                         as="textarea"
                         rows={3}
-                        value={item?.product.description}
+                        value={item?.product.description || ""}
                         disabled
                     />
                 </Col>
@@ -116,7 +116,7 @@ export default function ItemComponent(
                 <Col sm={8}>
                     <Form.Control
                         type="number"
-                        value={item?.quantity}
+                        value={item?.quantity ?? 0}
                         disabled
                     />
                 </Col>
@@ -129,7 +129,7 @@ export default function ItemComponent(
                     <Form.Select
                         disabled={!editStatusAllowed}
                         onChange={handleStatusChange}
-                        value={item?.status}
+                        value={item?.status || ItemStatus.AVAILABLE}
                     >
                         <option value={ItemStatus.AVAILABLE}>{t("status_available")}</option>
                         <option value={ItemStatus.RESERVED}>{t("status_reserved")}</option>
