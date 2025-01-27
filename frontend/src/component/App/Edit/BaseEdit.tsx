@@ -33,8 +33,8 @@ export default function BaseEdit(
     }
 
     const loadAiProcessingState = () => {
-        return localStorage.getItem('aiProcessingState') == "true";
-    }
+        return localStorage.getItem('aiProcessingState') === "true";
+    };
 
     const [isAiProcessingEnabled, setIsAiProcessingEnabled] = useState(loadAiProcessingState());
 
@@ -51,12 +51,19 @@ export default function BaseEdit(
         watch,
         formState: {errors}
     } = useForm<RegistryRestricted>({
-        resolver: yupResolver(registryFormSchema)
+        resolver: yupResolver(registryFormSchema),
+        defaultValues: {
+            title: "",
+            description: "",
+            active: true,
+            deactivationDate: null,
+            itemIds: []
+        }
     });
 
     const isActive = watch("active", true);
 
-    const [isAutoDisable, setIsAutoDisable] = useState<boolean>();
+    const [isAutoDisable, setIsAutoDisable] = useState(false);
 
     const onSubmit: SubmitHandler<RegistryRestricted> = (data: RegistryRestricted) => {
         const payload = {...data};
@@ -75,7 +82,7 @@ export default function BaseEdit(
                 addToast(t("toast_registry_save_successful"), ToastVariant.SUCCESS);
             })
             .catch((error) => {
-                console.error('Error fetching data:', error);
+                console.error('Error saving data:', error);
                 addToast(t("toast_registry_save_failed"), ToastVariant.ERROR);
             });
     };
