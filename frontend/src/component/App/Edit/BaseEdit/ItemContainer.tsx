@@ -43,7 +43,7 @@ export default function ItemContainer(
                         {itemIdList.length > 0 ? (
                             itemIdList.map(
                                 (itemId) => (
-                            <Col sm={4}>
+                            <Col sm={4} key={itemId.publicId}>
                                 <EditItemComponent
                                     config={config}
                                     itemId={itemId}

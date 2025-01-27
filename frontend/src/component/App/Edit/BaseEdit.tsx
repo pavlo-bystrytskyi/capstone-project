@@ -161,7 +161,7 @@ export default function BaseEdit(
                                         id="isActiveSwitch"
                                         label={t("active_hint")}
                                         checked={isActive}
-                                        onChange={(e) => setValue("active", e.target.checked)} // Обновление поля через setValue
+                                        onChange={(e) => setValue("active", e.target.checked)}
                                     />
                                 </Col>
                             </Form.Group>

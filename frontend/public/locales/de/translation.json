@@ -83,6 +83,11 @@
   "toast_registry_save_failed": "Fehler beim Speichern der Geschenkliste",
   "toast_registry_save_successful": "Geschenkliste erfolgreich gespeichert",
   "toast_ai_processing_success": "KI-Verarbeitung erfolgreich abgeschlossen",
-  "toast_ai_processing_failed": "KI-Verarbeitung fehlgeschlagen",
-  "enable_ai_hint": "KI-Linkverarbeitung aktivieren (kann langsam sein)"
+  "toast_ai_processing_failed": "KI-Verarbeitung fehlgeschlagen, da die Website automatisierten Zugriff blockiert",
+  "enable_ai_hint": "KI-Linkverarbeitung aktivieren (kann langsam sein)",
+  "active": "Geschenkliste aktivieren",
+  "active_hint": "Inaktive Geschenklisten sind nur für den Eigentümer sichtbar",
+  "auto_disable": "Automatische Deaktivierung",
+  "auto_disable_hint": "Deaktiviert die Geschenkliste automatisch nach einem bestimmten Uhrzeit",
+  "select_time": "Deaktivierungszeit auswählen"
 }
